@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ShoppingBag, X, Plus, Minus, MapPin, Phone, ArrowRight, 
   Bot, Send, Menu as MenuIcon, Instagram, Facebook, Twitter, 
-  ChevronLeft, Star, Clock, Mail, ExternalLink
+  ChevronLeft, Star, Clock, Sun, Moon // Added Sun and Moon icons
 } from 'lucide-react';
 
 // --- Styles (Injecting L'Avenue inspired Fonts & Animations) ---
@@ -11,22 +11,55 @@ const GlobalStyles = () => (
     {`
       @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap');
       
+      /* Base Accent Color */
       :root {
-        --color-cream: #F9F7F2;
-        --color-gold: #C5A059;
-        --color-black: #1A1A1A;
-        --color-green: #2C3E30;
+        --color-accent: #C5A059; /* Gold */
+      }
+      
+      /* LIGHT MODE DEFINITIONS */
+      .light-theme {
+        --color-bg: #F9F7F2; /* Cream */
+        --color-text: #1A1A1A; /* Black */
+        --color-bg-secondary: #FFFFFF;
+        --color-text-secondary: #555555;
+        --color-border: #EEEEEE;
+        --color-nav-bg: rgba(255, 255, 255, 0.95);
+        --color-hero-overlay: rgba(26, 26, 26, 0.6);
+        --color-primary-button-bg: #1A1A1A;
+        --color-primary-button-text: #FFFFFF;
+      }
+
+      /* DARK MODE DEFINITIONS */
+      .dark-theme {
+        --color-bg: #1A1A1A; /* Dark Charcoal */
+        --color-text: #F9F7F2; /* Cream Text */
+        --color-bg-secondary: #2C2C2C;
+        --color-text-secondary: #AAAAAA;
+        --color-border: #333333;
+        --color-nav-bg: rgba(26, 26, 26, 0.95);
+        --color-hero-overlay: rgba(255, 255, 255, 0.1);
+        --color-primary-button-bg: #C5A059;
+        --color-primary-button-text: #1A1A1A;
       }
 
       body { 
-        background-color: var(--color-cream); 
-        color: var(--color-black); 
+        background-color: var(--color-bg); 
+        color: var(--color-text); 
         overflow-x: hidden; 
-        /* FIX: Enable native momentum scrolling on iOS */
+        transition: background-color 0.5s ease; /* Smooth transition */
         -webkit-overflow-scrolling: touch; 
       }
+      
       .font-serif { font-family: 'Playfair Display', serif; }
       .font-sans { font-family: 'Montserrat', sans-serif; }
+      
+      /* Utility classes using variables */
+      .text-primary { color: var(--color-text); }
+      .bg-primary { background-color: var(--color-bg); }
+      .bg-secondary { background-color: var(--color-bg-secondary); }
+      .text-secondary { color: var(--color-text-secondary); }
+      .border-primary { border-color: var(--color-border); }
+      .text-accent { color: var(--color-accent); }
       
       /* Smooth View Transitions (FAST FADE-IN) */
       .view-fade-in { animation: fadeInPage 0.4s ease-out forwards; }
@@ -35,8 +68,6 @@ const GlobalStyles = () => (
       /* Hero Animation FIX: will-change helps mitigate blinking/jank */
       .ken-burns { animation: kenBurns 20s infinite alternate; will-change: transform; }
       @keyframes kenBurns { from { transform: scale(1); } to { transform: scale(1.15); } }
-      
-      .btn-morph { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
       
       /* Hide Scrollbar for clean UI */
       .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -94,11 +125,12 @@ const generateWhatsAppLink = (cart) => {
 const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) => (
   <button
     onClick={onClick}
+    // Using CSS variables for dynamic colors
     className={`
       px-8 py-4 font-sans text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300
-      ${variant === 'dark' 
-        ? 'bg-[#1A1A1A] text-white hover:bg-[#C5A059]' 
-        : 'border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white'}
+      bg-[var(--color-primary-button-bg)] text-[var(--color-primary-button-text)]
+      hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]
+      ${variant === 'outline' ? 'bg-transparent border border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:border-[var(--color-accent)] hover:text-black' : ''}
       ${className}
     `}
   >
@@ -111,18 +143,20 @@ const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
   
   if (cartItem) {
     return (
-      <div className="flex items-center justify-between bg-[#1A1A1A] text-white px-3 py-2 w-full animate-pulse">
-        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="hover:text-[#C5A059]"><Minus size={14} /></button>
+      // Using CSS variables for dynamic colors
+      <div className="flex items-center justify-between bg-[var(--color-text)] text-[var(--color-bg)] px-3 py-2 w-full animate-pulse">
+        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="hover:text-[var(--color-accent)]"><Minus size={14} /></button>
         <span className="font-sans font-bold text-sm">{cartItem.quantity}</span>
-        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="hover:text-[#C5A059]"><Plus size={14} /></button>
+        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="hover:text-[var(--color-accent)]"><Plus size={14} /></button>
       </div>
     );
   }
 
   return (
+    // Using CSS variables for dynamic colors
     <button 
       onClick={() => addToCart(item)}
-      className="w-full bg-white border border-[#1A1A1A] text-[#1A1A1A] py-2 text-xs font-bold uppercase tracking-widest hover:bg-[#1A1A1A] hover:text-white transition-all duration-300"
+      className="w-full bg-transparent border border-[var(--color-text)] text-[var(--color-text)] py-2 text-xs font-bold uppercase tracking-widest hover:bg-[var(--color-text)] hover:text-[var(--color-bg-secondary)] transition-all duration-300"
     >
       Add
     </button>
@@ -130,8 +164,9 @@ const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
 };
 
 const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
-  <div className="group bg-white p-4 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[#C5A059]/30">
-    <div className="relative overflow-hidden aspect-[4/5] mb-6 bg-gray-100">
+  // Using CSS variables for dynamic colors
+  <div className="group bg-bg-secondary p-4 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--color-accent)]/30">
+    <div className="relative overflow-hidden aspect-[4/5] mb-6 bg-[var(--color-border)]">
       <img 
         src={item.image} 
         alt={item.name} 
@@ -139,9 +174,9 @@ const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
       />
     </div>
     <div className="text-center mb-4">
-      <h3 className="font-serif text-lg text-[#1A1A1A] mb-2">{item.name}</h3>
-      <p className="text-gray-500 text-xs leading-relaxed mb-3 h-10 line-clamp-2 px-2">{item.description}</p>
-      <span className="block text-[#C5A059] font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
+      <h3 className="font-serif text-lg text-primary mb-2">{item.name}</h3>
+      <p className="text-secondary text-xs leading-relaxed mb-3 h-10 line-clamp-2 px-2">{item.description}</p>
+      <span className="block text-accent font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
     </div>
     <div className="px-2 pb-2">
         <AddToCartButton item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
@@ -150,18 +185,25 @@ const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
 );
 
 // New Component for Nav Links
-const NavLink = ({ page, current, setPage, scrolled, children }) => (
-    <button
-        onClick={() => setPage(page)}
-        className={`
-            text-xs font-bold uppercase tracking-widest transition-colors duration-300 relative pb-1
-            ${scrolled || current !== 'home' ? 'text-black' : 'text-white'}
-            ${current === page ? 'text-[#C5A059] border-b-2 border-[#C5A059]' : 'hover:text-[#C5A059]/80'}
-        `}
-    >
-        {children}
-    </button>
-);
+const NavLink = ({ page, current, setPage, scrolled, children, theme }) => {
+    // Determine link color based on scroll/page/theme
+    const isDarkBackground = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const defaultColor = (scrolled || current !== 'home') ? 'var(--color-text)' : (isDarkBackground ? 'var(--color-text)' : 'white');
+
+    return (
+        <button
+            onClick={() => setPage(page)}
+            className={`
+                text-xs font-bold uppercase tracking-widest transition-colors duration-300 relative pb-1
+                text-[${defaultColor}]
+                ${current === page ? 'text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]' : 'hover:text-[var(--color-accent)]/80'}
+            `}
+            style={{ color: defaultColor }}
+        >
+            {children}
+        </button>
+    );
+};
 
 
 // --- Main Application ---
@@ -176,10 +218,50 @@ const JaysBistro = () => {
   const [chatInput, setChatInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+  // NEW: Theme State
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system'); // 'light', 'dark', or 'system'
 
   // Hero Slideshow State
   const [currentSlide, setCurrentSlide] = useState(0);
   const heroSlides = MENU_ITEMS.filter(item => item.featured).slice(0, 3); 
+
+  // --- Theme Logic ---
+  const applyTheme = (mode) => {
+    let bodyClass = 'light-theme';
+    if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        bodyClass = 'dark-theme';
+    }
+    document.body.className = bodyClass;
+  };
+
+  const toggleTheme = () => {
+    setTheme(prev => {
+        let newTheme;
+        // Simple manual cycle: system -> light -> dark -> system
+        if (prev === 'system') newTheme = 'light';
+        else if (prev === 'light') newTheme = 'dark';
+        else newTheme = 'system';
+        
+        localStorage.setItem('theme', newTheme);
+        return newTheme;
+    });
+  };
+
+  // Effect to apply theme on load and state change
+  useEffect(() => {
+    applyTheme(theme);
+    // Listen for system theme changes if set to 'system'
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => {
+        if (theme === 'system') {
+            applyTheme('system');
+        }
+    };
+    mediaQuery.addListener(handler);
+    return () => mediaQuery.removeListener(handler);
+  }, [theme]);
+  // --- End Theme Logic ---
+
 
   // Scroll Listener
   useEffect(() => {
@@ -269,11 +351,13 @@ const JaysBistro = () => {
   // --- Views ---
 
   const HeroSection = () => (
-    <section className="relative h-screen flex items-end justify-end bg-[#1A1A1A] overflow-hidden">
+    <section className="relative h-screen flex items-end justify-end bg-bg-secondary overflow-hidden">
         {heroSlides.map((slide, index) => (
             <div 
                 key={slide.id}
-                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-60 z-10' : 'opacity-0 z-0'}`}
+                // Use CSS variable for the overlay opacity
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'z-10' : 'opacity-0 z-0'}`}
+                style={{ backgroundColor: index === currentSlide ? 'var(--color-hero-overlay)' : ''}}
             >
                 <img 
                     src={slide.image} 
@@ -285,7 +369,7 @@ const JaysBistro = () => {
         
         {/* Overlay Content */}
         <div className="relative z-20 w-full h-full flex flex-col justify-center items-center text-center px-4">
-             <p className="text-[#C5A059] text-xs font-bold tracking-[0.3em] uppercase mb-6 animate-[fadeIn_1s_ease-out]">
+             <p className="text-accent text-xs font-bold tracking-[0.3em] uppercase mb-6 animate-[fadeIn_1s_ease-out]">
                 Welcome to Jay's Bistro
              </p>
              <h1 className="font-serif text-5xl md:text-7xl text-white mb-6 leading-tight max-w-4xl mx-auto animate-[fadeIn_1s_ease-out_0.2s_both]">
@@ -295,12 +379,12 @@ const JaysBistro = () => {
 
         {/* Bottom Right Order Button */}
         <div className="absolute bottom-12 right-6 md:right-12 z-30 animate-[slideInRight_0.5s_ease-out]">
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-none max-w-xs text-left">
+            <div className="bg-bg-secondary/10 backdrop-blur-md border border-white/20 p-6 rounded-none max-w-xs text-left">
                 <p className="text-gray-300 text-xs uppercase tracking-widest mb-1">Featured Dish</p>
                 <h3 className="text-white font-serif text-xl mb-4">{heroSlides[currentSlide].name}</h3>
                 <button 
                     onClick={() => addToCart(heroSlides[currentSlide])}
-                    className="flex items-center gap-3 bg-[#C5A059] text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-[#1A1A1A] transition-colors"
+                    className="flex items-center gap-3 bg-accent text-primary px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors"
                 >
                     Order Now <ArrowRight size={16} />
                 </button>
@@ -315,37 +399,37 @@ const JaysBistro = () => {
       
       {/* Intro */}
       <section className="py-24 px-6 max-w-4xl mx-auto text-center">
-        <span className="text-[#C5A059] text-xs font-bold tracking-[0.2em] uppercase">The Experience</span>
-        <h2 className="font-serif text-4xl text-[#1A1A1A] mt-4 mb-8">Where atmosphere meets culinary art</h2>
-        <p className="text-gray-500 leading-loose font-light">
+        <span className="text-accent text-xs font-bold tracking-[0.2em] uppercase">The Experience</span>
+        <h2 className="font-serif text-4xl text-primary mt-4 mb-8">Where atmosphere meets culinary art</h2>
+        <p className="text-secondary leading-loose font-light">
             Nestled in Victoria Island, we offer an escape from the bustling city. Inspired by chic Parisian cafes and the vibrant flavors of Lagos.
         </p>
       </section>
 
       {/* Favorites (Partial Menu) - COMPACT LIST */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-bg-secondary">
         <div className="container mx-auto px-6">
             <div className="flex justify-between items-end mb-12">
                 <div>
-                    <h2 className="font-serif text-3xl text-[#1A1A1A]">Curated Favorites</h2>
-                    <p className="text-gray-400 text-sm mt-2">A glimpse into our kitchen.</p>
+                    <h2 className="font-serif text-3xl text-primary">Curated Favorites</h2>
+                    <p className="text-secondary text-sm mt-2">A glimpse into our kitchen.</p>
                 </div>
             </div>
             
             {/* Compact List Layout with Price and Button side-by-side */}
             <div className="space-y-8 max-w-3xl mx-auto"> 
                 {heroSlides.map(item => ( // Only 3 featured items
-                    <div key={item.id} className="pb-8 border-b border-gray-200">
+                    <div key={item.id} className="pb-8 border-b border-primary/10">
                         <div className="flex justify-between items-start mb-2">
                             {/* Dish Name & Description */}
                             <div className="w-full md:w-3/5">
-                                <h3 className="font-serif text-xl font-medium text-[#1A1A1A]">{item.name}</h3>
-                                <p className="text-gray-500 text-sm leading-relaxed mt-1">{item.description}</p>
+                                <h3 className="font-serif text-xl font-medium text-primary">{item.name}</h3>
+                                <p className="text-secondary text-sm leading-relaxed mt-1">{item.description}</p>
                             </div>
 
                             {/* Price and Button Group */}
                             <div className="flex items-center gap-4 min-w-[200px] justify-end">
-                                <span className="text-[#C5A059] font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
+                                <span className="text-accent font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
                                 <div className="w-24"> 
                                     <AddToCartButton 
                                         item={item} 
@@ -373,8 +457,8 @@ const JaysBistro = () => {
       {/* Gallery */}
       <section className="pb-24 px-4 container mx-auto">
           <div className="text-center mb-12">
-             <span className="text-[#C5A059] text-xs font-bold tracking-[0.2em] uppercase">Ambience</span>
-             <h2 className="font-serif text-4xl mt-2">Visual Chronicle</h2>
+             <span className="text-accent text-xs font-bold tracking-[0.2em] uppercase">Ambience</span>
+             <h2 className="font-serif text-4xl mt-2 text-primary">Visual Chronicle</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 h-[500px]">
               <div className="col-span-2 row-span-2 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
@@ -392,20 +476,18 @@ const JaysBistro = () => {
     return (
         <div className="pt-32 pb-20 min-h-screen view-fade-in container mx-auto px-6">
             <div className="text-center mb-16">
-                {/* FIX 1: Updated Title */}
-                <h1 className="font-serif text-5xl md:text-6xl mb-4">The Menu Carte</h1>
-                <p className="text-gray-500 font-light max-w-xl mx-auto">Discover flavors crafted with passion, from our signature teas to our fusion entrees.</p>
+                {/* Updated Title */}
+                <h1 className="font-serif text-5xl md:text-6xl mb-4 text-primary">The Menu Carte</h1>
+                <p className="text-secondary font-light max-w-xl mx-auto">Discover flavors crafted with passion, from our signature teas to our fusion entrees.</p>
             </div>
 
             {/* Sticky Categories */}
-            {/* FIX 2: top-20 changed to top-16 to eliminate scroll gap */}
-            <div className="sticky top-16 z-30 bg-[#F9F7F2]/95 backdrop-blur py-4 mb-12 flex justify-center gap-6 overflow-x-auto no-scrollbar border-b border-[#C5A059]/20">
+            <div className="sticky top-16 z-30 bg-bg/95 backdrop-blur py-4 mb-12 flex justify-center gap-6 overflow-x-auto no-scrollbar border-b border-accent/20">
                 {CATEGORIES.map(cat => (
                     <button 
                         key={cat} 
                         onClick={() => setActiveCategory(cat)} 
-                        // FIX 3: Added whitespace-nowrap to prevent truncation
-                        className={`text-sm uppercase tracking-widest pb-2 transition-all whitespace-nowrap ${activeCategory === cat ? 'text-[#C5A059] border-b-2 border-[#C5A059]' : 'text-gray-400 hover:text-black'}`}
+                        className={`text-sm uppercase tracking-widest pb-2 transition-all whitespace-nowrap ${activeCategory === cat ? 'text-accent border-b-2 border-accent' : 'text-secondary hover:text-primary'}`}
                     >
                         {cat}
                     </button>
@@ -418,9 +500,9 @@ const JaysBistro = () => {
                 ))}
             </div>
 
-            <div className="mt-20 text-center border-t border-gray-200 pt-10">
-                <p className="text-gray-400 mb-6">Need assistance? Speak to our concierge.</p>
-                <button onClick={() => setIsChatOpen(true)} className="text-[#C5A059] font-serif italic text-xl hover:underline">Chat with Jay</button>
+            <div className="mt-20 text-center border-t border-primary/10 pt-10">
+                <p className="text-secondary mb-6">Need assistance? Speak to our concierge.</p>
+                <button onClick={() => setIsChatOpen(true)} className="text-accent font-serif italic text-xl hover:underline">Chat with Jay</button>
             </div>
         </div>
     );
@@ -431,11 +513,11 @@ const JaysBistro = () => {
     return (
         <div className="pt-32 pb-20 min-h-screen view-fade-in container mx-auto px-6 max-w-4xl">
             <div className="text-center mb-16">
-                <h1 className="font-serif text-5xl md:text-6xl mb-4">Our Story & Philosophy</h1>
-                <p className="text-[#C5A059] font-light text-sm tracking-widest uppercase">The heart of Jay's Bistro</p>
+                <h1 className="font-serif text-5xl md:text-6xl mb-4 text-primary">Our Story & Philosophy</h1>
+                <p className="text-accent font-light text-sm tracking-widest uppercase">The heart of Jay's Bistro</p>
             </div>
 
-            <div className="text-gray-700 space-y-8 text-lg leading-relaxed">
+            <div className="text-secondary space-y-8 text-lg leading-relaxed">
                 <p>
                     **Jay's Bistro** was founded on the principle that exceptional food should be complemented by an equally exquisite atmosphere. We drew inspiration from the subtle elegance of Parisian bistros and fused it with the bold, vibrant flavors of West Africa.
                 </p>
@@ -448,7 +530,7 @@ const JaysBistro = () => {
             </div>
 
             <div className="mt-16 text-center">
-                <p className="text-gray-400 mb-4">Contact us for reservations and events.</p>
+                <p className="text-secondary mb-4">Contact us for reservations and events.</p>
                 <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
                     <PrimaryButton variant="dark">Make a Reservation</PrimaryButton>
                 </a>
@@ -469,19 +551,31 @@ const JaysBistro = () => {
       }
   }
 
+  // Helper to determine icon color (white on transparent hero, black/primary on scroll/sub-pages)
+  const isDarkNavText = scrolled || currentPage !== 'home';
+  const navTextColor = isDarkNavText ? 'var(--color-text)' : 'white';
+
+
   return (
-    <div className="min-h-screen font-sans bg-[#F9F7F2] text-[#1A1A1A]">
+    <div className="min-h-screen font-sans">
       <GlobalStyles />
       
       {/* Navigation (Redesigned) */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-700 ease-in-out ${scrolled ? 'bg-white/95 backdrop-blur shadow-sm py-4' : 'bg-transparent py-6'}`}>
+      <nav 
+        className={`fixed top-0 w-full z-50 transition-all duration-700 ease-in-out ${scrolled ? 'py-4 shadow-sm' : 'bg-transparent py-6'}`}
+        style={{ backgroundColor: scrolled ? 'var(--color-nav-bg)' : 'transparent' }}
+      >
         <div className="container mx-auto px-6 flex justify-between items-center">
             
             {/* LEFT: Logo/Title Group */}
             <div className="flex items-center gap-4">
                 {/* Back Button (Mobile/Sub-Pages) */}
                 {currentPage !== 'home' && (
-                    <button onClick={() => setCurrentPage('home')} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black hover:text-[#C5A059] transition-colors">
+                    <button 
+                        onClick={() => setCurrentPage('home')} 
+                        className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors"
+                        style={{ color: navTextColor }}
+                    >
                         <ChevronLeft size={16} /> 
                     </button>
                 )}
@@ -492,31 +586,46 @@ const JaysBistro = () => {
                     className="flex items-center gap-2 cursor-pointer transition-colors duration-500"
                 >
                     {/* Placeholder Logo Icon */}
-                    <div className={`w-5 h-5 border-2 border-[#C5A059] flex items-center justify-center transition-all duration-500 ${scrolled ? 'scale-90' : 'scale-100'}`}>
-                        <Star size={12} className="text-[#C5A059]" />
+                    <div className={`w-5 h-5 border-2 border-accent flex items-center justify-center transition-all duration-500 ${scrolled ? 'scale-90' : 'scale-100'}`}>
+                        <Star size={12} className="text-accent" />
                     </div> 
-                    <div className={`text-2xl font-serif font-bold tracking-tighter transition-colors duration-500 ${scrolled || currentPage !== 'home' ? 'text-black' : 'text-white'}`}>
-                        Jay's <span className="text-[#C5A059]">Bistro</span>
+                    <div 
+                        className={`text-2xl font-serif font-bold tracking-tighter transition-colors duration-500`}
+                        style={{ color: navTextColor }}
+                    >
+                        Jay's <span className="text-accent">Bistro</span>
                     </div>
                 </div>
             </div>
 
             {/* CENTER: Navigation Links (Desktop Only) */}
             <div className="hidden md:flex items-center gap-10">
-                <NavLink page="home" current={currentPage} setPage={setCurrentPage} scrolled={scrolled}>Home</NavLink>
-                <NavLink page="menu" current={currentPage} setPage={setCurrentPage} scrolled={scrolled}>Menu</NavLink>
-                <NavLink page="about" current={currentPage} setPage={setCurrentPage} scrolled={scrolled}>About Us</NavLink>
+                <NavLink page="home" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>Home</NavLink>
+                <NavLink page="menu" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>Menu</NavLink>
+                <NavLink page="about" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>About Us</NavLink>
             </div>
 
             {/* RIGHT: Cart/Utility */}
             <div className="flex items-center gap-6">
+                
+                {/* NEW: Theme Toggle Button */}
+                <button 
+                    onClick={toggleTheme}
+                    className="p-2 transition-colors duration-500 hover:text-accent"
+                    style={{ color: navTextColor }}
+                    title={`Current theme: ${theme}. Click to switch.`}
+                >
+                    {theme === 'dark' || (theme === 'system' && document.body.className === 'dark-theme') ? <Sun size={22} /> : <Moon size={22} />}
+                </button>
+
                 <button 
                     onClick={() => setIsCartOpen(true)}
-                    className={`relative p-2 transition-colors duration-500 ${scrolled || currentPage !== 'home' ? 'text-black' : 'text-white'}`}
+                    className="relative p-2 transition-colors duration-500 hover:text-accent"
+                    style={{ color: navTextColor }}
                 >
                     <ShoppingBag size={22} />
                     {cartCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-[#C5A059] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full animate-bounce">
+                        <span className="absolute -top-1 -right-1 bg-accent text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full animate-bounce">
                             {cartCount}
                         </span>
                     )}
@@ -530,34 +639,34 @@ const JaysBistro = () => {
           {renderView()}
       </main>
 
-      {/* Expanded Footer (Unchanged) */}
-      <footer className="bg-[#1A1A1A] text-white pt-20 pb-10 border-t border-gray-800">
+      {/* Expanded Footer (Updated to use CSS variables) */}
+      <footer className="bg-[var(--color-text)] text-[var(--color-bg)] pt-20 pb-10 border-t border-[var(--color-border)]">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="space-y-6">
                 <h3 className="font-serif text-2xl font-bold">Jay's Bistro</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">Defining modern dining with a touch of traditional elegance.</p>
+                <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed">Defining modern dining with a touch of traditional elegance.</p>
                 <div className="flex gap-4">
-                    <Instagram size={20} className="hover:text-[#C5A059] cursor-pointer" />
-                    <Twitter size={20} className="hover:text-[#C5A059] cursor-pointer" />
-                    <Facebook size={20} className="hover:text-[#C5A059] cursor-pointer" />
+                    <Instagram size={20} className="hover:text-accent cursor-pointer" />
+                    <Twitter size={20} className="hover:text-accent cursor-pointer" />
+                    <Facebook size={20} className="hover:text-accent cursor-pointer" />
                 </div>
             </div>
             
             <div>
-                <h4 className="font-serif text-[#C5A059] text-lg mb-6">Visit Us</h4>
-                <a href={GOOGLE_MAPS_URL} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 group text-gray-400 hover:text-white transition-colors mb-4">
-                    <MapPin size={18} className="text-[#C5A059] mt-1 group-hover:scale-110 transition-transform" />
+                <h4 className="font-serif text-accent text-lg mb-6">Visit Us</h4>
+                <a href={GOOGLE_MAPS_URL} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 group text-[var(--color-text-secondary)] hover:text-[var(--color-bg)] transition-colors mb-4">
+                    <MapPin size={18} className="text-accent mt-1 group-hover:scale-110 transition-transform" />
                     <span>Plot 42, **Victoria Island**,<br/>Lagos, Nigeria</span>
                 </a>
-                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group text-gray-400 hover:text-white transition-colors">
-                    <Phone size={18} className="text-[#C5A059] group-hover:scale-110 transition-transform" />
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group text-[var(--color-text-secondary)] hover:text-[var(--color-bg)] transition-colors">
+                    <Phone size={18} className="text-accent group-hover:scale-110 transition-transform" />
                     <span>+234 800 123 4567</span>
                 </a>
             </div>
 
             <div>
-                <h4 className="font-serif text-[#C5A059] text-lg mb-6">Opening Hours</h4>
-                <ul className="space-y-3 text-gray-400 text-sm">
+                <h4 className="font-serif text-accent text-lg mb-6">Opening Hours</h4>
+                <ul className="space-y-3 text-[var(--color-text-secondary)] text-sm">
                     <li className="flex justify-between"><span>Mon - Fri</span> <span>08:00 - 22:00</span></li>
                     <li className="flex justify-between"><span>Saturday</span> <span>09:00 - 23:00</span></li>
                     <li className="flex justify-between"><span>Sunday</span> <span>10:00 - 22:00</span></li>
@@ -565,45 +674,45 @@ const JaysBistro = () => {
             </div>
 
             <div>
-                <h4 className="font-serif text-[#C5A059] text-lg mb-6">Newsletter</h4>
+                <h4 className="font-serif text-accent text-lg mb-6">Newsletter</h4>
                 <div className="flex flex-col gap-3">
-                    <input type="email" placeholder="Your email address" className="bg-[#2A2A2A] border-none text-white px-4 py-3 text-sm focus:ring-1 focus:ring-[#C5A059] outline-none" />
-                    <button className="bg-[#C5A059] text-white py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors">Subscribe</button>
+                    <input type="email" placeholder="Your email address" className="bg-[var(--color-bg-secondary)] border-none text-[var(--color-text)] px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none" />
+                    <button className="bg-accent text-primary py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors">Subscribe</button>
                 </div>
             </div>
         </div>
-        <div className="text-center text-gray-600 text-xs uppercase tracking-widest pt-8 border-t border-gray-800">
+        <div className="text-center text-[var(--color-text-secondary)]/50 text-xs uppercase tracking-widest pt-8 border-t border-[var(--color-border)]">
             © {new Date().getFullYear()} Jay's Bistro. All rights reserved.
         </div>
       </footer>
 
-      {/* Cart Drawer (WhatsApp Checkout Implemented - Unchanged) */}
+      {/* Cart Drawer (Updated to use CSS variables) */}
       <div className={`fixed inset-0 z-[60] ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
          <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsCartOpen(false)} />
-         <div className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transform transition-transform duration-500 flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-            <div className="p-8 border-b border-gray-100 flex justify-between items-center">
-                <h2 className="font-serif text-2xl">Your Selection</h2>
-                <button onClick={() => setIsCartOpen(false)}><X className="text-gray-400 hover:text-black" /></button>
+         <div className={`absolute top-0 right-0 h-full w-full max-w-md bg-bg-secondary shadow-2xl transform transition-transform duration-500 flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className="p-8 border-b border-border flex justify-between items-center">
+                <h2 className="font-serif text-2xl text-primary">Your Selection</h2>
+                <button onClick={() => setIsCartOpen(false)}><X className="text-secondary hover:text-primary" /></button>
             </div>
             
             <div className="flex-1 overflow-y-auto p-8 space-y-6">
                 {cart.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                    <div className="h-full flex flex-col items-center justify-center text-secondary">
                         <ShoppingBag size={48} strokeWidth={1} className="mb-4" />
                         <p>Your tray is empty.</p>
                     </div>
                 ) : (
                     cart.map(item => (
                         <div key={item.id} className="flex gap-4 items-center">
-                             <img src={item.image} className="w-16 h-16 object-cover bg-gray-100" alt={item.name} />
+                             <img src={item.image} className="w-16 h-16 object-cover bg-border" alt={item.name} />
                              <div className="flex-1">
-                                 <h4 className="font-serif text-lg">{item.name}</h4>
-                                 <p className="text-[#C5A059] text-sm">{formatPrice(item.price * item.quantity)}</p>
+                                 <h4 className="font-serif text-lg text-primary">{item.name}</h4>
+                                 <p className="text-accent text-sm">{formatPrice(item.price * item.quantity)}</p>
                              </div>
-                             <div className="flex items-center border border-gray-200">
-                                 <button onClick={() => updateQuantity(item.id, -1)} className="p-2 hover:bg-gray-100"><Minus size={14}/></button>
-                                 <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
-                                 <button onClick={() => updateQuantity(item.id, 1)} className="p-2 hover:bg-gray-100"><Plus size={14}/></button>
+                             <div className="flex items-center border border-border">
+                                 <button onClick={() => updateQuantity(item.id, -1)} className="p-2 hover:bg-border"><Minus size={14} className="text-primary"/></button>
+                                 <span className="w-8 text-center text-sm font-bold text-primary">{item.quantity}</span>
+                                 <button onClick={() => updateQuantity(item.id, 1)} className="p-2 hover:bg-border"><Plus size={14} className="text-primary"/></button>
                              </div>
                         </div>
                     ))
@@ -611,8 +720,8 @@ const JaysBistro = () => {
             </div>
 
             {cart.length > 0 && (
-                <div className="p-8 bg-gray-50 border-t border-gray-100">
-                    <div className="flex justify-between mb-6 text-lg font-bold">
+                <div className="p-8 bg-bg border-t border-border">
+                    <div className="flex justify-between mb-6 text-lg font-bold text-primary">
                         <span>Total</span>
                         <span>{formatPrice(cartTotal)}</span>
                     </div>
@@ -629,43 +738,43 @@ const JaysBistro = () => {
          </div>
       </div>
 
-      {/* Concierge Chat Bot (Functionality Enabled - Unchanged) */}
-      <button onClick={() => setIsChatOpen(!isChatOpen)} className="fixed bottom-6 right-6 z-50 bg-[#C5A059] text-white p-4 rounded-full shadow-xl hover:bg-[#1A1A1A] transition-colors hover:scale-110 duration-300">
+      {/* Concierge Chat Bot (Updated to use CSS variables) */}
+      <button onClick={() => setIsChatOpen(!isChatOpen)} className="fixed bottom-6 right-6 z-50 bg-accent text-primary p-4 rounded-full shadow-xl hover:bg-primary hover:text-accent transition-colors hover:scale-110 duration-300">
         {isChatOpen ? <X size={24} /> : <Bot size={24} />}
       </button>
 
       {isChatOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[90vw] max-w-sm bg-white shadow-2xl rounded-lg overflow-hidden border border-gray-100 animate-[fadeIn_0.3s_ease-out]">
-             <div className="bg-[#1A1A1A] p-4 text-white flex justify-between items-center">
-                 <span className="font-serif italic">Concierge</span>
+        <div className="fixed bottom-24 right-6 z-50 w-[90vw] max-w-sm bg-bg-secondary shadow-2xl rounded-lg overflow-hidden border border-border animate-[fadeIn_0.3s_ease-out]">
+             <div className="bg-primary p-4 text-bg-secondary flex justify-between items-center">
+                 <span className="font-serif italic text-bg">Concierge</span>
                  <span className="text-[10px] uppercase tracking-widest bg-green-500/20 text-green-400 px-2 py-1 rounded animate-pulse">Online</span>
              </div>
-             <div className="h-64 p-4 bg-[#F9F7F2] overflow-y-auto">
+             <div className="h-64 p-4 bg-bg overflow-y-auto">
                  <div className="space-y-4">
-                    {chatHistory.length === 0 && <div className="text-gray-400 text-center text-xs mt-4">How can I help you today?</div>}
+                    {chatHistory.length === 0 && <div className="text-secondary text-center text-xs mt-4">How can I help you today?</div>}
                     {chatHistory.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[85%] p-3 text-sm ${msg.role === 'user' ? 'bg-[#1A1A1A] text-white' : 'bg-white border border-gray-200 text-gray-700 shadow-sm'}`}>
+                            <div className={`max-w-[85%] p-3 text-sm ${msg.role === 'user' ? 'bg-primary text-bg' : 'bg-bg-secondary border border-border text-primary shadow-sm'}`}>
                                 {msg.text}
                             </div>
                         </div>
                     ))}
                     <div ref={messagesEndRef} />
-                    {isTyping && <div className="text-xs text-gray-400 italic">Typing...</div>}
+                    {isTyping && <div className="text-xs text-secondary italic">Typing...</div>}
                  </div>
              </div>
-             <div className="p-3 bg-white border-t border-gray-100 flex gap-2">
+             <div className="p-3 bg-bg-secondary border-t border-border flex gap-2">
                  <input 
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
                     placeholder="Ask about our menu..." 
-                    className="flex-1 bg-transparent text-sm outline-none" 
+                    className="flex-1 bg-transparent text-sm outline-none text-primary" 
                  />
-                 <button onClick={handleChatSend} className="text-[#C5A059] hover:text-[#1A1A1A]"><Send size={18} /></button>
+                 <button onClick={handleChatSend} className="text-accent hover:text-primary"><Send size={18} /></button>
              </div>
-             <div className="p-1 text-center text-[10px] text-gray-400 bg-white">
-                 API Key space: <code className="text-red-500 font-bold">CHATBOT_API_KEY</code>
+             <div className="p-1 text-center text-[10px] text-secondary/50 bg-bg-secondary">
+                 API Key space: <code className="text-accent font-bold">CHATBOT_API_KEY</code>
              </div>
         </div>
       )}
