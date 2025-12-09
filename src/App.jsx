@@ -18,7 +18,13 @@ const GlobalStyles = () => (
         --color-green: #2C3E30;
       }
 
-      body { background-color: var(--color-cream); color: var(--color-black); overflow-x: hidden; }
+      body { 
+        background-color: var(--color-cream); 
+        color: var(--color-black); 
+        overflow-x: hidden; 
+        /* FIX: Enable native momentum scrolling on iOS */
+        -webkit-overflow-scrolling: touch; 
+      }
       .font-serif { font-family: 'Playfair Display', serif; }
       .font-sans { font-family: 'Montserrat', sans-serif; }
       
@@ -372,7 +378,7 @@ const JaysBistro = () => {
   const MenuView = () => {
     const filtered = activeCategory === "All" ? MENU_ITEMS : MENU_ITEMS.filter(i => i.category === activeCategory);
     
-    useEffect(() => { window.scrollTo(0,0); }, []);
+    // REMOVED: useEffect(() => { window.scrollTo(0,0); }, []); to prevent scroll-snapping issues
 
     return (
         <div className="pt-32 pb-20 min-h-screen view-fade-in container mx-auto px-6">
