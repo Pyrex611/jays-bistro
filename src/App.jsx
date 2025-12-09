@@ -392,14 +392,21 @@ const JaysBistro = () => {
     return (
         <div className="pt-32 pb-20 min-h-screen view-fade-in container mx-auto px-6">
             <div className="text-center mb-16">
-                <h1 className="font-serif text-5xl md:text-6xl mb-4">Our Collection</h1>
+                {/* FIX 1: Updated Title */}
+                <h1 className="font-serif text-5xl md:text-6xl mb-4">The Menu Carte</h1>
                 <p className="text-gray-500 font-light max-w-xl mx-auto">Discover flavors crafted with passion, from our signature teas to our fusion entrees.</p>
             </div>
 
             {/* Sticky Categories */}
-            <div className="sticky top-20 z-30 bg-[#F9F7F2]/95 backdrop-blur py-4 mb-12 flex justify-center gap-6 overflow-x-auto no-scrollbar border-b border-[#C5A059]/20">
+            {/* FIX 2: top-20 changed to top-16 to eliminate scroll gap */}
+            <div className="sticky top-16 z-30 bg-[#F9F7F2]/95 backdrop-blur py-4 mb-12 flex justify-center gap-6 overflow-x-auto no-scrollbar border-b border-[#C5A059]/20">
                 {CATEGORIES.map(cat => (
-                    <button key={cat} onClick={() => setActiveCategory(cat)} className={`text-sm uppercase tracking-widest pb-2 transition-all ${activeCategory === cat ? 'text-[#C5A059] border-b-2 border-[#C5A059]' : 'text-gray-400 hover:text-black'}`}>
+                    <button 
+                        key={cat} 
+                        onClick={() => setActiveCategory(cat)} 
+                        // FIX 3: Added whitespace-nowrap to prevent truncation
+                        className={`text-sm uppercase tracking-widest pb-2 transition-all whitespace-nowrap ${activeCategory === cat ? 'text-[#C5A059] border-b-2 border-[#C5A059]' : 'text-gray-400 hover:text-black'}`}
+                    >
                         {cat}
                     </button>
                 ))}
