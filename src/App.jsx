@@ -333,10 +333,35 @@ const JaysBistro = () => {
                     <p className="text-gray-500 leading-loose font-light">
                         Nestled in Victoria Island, we offer an escape from the bustling city. Inspired by chic Parisian cafes and the vibrant flavors of Lagos.
                     </p>
-                    <PrimaryButton onClick={() => setCurrentPage('menu')} className="mt-8 bg-transparent border border-black text-black hover:bg-black hover:text-white">
+                </section>
+							
+				{/* Favorites (Partial Menu) */}
+				<section className="py-20 bg-white">
+					<div className="container mx-auto px-6">
+						<div className="flex justify-between items-end mb-12">
+							<div>
+								<h2 className="font-serif text-3xl text-[#1A1A1A]">Curated Favorites</h2>
+								<p className="text-gray-400 text-sm mt-2">A glimpse into our kitchen.</p>
+							</div>
+							<button onClick={() => setCurrentPage('menu')} className="hidden md:flex items-center gap-2 text-sm font-bold uppercase tracking-widest hover:text-[#C5A059] transition-colors">
+								See All <ArrowRight size={16} />
+							</button>
+						</div>
+						
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+							{MENU_ITEMS.filter(i => i.featured).map(item => (
+								<MenuCard key={item.id} item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
+							))}
+						</div>
+
+						<div className="mt-12 text-center md:hidden">
+							 <PrimaryButton onClick={() => setCurrentPage('menu')} variant="outline">View Full Menu</PrimaryButton>
+						</div>
+					</div>
+                    <PrimaryButton onClick={() => setCurrentPage('menu')} className="mt-8 bg-transparent border border-black text-black hover:bg-black hover:text-orange">
                         Explore Menu
                     </PrimaryButton>
-                </section>
+				</section>
 
                 {/* Gallery */}
                 <section className="pb-24 px-4 container mx-auto">
@@ -415,7 +440,7 @@ const JaysBistro = () => {
             </div>
         </div>
         <div className="text-center text-gray-600 text-xs uppercase tracking-widest pt-8 border-t border-gray-800">
-            &copy; {new Date().getFullYear()} Jay's Bistro. All rights reserved.
+            &copy; {new Date().getFullYear()} Jay's Bistro. All rights reserved. Designed by Pyrexx
         </div>
       </footer>
 
