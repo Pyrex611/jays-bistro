@@ -32,8 +32,8 @@ const GlobalStyles = () => (
       .view-fade-in { animation: fadeInPage 0.4s ease-out forwards; }
       @keyframes fadeInPage { from { opacity: 0; } to { opacity: 1; } }
 
-      /* Hero Animation */
-      .ken-burns { animation: kenBurns 20s infinite alternate; }
+      /* Hero Animation FIX: will-change helps mitigate blinking/jank */
+      .ken-burns { animation: kenBurns 20s infinite alternate; will-change: transform; }
       @keyframes kenBurns { from { transform: scale(1); } to { transform: scale(1.15); } }
       
       .btn-morph { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -106,13 +106,11 @@ const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) 
   </button>
 );
 
-// Quantity Adjuster/Add Button (The "Smart" Button)
 const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
   const cartItem = cart.find(i => i.id === item.id);
   
   if (cartItem) {
     return (
-      // The quantity adjuster when item is in cart
       <div className="flex items-center justify-between bg-[#1A1A1A] text-white px-3 py-2 w-full animate-pulse">
         <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="hover:text-[#C5A059]"><Minus size={14} /></button>
         <span className="font-sans font-bold text-sm">{cartItem.quantity}</span>
@@ -122,7 +120,6 @@ const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
   }
 
   return (
-    // The "Add" button when item is not in cart
     <button 
       onClick={() => addToCart(item)}
       className="w-full bg-white border border-[#1A1A1A] text-[#1A1A1A] py-2 text-xs font-bold uppercase tracking-widest hover:bg-[#1A1A1A] hover:text-white transition-all duration-300"
@@ -133,7 +130,6 @@ const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
 };
 
 const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
-  // Used only for the FULL Menu View
   <div className="group bg-white p-4 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[#C5A059]/30">
     <div className="relative overflow-hidden aspect-[4/5] mb-6 bg-gray-100">
       <img 
@@ -152,6 +148,21 @@ const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
     </div>
   </div>
 );
+
+// New Component for Nav Links
+const NavLink = ({ page, current, setPage, scrolled, children }) => (
+    <button
+        onClick={() => setPage(page)}
+        className={`
+            text-xs font-bold uppercase tracking-widest transition-colors duration-300 relative pb-1
+            ${scrolled || current !== 'home' ? 'text-black' : 'text-white'}
+            ${current === page ? 'text-[#C5A059] border-b-2 border-[#C5A059]' : 'hover:text-[#C5A059]/80'}
+        `}
+    >
+        {children}
+    </button>
+);
+
 
 // --- Main Application ---
 const JaysBistro = () => {
@@ -378,8 +389,6 @@ const JaysBistro = () => {
   const MenuView = () => {
     const filtered = activeCategory === "All" ? MENU_ITEMS : MENU_ITEMS.filter(i => i.category === activeCategory);
     
-    // REMOVED: useEffect(() => { window.scrollTo(0,0); }, []); to prevent scroll-snapping issues
-
     return (
         <div className="pt-32 pb-20 min-h-screen view-fade-in container mx-auto px-6">
             <div className="text-center mb-16">
@@ -409,33 +418,94 @@ const JaysBistro = () => {
         </div>
     );
   };
+  
+  const AboutView = () => {
+    useEffect(() => { window.scrollTo(0,0); }, []);
+    return (
+        <div className="pt-32 pb-20 min-h-screen view-fade-in container mx-auto px-6 max-w-4xl">
+            <div className="text-center mb-16">
+                <h1 className="font-serif text-5xl md:text-6xl mb-4">Our Story & Philosophy</h1>
+                <p className="text-[#C5A059] font-light text-sm tracking-widest uppercase">The heart of Jay's Bistro</p>
+            </div>
+
+            <div className="text-gray-700 space-y-8 text-lg leading-relaxed">
+                <p>
+                    **Jay's Bistro** was founded on the principle that exceptional food should be complemented by an equally exquisite atmosphere. We drew inspiration from the subtle elegance of Parisian bistros and fused it with the bold, vibrant flavors of West Africa.
+                </p>
+                <p>
+                    Our menu is a curated journey, highlighting locally sourced ingredients transformed through classic and modern culinary techniques. We believe in simplicity, quality, and presentation that delights both the eye and the palate.
+                </p>
+                <p>
+                    Join us for an experience where every cup of tea and every dish tells a story of heritage and sophistication. We look forward to welcoming you to our table.
+                </p>
+            </div>
+
+            <div className="mt-16 text-center">
+                <p className="text-gray-400 mb-4">Contact us for reservations and events.</p>
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
+                    <PrimaryButton variant="dark">Make a Reservation</PrimaryButton>
+                </a>
+            </div>
+        </div>
+    );
+};
+
+  const renderView = () => {
+      switch (currentPage) {
+          case 'menu':
+              return <MenuView />;
+          case 'about':
+              return <AboutView />;
+          case 'home':
+          default:
+              return <HomeView />;
+      }
+  }
 
   return (
     <div className="min-h-screen font-sans bg-[#F9F7F2] text-[#1A1A1A]">
       <GlobalStyles />
       
-      {/* Navigation */}
+      {/* Navigation (Redesigned) */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-700 ease-in-out ${scrolled ? 'bg-white/95 backdrop-blur shadow-sm py-4' : 'bg-transparent py-6'}`}>
         <div className="container mx-auto px-6 flex justify-between items-center">
-            <div className="flex items-center gap-6">
-                 {currentPage === 'menu' && (
+            
+            {/* LEFT: Logo/Title Group */}
+            <div className="flex items-center gap-4">
+                {/* Back Button (Mobile/Sub-Pages) */}
+                {currentPage !== 'home' && (
                     <button onClick={() => setCurrentPage('home')} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black hover:text-[#C5A059] transition-colors">
-                        <ChevronLeft size={16} /> Back
+                        <ChevronLeft size={16} /> 
                     </button>
-                 )}
+                )}
+                
+                {/* Logo & Text */}
+                <div 
+                    onClick={() => setCurrentPage('home')}
+                    className="flex items-center gap-2 cursor-pointer transition-colors duration-500"
+                >
+                    {/* Placeholder Logo Icon */}
+                    <div className={`w-5 h-5 border-2 border-[#C5A059] flex items-center justify-center transition-all duration-500 ${scrolled ? 'scale-90' : 'scale-100'}`}>
+                        <Star size={12} className="text-[#C5A059]" />
+                    </div> 
+                    <div className={`text-2xl font-serif font-bold tracking-tighter transition-colors duration-500 ${scrolled || currentPage !== 'home' ? 'text-black' : 'text-white'}`}>
+                        Jay's <span className="text-[#C5A059]">Bistro</span>
+                    </div>
+                </div>
             </div>
 
-            <div 
-                className={`text-2xl font-serif font-bold tracking-tighter absolute left-1/2 -translate-x-1/2 cursor-pointer transition-colors duration-500 ${scrolled || currentPage === 'menu' ? 'text-black' : 'text-white'}`}
-                onClick={() => setCurrentPage('home')}
-            >
-                Jay's <span className="text-[#C5A059]">Bistro</span>
+            {/* CENTER: Navigation Links (Desktop Only) */}
+            <div className="hidden md:flex items-center gap-10">
+                <NavLink page="home" current={currentPage} setPage={setCurrentPage} scrolled={scrolled}>Home</NavLink>
+                <NavLink page="menu" current={currentPage} setPage={setCurrentPage} scrolled={scrolled}>Menu</NavLink>
+                <NavLink page="about" current={currentPage} setPage={setCurrentPage} scrolled={scrolled}>About Us</NavLink>
             </div>
 
+            {/* RIGHT: Cart/Utility */}
             <div className="flex items-center gap-6">
                 <button 
                     onClick={() => setIsCartOpen(true)}
-                    className={`relative p-2 transition-colors duration-500 ${scrolled || currentPage === 'menu' ? 'text-black' : 'text-white'}`}
+                    className={`relative p-2 transition-colors duration-500 ${scrolled || currentPage !== 'home' ? 'text-black' : 'text-white'}`}
                 >
                     <ShoppingBag size={22} />
                     {cartCount > 0 && (
@@ -450,10 +520,10 @@ const JaysBistro = () => {
 
       {/* Main Content Area */}
       <main>
-          {currentPage === 'home' ? <HomeView /> : <MenuView />}
+          {renderView()}
       </main>
 
-      {/* Expanded Footer */}
+      {/* Expanded Footer (Unchanged) */}
       <footer className="bg-[#1A1A1A] text-white pt-20 pb-10 border-t border-gray-800">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="space-y-6">
@@ -500,7 +570,7 @@ const JaysBistro = () => {
         </div>
       </footer>
 
-      {/* Cart Drawer (WhatsApp Checkout Implemented) */}
+      {/* Cart Drawer (WhatsApp Checkout Implemented - Unchanged) */}
       <div className={`fixed inset-0 z-[60] ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
          <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsCartOpen(false)} />
          <div className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transform transition-transform duration-500 flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -552,7 +622,7 @@ const JaysBistro = () => {
          </div>
       </div>
 
-      {/* Concierge Chat Bot (Functionality Enabled) */}
+      {/* Concierge Chat Bot (Functionality Enabled - Unchanged) */}
       <button onClick={() => setIsChatOpen(!isChatOpen)} className="fixed bottom-6 right-6 z-50 bg-[#C5A059] text-white p-4 rounded-full shadow-xl hover:bg-[#1A1A1A] transition-colors hover:scale-110 duration-300">
         {isChatOpen ? <X size={24} /> : <Bot size={24} />}
       </button>
