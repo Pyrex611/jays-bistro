@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 // --- Configuration ---
-const WHATSAPP_NUMBER = "2348001234567"; 
+const WHATSAPP_NUMBER = "2348162624447"; 
 const GOOGLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Plot+42+Victoria+Island+Lagos";
 const CHATBOT_API_KEY = ""; 
 
@@ -138,8 +138,10 @@ const NavLink = ({ page, current, setPage, scrolled, children, theme }) => {
 const GlobalStyles = () => (
   <style>
     {`
-      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap');
+      /* @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap');*/
+	  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&family=Sacramento&display=swap');
       
+	  
       /* Base Accent Color */
       :root {
         --color-accent: #C5A059; /* Gold */
@@ -181,6 +183,7 @@ const GlobalStyles = () => (
       
       .font-serif { font-family: 'Playfair Display', serif; }
       .font-sans { font-family: 'Montserrat', sans-serif; }
+	  .font-handwritten { font-family: 'Sacramento', cursive; }
       
       /* Utility classes using variables */
       .text-primary { color: var(--color-text); }
@@ -320,7 +323,7 @@ const JaysBistro = () => {
     
     // Safety check: if no API key is set, give a friendly message.
     if (!apiKey) {
-        setChatHistory(prev => [...prev, { role: 'model', text: "I'm a simulated concierge. Please set a valid API key to enable live chat functionality. For orders, please use the WhatsApp link in the cart." }]);
+        setChatHistory(prev => [...prev, { role: 'model', text: "I'm a simulated concierge. Unable to use live chat functionality. For orders, please use the WhatsApp link in the cart." }]);
         setIsTyping(false);
         return;
     }
@@ -404,7 +407,7 @@ const JaysBistro = () => {
         <span className="text-accent text-xs font-bold tracking-[0.2em] uppercase">The Experience</span>
         <h2 className="font-serif text-4xl text-primary mt-4 mb-8">Where atmosphere meets culinary art</h2>
         <p className="text-secondary leading-loose font-light">
-            Nestled in Victoria Island, we offer an escape from the bustling city. Inspired by chic Parisian cafes and the vibrant flavors of Lagos.
+            Nestled in Makurdi, we offer an escape from the bustling city. Inspired by chic Parisian cafes and the vibrant flavors of Benue State.
         </p>
       </section>
 
@@ -597,20 +600,32 @@ const JaysBistro = () => {
                 
                 {/* Logo & Text */}
                 <div 
-                    onClick={() => setCurrentPage('home')}
-                    className="flex items-center gap-2 cursor-pointer transition-colors duration-500"
-                >
-                    {/* Placeholder Logo Icon */}
-                    <div className={`w-5 h-5 border-2 border-accent flex items-center justify-center transition-all duration-500 ${scrolled ? 'scale-90' : 'scale-100'}`}>
-                        <Star size={12} className="text-accent" />
-                    </div> 
-                    <div 
-                        className={`text-2xl font-serif font-bold tracking-tighter transition-colors duration-500`}
-                        style={{ color: navTextColor }}
-                    >
-                        Jay's <span className="text-accent">Bistro</span>
-                    </div>
-                </div>
+					onClick={() => setCurrentPage('home')}
+					className="cursor-pointer transition-colors duration-500"
+				>
+					{/* New Logo: Handwritten, Two-Lines, Circle */}
+					<div 
+						className={`
+							w-16 h-16 rounded-full border-2 border-accent flex flex-col items-center justify-center 
+							transition-all duration-500 
+							${scrolled ? 'scale-90' : 'scale-100'} 
+							bg-bg-secondary // Ensures the circle is solid against the hero background
+						`}
+						style={{ borderColor: navTextColor }} // Border color changes with scroll/page for visibility
+					>
+						<span 
+							className="font-handwritten leading-none text-xl" 
+							style={{ color: navTextColor }}
+						>
+							Jay's
+						</span>
+						<span 
+							className="font-handwritten leading-none text-xl text-accent"
+						>
+							Bistro
+						</span>
+					</div>
+				</div>
             </div>
 
             {/* CENTER: Navigation Links (Desktop Only) */}
@@ -674,7 +689,7 @@ const JaysBistro = () => {
                 <h4 className="font-serif text-accent text-lg mb-6">Visit Us</h4>
                 <a href={GOOGLE_MAPS_URL} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 group hover:text-white transition-colors mb-4" style={{ color: FOOTER_TEXT_SECONDARY }}>
                     <MapPin size={18} className="text-accent mt-1 group-hover:scale-110 transition-transform" />
-                    <span>Plot 42, **Victoria Island**,<br/>Lagos, Nigeria</span>
+                    <span>**Precious Events**,<br/>Makurdi, Nigeria</span>
                 </a>
                 <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group hover:text-white transition-colors" style={{ color: FOOTER_TEXT_SECONDARY }}>
                     <Phone size={18} className="text-accent group-hover:scale-110 transition-transform" />
@@ -701,7 +716,7 @@ const JaysBistro = () => {
             </div>
         </div>
         <div className="text-center text-xs uppercase tracking-widest pt-8 border-t" style={{ color: FOOTER_TEXT_SECONDARY, borderColor: '#333333' }}>
-            © {new Date().getFullYear()} Jay's Bistro. All rights reserved.
+            © {new Date().getFullYear()} Jay's Bistro. All rights reserved. Designed by Pyrexx.
         </div>
       </footer>
 
