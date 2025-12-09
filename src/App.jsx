@@ -430,8 +430,8 @@ const JaysBistro = () => {
                             className="w-16 h-16 object-cover flex-shrink-0 rounded-sm"
                         />
                         
-                        {/* * FIX: Changed parent flex to stack on mobile (flex-col) 
-                            * and allowed the text div to take full width on mobile (w-full md:flex-1)
+                        {/* FIX: Changed parent flex to stack on mobile (flex-col) 
+                                and allowed the text div to take full width on mobile (w-full md:flex-1)
                         */}
                         <div className="flex flex-1 flex-col md:flex-row justify-between items-start"> 
                             
@@ -770,13 +770,18 @@ const JaysBistro = () => {
                  <span className="text-[10px] uppercase tracking-widest bg-green-500/20 text-green-400 px-2 py-1 rounded animate-pulse">Online</span>
              </div>
              
-             {/* Chat Messages Body - FIX: Using bg-bg-secondary for solid, distinct background */}
-             <div className="h-64 p-4 bg-bg-secondary overflow-y-auto">
+             {/* Chat Messages Body - FIX: Changed to bg-bg for solid background and high contrast */}
+             <div className="h-64 p-4 bg-bg overflow-y-auto">
                  <div className="space-y-4">
                     {chatHistory.length === 0 && <div className="text-secondary text-center text-xs mt-4">How can I help you today?</div>}
                     {chatHistory.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[85%] p-3 text-sm ${msg.role === 'user' ? 'bg-primary text-bg' : 'bg-bg border border-border text-primary shadow-sm'}`}>
+                            <div className={`max-w-[85%] p-3 text-sm ${
+                                // FIX: User message is now bg-accent
+                                msg.role === 'user' ? 'bg-accent text-primary' 
+                                // FIX: Model message is now bg-bg-secondary to contrast with body's bg-bg
+                                : 'bg-bg-secondary border border-border text-primary shadow-sm'
+                            }`}>
                                 {msg.text}
                             </div>
                         </div>
