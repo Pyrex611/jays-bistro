@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 // --- Configuration ---
-const WHATSAPP_NUMBER = "2348162624447"; 
+const WHATSAPP_NUMBER = "2348062624447"; 
 const GOOGLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Plot+42+Victoria+Island+Lagos";
 const CHATBOT_API_KEY = ""; 
 
@@ -693,7 +693,7 @@ const JaysBistro = () => {
                 </a>
                 <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group hover:text-white transition-colors" style={{ color: FOOTER_TEXT_SECONDARY }}>
                     <Phone size={18} className="text-accent group-hover:scale-110 transition-transform" />
-                    <span>+234 800 123 4567</span>
+                    <span>+234 806 262 4447</span>
                 </a>
             </div>
 
