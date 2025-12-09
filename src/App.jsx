@@ -430,15 +430,19 @@ const JaysBistro = () => {
                             className="w-16 h-16 object-cover flex-shrink-0 rounded-sm"
                         />
                         
-                        <div className="flex flex-1 justify-between items-start">
-                            {/* Dish Name & Description */}
-                            <div className="w-full"> {/* Removed md:w-3/5 for better mobile text space */}
+                        {/* * FIX: Changed parent flex to stack on mobile (flex-col) 
+                            * and allowed the text div to take full width on mobile (w-full md:flex-1)
+                        */}
+                        <div className="flex flex-1 flex-col md:flex-row justify-between items-start"> 
+                            
+                            {/* Dish Name & Description - now takes full width on mobile */}
+                            <div className="w-full md:flex-1 mb-4 md:mb-0">
                                 <h3 className="font-serif text-xl font-medium text-primary">{item.name}</h3>
                                 <p className="text-secondary text-sm leading-relaxed mt-1">{item.description}</p>
                             </div>
 
-                            {/* Price and Button Group - Responsive Layout */}
-                            <div className="flex flex-col items-end gap-2 min-w-[150px] justify-end md:flex-row md:items-center md:gap-4 md:min-w-[200px] ml-4 flex-shrink-0">
+                            {/* Price and Button Group - is now below the text on mobile */}
+                            <div className="flex flex-col items-end gap-2 justify-end md:flex-row md:items-center md:gap-4 md:min-w-[200px] ml-0 md:ml-4 flex-shrink-0 w-full md:w-auto">
                                 {/* Price */}
                                 <span className="text-accent font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
                                 {/* Button Container (fixed width for consistency) */}
@@ -766,13 +770,13 @@ const JaysBistro = () => {
                  <span className="text-[10px] uppercase tracking-widest bg-green-500/20 text-green-400 px-2 py-1 rounded animate-pulse">Online</span>
              </div>
              
-             {/* Chat Messages Body */}
-             <div className="h-64 p-4 bg-bg overflow-y-auto">
+             {/* Chat Messages Body - FIX: Using bg-bg-secondary for solid, distinct background */}
+             <div className="h-64 p-4 bg-bg-secondary overflow-y-auto">
                  <div className="space-y-4">
                     {chatHistory.length === 0 && <div className="text-secondary text-center text-xs mt-4">How can I help you today?</div>}
                     {chatHistory.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[85%] p-3 text-sm ${msg.role === 'user' ? 'bg-primary text-bg' : 'bg-bg-secondary border border-border text-primary shadow-sm'}`}>
+                            <div className={`max-w-[85%] p-3 text-sm ${msg.role === 'user' ? 'bg-primary text-bg' : 'bg-bg border border-border text-primary shadow-sm'}`}>
                                 {msg.text}
                             </div>
                         </div>
