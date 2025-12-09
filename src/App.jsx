@@ -42,6 +42,7 @@ const GlobalStyles = () => (
 // --- Configuration ---
 const WHATSAPP_NUMBER = "2348001234567"; // Replace with real number (Format: CountryCode+Number, no +)
 const GOOGLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Plot+42+Victoria+Island+Lagos";
+const CHATBOT_API_KEY = ""; // <--- INSERT YOUR API KEY HERE
 
 // --- Data ---
 const MENU_ITEMS = [
@@ -51,7 +52,7 @@ const MENU_ITEMS = [
   { id: 1, category: "Tea", name: "Classic Arabian Blend", price: 1200, description: "Heritage spice infusion with cardamom and rosewater.", image: "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?auto=format&fit=crop&q=80&w=1920", featured: true },
   
   // Full Menu
-  { id: 5, category: "Appetizers", name: "Smoky Goat Pepper Soup", price: 3500, description: "Slow-simmered broth, tender smoked goat, native spices.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800", featured: true },
+  { id: 5, category: "Appetizers", name: "Smoky Goat Pepper Soup", price: 3500, description: "Slow-simmered broth, tender smoked goat, native spices.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
   { id: 2, category: "Tea", name: "Midnight Espresso Tonic", price: 1800, description: "Single-origin espresso, tonic water, orange peel.", image: "https://images.unsplash.com/photo-1517701604599-bb29b5c7dd90?auto=format&fit=crop&q=80&w=800" },
   { id: 3, category: "Tea", name: "Hibiscus & Ginger Zobo", price: 1500, description: "Hibiscus petals, fresh ginger, organic honey.", image: "https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&q=80&w=800" },
   { id: 9, category: "Meals", name: "Pesto Shrimp Tagliatelle", price: 6000, description: "Fresh pasta, basil pesto, grilled jumbo shrimp.", image: "https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&q=80&w=800" },
@@ -77,7 +78,7 @@ const generateWhatsAppLink = (cart) => {
     });
     
     message += `\n*Total Order Value: ${formatPrice(total)}*`;
-    message += `\n\nPlease confirm availability.`;
+    message += `\n\nPlease confirm availability and address details.`;
     
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 };
@@ -104,10 +105,10 @@ const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
   
   if (cartItem) {
     return (
-      <div className="flex items-center justify-between bg-[#1A1A1A] text-white px-4 py-3 w-full animate-pulse">
-        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="hover:text-[#C5A059]"><Minus size={16} /></button>
+      <div className="flex items-center justify-between bg-[#1A1A1A] text-white px-3 py-2 w-full animate-pulse">
+        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="hover:text-[#C5A059]"><Minus size={14} /></button>
         <span className="font-sans font-bold text-sm">{cartItem.quantity}</span>
-        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="hover:text-[#C5A059]"><Plus size={16} /></button>
+        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="hover:text-[#C5A059]"><Plus size={14} /></button>
       </div>
     );
   }
@@ -115,14 +116,15 @@ const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
   return (
     <button 
       onClick={() => addToCart(item)}
-      className="w-full bg-white border border-[#1A1A1A] text-[#1A1A1A] py-3 text-xs font-bold uppercase tracking-widest hover:bg-[#1A1A1A] hover:text-white transition-all duration-300"
+      className="w-full bg-white border border-[#1A1A1A] text-[#1A1A1A] py-2 text-xs font-bold uppercase tracking-widest hover:bg-[#1A1A1A] hover:text-white transition-all duration-300"
     >
-      Add to Order
+      Add
     </button>
   );
 };
 
 const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
+  // NOTE: This MenuCard is still used for the Full Menu View
   <div className="group bg-white p-4 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[#C5A059]/30">
     <div className="relative overflow-hidden aspect-[4/5] mb-6 bg-gray-100">
       <img 
@@ -157,7 +159,7 @@ const JaysBistro = () => {
 
   // Hero Slideshow State
   const [currentSlide, setCurrentSlide] = useState(0);
-  const heroSlides = MENU_ITEMS.filter(item => item.featured).slice(0, 3);
+  const heroSlides = MENU_ITEMS.filter(item => item.featured).slice(0, 3); // Ensures only 3 items
 
   // Scroll Listener
   useEffect(() => {
@@ -186,7 +188,7 @@ const JaysBistro = () => {
       if (exists) return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
       return [...prev, { ...item, quantity: 1 }];
     });
-    // Removed setIsCartOpen(true) to prevent annoying popup
+    // Cart no longer opens on every new addition
   };
 
   const updateQuantity = (id, delta) => {
@@ -213,11 +215,17 @@ const JaysBistro = () => {
     setChatInput('');
     setIsTyping(true);
 
-    const apiKey = ""; // <--- INSERT YOUR API KEY HERE
+    const apiKey = CHATBOT_API_KEY; 
+    
+    if (!apiKey) {
+        setChatHistory(prev => [...prev, { role: 'model', text: "API Key is missing. Please contact the administrator. I cannot process your request." }]);
+        setIsTyping(false);
+        return;
+    }
+    
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
     
-    // System context for the AI
-    const systemPrompt = `You are the concierge at Jay's Bistro. Answer politely. Current Menu: ${MENU_ITEMS.map(i => i.name).join(', ')}.`;
+    const systemPrompt = `You are the concierge at Jay's Bistro. Answer politely, chic, and sophisticated. Current Menu: ${MENU_ITEMS.map(i => i.name).join(', ')}.`;
     
     try {
         const response = await fetch(apiUrl, {
@@ -229,7 +237,7 @@ const JaysBistro = () => {
         });
         
         const data = await response.json();
-        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I apologize, I am unable to connect right now.";
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I apologize, I am unable to connect right now. We may be experiencing a high volume of requests.";
         
         setChatHistory(prev => [...prev, { role: 'model', text: reply }]);
     } catch (e) {
@@ -282,6 +290,113 @@ const JaysBistro = () => {
     </section>
   );
 
+  const HomeView = () => (
+    <div className="page-transition">
+      <HeroSection />
+      
+      {/* Intro */}
+      <section className="py-24 px-6 max-w-4xl mx-auto text-center">
+        <span className="text-[#C5A059] text-xs font-bold tracking-[0.2em] uppercase">The Experience</span>
+        <h2 className="font-serif text-4xl text-[#1A1A1A] mt-4 mb-8">Where atmosphere meets culinary art</h2>
+        <p className="text-gray-500 leading-loose font-light">
+            Nestled in Victoria Island, we offer an escape from the bustling city. Inspired by chic Parisian cafes and the vibrant flavors of Lagos.
+        </p>
+      </section>
+
+      {/* Favorites (Partial Menu) - MODIFIED FOR COMPACT DISPLAY */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-6">
+            <div className="flex justify-between items-end mb-12">
+                <div>
+                    <h2 className="font-serif text-3xl text-[#1A1A1A]">Curated Favorites</h2>
+                    <p className="text-gray-400 text-sm mt-2">A glimpse into our kitchen.</p>
+                </div>
+            </div>
+            
+            {/* Compact List Layout */}
+            <div className="space-y-8 max-w-3xl mx-auto"> 
+                {heroSlides.map(item => ( // Using heroSlides (3 items)
+                    <div key={item.id} className="pb-8 border-b border-gray-200">
+                        <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-serif text-xl font-medium text-[#1A1A1A] w-3/5">{item.name}</h3>
+                            <div className="flex items-center gap-4">
+                                <span className="text-[#C5A059] font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
+                                {/* The Button/Adjuster beside the price */}
+                                <div className="w-24"> 
+                                    <AddToCartButton 
+                                        item={item} 
+                                        cart={cart} 
+                                        addToCart={addToCart} 
+                                        updateQuantity={updateQuantity} 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-gray-500 text-sm leading-relaxed">{item.description}</p>
+                    </div>
+                ))}
+            </div>
+
+            {/* Show Full Menu Button */}
+            <div className="mt-12 text-center">
+                 <PrimaryButton onClick={() => setCurrentPage('menu')} variant="outline">
+                    Show Full Menu
+                    <ArrowRight size={16} className="ml-2 inline" />
+                 </PrimaryButton>
+            </div>
+        </div>
+      </section>
+
+      {/* Gallery */}
+      <section className="pb-24 px-4 container mx-auto">
+          <div className="text-center mb-12">
+             <span className="text-[#C5A059] text-xs font-bold tracking-[0.2em] uppercase">Ambience</span>
+             <h2 className="font-serif text-4xl mt-2">Visual Chronicle</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 h-[500px]">
+              <div className="col-span-2 row-span-2 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
+              <div className="col-span-1 row-span-1 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
+              <div className="col-span-1 row-span-2 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
+              <div className="col-span-1 row-span-1 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1507914372368-b2b085b925a1?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
+          </div>
+      </section>
+    </div>
+  );
+
+  const MenuView = () => {
+    const filtered = activeCategory === "All" ? MENU_ITEMS : MENU_ITEMS.filter(i => i.category === activeCategory);
+    
+    useEffect(() => { window.scrollTo(0,0); }, []);
+
+    return (
+        <div className="pt-32 pb-20 min-h-screen page-transition container mx-auto px-6">
+            <div className="text-center mb-16 animate-[fadeIn_0.5s_ease-out]">
+                <h1 className="font-serif text-5xl md:text-6xl mb-4">Our Collection</h1>
+                <p className="text-gray-500 font-light max-w-xl mx-auto">Discover flavors crafted with passion, from our signature teas to our fusion entrees.</p>
+            </div>
+
+            <div className="sticky top-20 z-30 bg-[#F9F7F2]/95 backdrop-blur py-4 mb-12 flex justify-center gap-6 overflow-x-auto no-scrollbar border-b border-[#C5A059]/20">
+                {CATEGORIES.map(cat => (
+                    <button key={cat} onClick={() => setActiveCategory(cat)} className={`text-sm uppercase tracking-widest pb-2 transition-all ${activeCategory === cat ? 'text-[#C5A059] border-b-2 border-[#C5A059]' : 'text-gray-400 hover:text-black'}`}>
+                        {cat}
+                    </button>
+                ))}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                {filtered.map(item => (
+                    <MenuCard key={item.id} item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
+                ))}
+            </div>
+
+            <div className="mt-20 text-center border-t border-gray-200 pt-10">
+                <p className="text-gray-400 mb-6">Need assistance? Speak to our concierge.</p>
+                <button onClick={() => setIsChatOpen(true)} className="text-[#C5A059] font-serif italic text-xl hover:underline">Chat with Jay</button>
+            </div>
+        </div>
+    );
+  };
+
   return (
     <div className="min-h-screen font-sans bg-[#F9F7F2] text-[#1A1A1A]">
       <GlobalStyles />
@@ -321,55 +436,8 @@ const JaysBistro = () => {
       </nav>
 
       {/* Main Content Area */}
-      <main className="page-transition">
-          {currentPage === 'home' ? (
-            <>
-                <HeroSection />
-                
-                {/* Intro */}
-                <section className="py-24 px-6 max-w-4xl mx-auto text-center">
-                    <span className="text-[#C5A059] text-xs font-bold tracking-[0.2em] uppercase">The Experience</span>
-                    <h2 className="font-serif text-4xl text-[#1A1A1A] mt-4 mb-8">Where atmosphere meets culinary art</h2>
-                    <p className="text-gray-500 leading-loose font-light">
-                        Nestled in Victoria Island, we offer an escape from the bustling city. Inspired by chic Parisian cafes and the vibrant flavors of Lagos.
-                    </p>
-                    <PrimaryButton onClick={() => setCurrentPage('menu')} className="mt-8 bg-transparent border border-black text-black hover:bg-black hover:text-white">
-                        Explore Menu
-                    </PrimaryButton>
-                </section>
-
-                {/* Gallery */}
-                <section className="pb-24 px-4 container mx-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 h-[500px]">
-                        <div className="col-span-2 row-span-2 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
-                        <div className="col-span-1 row-span-1 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
-                        <div className="col-span-1 row-span-2 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
-                        <div className="col-span-1 row-span-1 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1507914372368-b2b085b925a1?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
-                    </div>
-                </section>
-            </>
-          ) : (
-            <div className="pt-32 pb-20 min-h-screen container mx-auto px-6">
-                <div className="text-center mb-16 animate-[fadeIn_0.5s_ease-out]">
-                    <h1 className="font-serif text-5xl md:text-6xl mb-4">Our Collection</h1>
-                    <p className="text-gray-500 font-light max-w-xl mx-auto">Discover flavors crafted with passion.</p>
-                </div>
-
-                <div className="sticky top-20 z-30 bg-[#F9F7F2]/95 backdrop-blur py-4 mb-12 flex justify-center gap-6 overflow-x-auto no-scrollbar border-b border-[#C5A059]/20">
-                    {CATEGORIES.map(cat => (
-                        <button key={cat} onClick={() => setActiveCategory(cat)} className={`text-sm uppercase tracking-widest pb-2 transition-all ${activeCategory === cat ? 'text-[#C5A059] border-b-2 border-[#C5A059]' : 'text-gray-400 hover:text-black'}`}>
-                            {cat}
-                        </button>
-                    ))}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                    {(activeCategory === "All" ? MENU_ITEMS : MENU_ITEMS.filter(i => i.category === activeCategory)).map(item => (
-                        <MenuCard key={item.id} item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
-                    ))}
-                </div>
-            </div>
-          )}
+      <main>
+          {currentPage === 'home' ? <HomeView /> : <MenuView />}
       </main>
 
       {/* Expanded Footer */}
@@ -389,7 +457,7 @@ const JaysBistro = () => {
                 <h4 className="font-serif text-[#C5A059] text-lg mb-6">Visit Us</h4>
                 <a href={GOOGLE_MAPS_URL} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 group text-gray-400 hover:text-white transition-colors mb-4">
                     <MapPin size={18} className="text-[#C5A059] mt-1 group-hover:scale-110 transition-transform" />
-                    <span>Plot 42, Victoria Island,<br/>Lagos, Nigeria</span>
+                    <span>Plot 42, **Victoria Island**,<br/>Lagos, Nigeria</span>
                 </a>
                 <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group text-gray-400 hover:text-white transition-colors">
                     <Phone size={18} className="text-[#C5A059] group-hover:scale-110 transition-transform" />
@@ -415,11 +483,11 @@ const JaysBistro = () => {
             </div>
         </div>
         <div className="text-center text-gray-600 text-xs uppercase tracking-widest pt-8 border-t border-gray-800">
-            &copy; {new Date().getFullYear()} Jay's Bistro. All rights reserved.
+            © {new Date().getFullYear()} Jay's Bistro. All rights reserved.
         </div>
       </footer>
 
-      {/* Cart Drawer */}
+      {/* Cart Drawer (WhatsApp Checkout Implemented) */}
       <div className={`fixed inset-0 z-[60] ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
          <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsCartOpen(false)} />
          <div className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transform transition-transform duration-500 flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -471,7 +539,7 @@ const JaysBistro = () => {
          </div>
       </div>
 
-      {/* Chat Bot */}
+      {/* Concierge Chat Bot (Functionality Enabled) */}
       <button onClick={() => setIsChatOpen(!isChatOpen)} className="fixed bottom-6 right-6 z-50 bg-[#C5A059] text-white p-4 rounded-full shadow-xl hover:bg-[#1A1A1A] transition-colors hover:scale-110 duration-300">
         {isChatOpen ? <X size={24} /> : <Bot size={24} />}
       </button>
@@ -505,6 +573,9 @@ const JaysBistro = () => {
                     className="flex-1 bg-transparent text-sm outline-none" 
                  />
                  <button onClick={handleChatSend} className="text-[#C5A059] hover:text-[#1A1A1A]"><Send size={18} /></button>
+             </div>
+             <div className="p-1 text-center text-[10px] text-gray-400 bg-white">
+                 API Key space: <code className="text-red-500 font-bold">CHATBOT_API_KEY</code>
              </div>
         </div>
       )}
