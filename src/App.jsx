@@ -22,8 +22,8 @@ const GlobalStyles = () => (
       .font-serif { font-family: 'Playfair Display', serif; }
       .font-sans { font-family: 'Montserrat', sans-serif; }
       
-      /* Smooth Page Transitions */
-      .page-transition { animation: fadeInPage 0.8s ease-out forwards; }
+      /* Smooth View Transitions (FAST FADE-IN) */
+      .view-fade-in { animation: fadeInPage 0.4s ease-out forwards; }
       @keyframes fadeInPage { from { opacity: 0; } to { opacity: 1; } }
 
       /* Hero Animation */
@@ -100,11 +100,13 @@ const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) 
   </button>
 );
 
+// Quantity Adjuster/Add Button (The "Smart" Button)
 const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
   const cartItem = cart.find(i => i.id === item.id);
   
   if (cartItem) {
     return (
+      // The quantity adjuster when item is in cart
       <div className="flex items-center justify-between bg-[#1A1A1A] text-white px-3 py-2 w-full animate-pulse">
         <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="hover:text-[#C5A059]"><Minus size={14} /></button>
         <span className="font-sans font-bold text-sm">{cartItem.quantity}</span>
@@ -114,6 +116,7 @@ const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
   }
 
   return (
+    // The "Add" button when item is not in cart
     <button 
       onClick={() => addToCart(item)}
       className="w-full bg-white border border-[#1A1A1A] text-[#1A1A1A] py-2 text-xs font-bold uppercase tracking-widest hover:bg-[#1A1A1A] hover:text-white transition-all duration-300"
@@ -124,7 +127,7 @@ const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
 };
 
 const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
-  // NOTE: This MenuCard is still used for the Full Menu View
+  // Used only for the FULL Menu View
   <div className="group bg-white p-4 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[#C5A059]/30">
     <div className="relative overflow-hidden aspect-[4/5] mb-6 bg-gray-100">
       <img 
@@ -159,7 +162,7 @@ const JaysBistro = () => {
 
   // Hero Slideshow State
   const [currentSlide, setCurrentSlide] = useState(0);
-  const heroSlides = MENU_ITEMS.filter(item => item.featured).slice(0, 3); // Ensures only 3 items
+  const heroSlides = MENU_ITEMS.filter(item => item.featured).slice(0, 3); 
 
   // Scroll Listener
   useEffect(() => {
@@ -188,7 +191,6 @@ const JaysBistro = () => {
       if (exists) return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
       return [...prev, { ...item, quantity: 1 }];
     });
-    // Cart no longer opens on every new addition
   };
 
   const updateQuantity = (id, delta) => {
@@ -291,7 +293,7 @@ const JaysBistro = () => {
   );
 
   const HomeView = () => (
-    <div className="page-transition">
+    <div className="view-fade-in">
       <HeroSection />
       
       {/* Intro */}
@@ -303,7 +305,7 @@ const JaysBistro = () => {
         </p>
       </section>
 
-      {/* Favorites (Partial Menu) - MODIFIED FOR COMPACT DISPLAY */}
+      {/* Favorites (Partial Menu) - COMPACT LIST */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
             <div className="flex justify-between items-end mb-12">
@@ -313,15 +315,20 @@ const JaysBistro = () => {
                 </div>
             </div>
             
-            {/* Compact List Layout */}
+            {/* Compact List Layout with Price and Button side-by-side */}
             <div className="space-y-8 max-w-3xl mx-auto"> 
-                {heroSlides.map(item => ( // Using heroSlides (3 items)
+                {heroSlides.map(item => ( // Only 3 featured items
                     <div key={item.id} className="pb-8 border-b border-gray-200">
                         <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-serif text-xl font-medium text-[#1A1A1A] w-3/5">{item.name}</h3>
-                            <div className="flex items-center gap-4">
+                            {/* Dish Name & Description */}
+                            <div className="w-full md:w-3/5">
+                                <h3 className="font-serif text-xl font-medium text-[#1A1A1A]">{item.name}</h3>
+                                <p className="text-gray-500 text-sm leading-relaxed mt-1">{item.description}</p>
+                            </div>
+
+                            {/* Price and Button Group */}
+                            <div className="flex items-center gap-4 min-w-[200px] justify-end">
                                 <span className="text-[#C5A059] font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
-                                {/* The Button/Adjuster beside the price */}
                                 <div className="w-24"> 
                                     <AddToCartButton 
                                         item={item} 
@@ -332,7 +339,6 @@ const JaysBistro = () => {
                                 </div>
                             </div>
                         </div>
-                        <p className="text-gray-500 text-sm leading-relaxed">{item.description}</p>
                     </div>
                 ))}
             </div>
@@ -369,12 +375,13 @@ const JaysBistro = () => {
     useEffect(() => { window.scrollTo(0,0); }, []);
 
     return (
-        <div className="pt-32 pb-20 min-h-screen page-transition container mx-auto px-6">
-            <div className="text-center mb-16 animate-[fadeIn_0.5s_ease-out]">
+        <div className="pt-32 pb-20 min-h-screen view-fade-in container mx-auto px-6">
+            <div className="text-center mb-16">
                 <h1 className="font-serif text-5xl md:text-6xl mb-4">Our Collection</h1>
                 <p className="text-gray-500 font-light max-w-xl mx-auto">Discover flavors crafted with passion, from our signature teas to our fusion entrees.</p>
             </div>
 
+            {/* Sticky Categories */}
             <div className="sticky top-20 z-30 bg-[#F9F7F2]/95 backdrop-blur py-4 mb-12 flex justify-center gap-6 overflow-x-auto no-scrollbar border-b border-[#C5A059]/20">
                 {CATEGORIES.map(cat => (
                     <button key={cat} onClick={() => setActiveCategory(cat)} className={`text-sm uppercase tracking-widest pb-2 transition-all ${activeCategory === cat ? 'text-[#C5A059] border-b-2 border-[#C5A059]' : 'text-gray-400 hover:text-black'}`}>
