@@ -2,8 +2,137 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ShoppingBag, X, Plus, Minus, MapPin, Phone, ArrowRight, 
   Bot, Send, Menu as MenuIcon, Instagram, Facebook, Twitter, 
-  ChevronLeft, Star, Clock, Sun, Moon // Added Sun and Moon icons
+  ChevronLeft, Star, Clock, Sun, Moon 
 } from 'lucide-react';
+
+// --- Configuration ---
+const WHATSAPP_NUMBER = "2348001234567"; 
+const GOOGLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Plot+42+Victoria+Island+Lagos";
+const CHATBOT_API_KEY = ""; 
+
+// --- Data ---
+const MENU_ITEMS = [
+  // Curated / Featured (Shown on Hero & Home)
+  { id: 8, category: "Meals", name: "Signature Jollof Risotto", price: 4500, description: "Arborio rice, tomato reduction, grilled beef fillet.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=1920", featured: true },
+  { id: 10, category: "Meals", name: "Pan-Seared Salmon", price: 7500, description: "Atlantic salmon, creamy mash, asparagus.", image: "https://images.unsplash.com/photo-1467003909585-2f8a7270028d?auto=format&fit=crop&q=80&w=1920", featured: true },
+  { id: 1, category: "Tea", name: "Classic Arabian Blend", price: 1200, description: "Heritage spice infusion with cardamom and rosewater.", image: "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?auto=format&fit=crop&q=80&w=1920", featured: true },
+  
+  // Full Menu
+  { id: 5, category: "Appetizers", name: "Smoky Goat Pepper Soup", price: 3500, description: "Slow-simmered broth, tender smoked goat, native spices.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
+  { id: 2, category: "Tea", name: "Midnight Espresso Tonic", price: 1800, description: "Single-origin espresso, tonic water, orange peel.", image: "https://images.unsplash.com/photo-1517701604599-bb29b5c7dd90?auto=format&fit=crop&q=80&w=800" },
+  { id: 3, category: "Tea", name: "Hibiscus & Ginger Zobo", price: 1500, description: "Hibiscus petals, fresh ginger, organic honey.", image: "https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&q=80&w=800" },
+  { id: 9, category: "Meals", name: "Pesto Shrimp Tagliatelle", price: 6000, description: "Fresh pasta, basil pesto, grilled jumbo shrimp.", image: "https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&q=80&w=800" },
+  { id: 6, category: "Appetizers", name: "Bistro Chicken Satay", price: 2800, description: "Grilled skewers, peanut dipping sauce.", image: "https://images.unsplash.com/photo-1532635241-17e820acc59f?auto=format&fit=crop&q=80&w=800" },
+  { id: 11, category: "Bites", name: "Spiced Meat Samosa", price: 1500, description: "Crispy pastry, spiced minced lamb.", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800" },
+];
+
+const CATEGORIES = ["All", "Tea", "Appetizers", "Meals", "Bites"];
+
+// Hardcoded colors for the permanent dark footer
+const FOOTER_BG = '#1A1A1A'; 
+const FOOTER_TEXT_PRIMARY = '#F9F7F2';
+const FOOTER_TEXT_SECONDARY = '#AAAAAA';
+
+
+// --- Utilities ---
+const formatPrice = (p) => "₦" + p.toLocaleString();
+
+const generateWhatsAppLink = (cart) => {
+    if (cart.length === 0) return `https://wa.me/${WHATSAPP_NUMBER}`;
+    
+    let message = "Hello Jay's Bistro, I would like to place an order:\n\n";
+    let total = 0;
+    
+    cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        message += `▪ ${item.quantity}x ${item.name} - ${formatPrice(itemTotal)}\n`;
+    });
+    
+    message += `\n*Total Order Value: ${formatPrice(total)}*`;
+    message += `\n\nPlease confirm availability and address details.`;
+    
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+};
+
+// --- Components ---
+
+const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) => (
+  <button
+    onClick={onClick}
+    className={`
+      px-8 py-4 font-sans text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300
+      bg-[var(--color-primary-button-bg)] text-[var(--color-primary-button-text)]
+      hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]
+      ${variant === 'outline' ? 'bg-transparent border border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:border-[var(--color-accent)] hover:text-black' : ''}
+      ${className}
+    `}
+  >
+    {children}
+  </button>
+);
+
+const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
+  const cartItem = cart.find(i => i.id === item.id);
+  
+  if (cartItem) {
+    return (
+      <div className="flex items-center justify-between bg-[var(--color-text)] text-[var(--color-bg)] px-3 py-2 w-full animate-pulse">
+        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="hover:text-[var(--color-accent)]"><Minus size={14} /></button>
+        <span className="font-sans font-bold text-sm">{cartItem.quantity}</span>
+        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="hover:text-[var(--color-accent)]"><Plus size={14} /></button>
+      </div>
+    );
+  }
+
+  return (
+    <button 
+      onClick={() => addToCart(item)}
+      className="w-full bg-transparent border border-[var(--color-text)] text-[var(--color-text)] py-2 text-xs font-bold uppercase tracking-widest hover:bg-[var(--color-text)] hover:text-[var(--color-bg-secondary)] transition-all duration-300"
+    >
+      Add
+    </button>
+  );
+};
+
+const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
+  <div className="group bg-bg-secondary p-4 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--color-accent)]/30">
+    <div className="relative overflow-hidden aspect-[4/5] mb-6 bg-[var(--color-border)]">
+      <img 
+        src={item.image} 
+        alt={item.name} 
+        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+      />
+    </div>
+    <div className="text-center mb-4">
+      <h3 className="font-serif text-lg text-primary mb-2">{item.name}</h3>
+      <p className="text-secondary text-xs leading-relaxed mb-3 h-10 line-clamp-2 px-2">{item.description}</p>
+      <span className="block text-accent font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
+    </div>
+    <div className="px-2 pb-2">
+        <AddToCartButton item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
+    </div>
+  </div>
+);
+
+// New Component for Nav Links
+const NavLink = ({ page, current, setPage, scrolled, children, theme }) => {
+    const isDarkBackground = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const defaultColor = (scrolled || current !== 'home') ? 'var(--color-text)' : (isDarkBackground ? 'var(--color-text)' : 'white');
+
+    return (
+        <button
+            onClick={() => setPage(page)}
+            className={`
+                text-xs font-bold uppercase tracking-widest transition-colors duration-300 relative pb-1
+                ${current === page ? 'text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]' : 'hover:text-[var(--color-accent)]/80'}
+            `}
+            style={{ color: defaultColor }}
+        >
+            {children}
+        </button>
+    );
+};
 
 // --- Styles (Injecting L'Avenue inspired Fonts & Animations) ---
 const GlobalStyles = () => (
@@ -37,7 +166,7 @@ const GlobalStyles = () => (
         --color-text-secondary: #AAAAAA;
         --color-border: #333333;
         --color-nav-bg: rgba(26, 26, 26, 0.95);
-        --color-hero-overlay: rgba(255, 255, 255, 0.1);
+        --color-hero-overlay: rgba(0, 0, 0, 0.5);
         --color-primary-button-bg: #C5A059;
         --color-primary-button-text: #1A1A1A;
       }
@@ -76,135 +205,6 @@ const GlobalStyles = () => (
   </style>
 );
 
-// --- Configuration ---
-const WHATSAPP_NUMBER = "2348001234567"; // Replace with real number (Format: CountryCode+Number, no +)
-const GOOGLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Plot+42+Victoria+Island+Lagos";
-const CHATBOT_API_KEY = ""; // <--- INSERT YOUR API KEY HERE
-
-// --- Data ---
-const MENU_ITEMS = [
-  // Curated / Featured (Shown on Hero & Home)
-  { id: 8, category: "Meals", name: "Signature Jollof Risotto", price: 4500, description: "Arborio rice, tomato reduction, grilled beef fillet.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=1920", featured: true },
-  { id: 10, category: "Meals", name: "Pan-Seared Salmon", price: 7500, description: "Atlantic salmon, creamy mash, asparagus.", image: "https://images.unsplash.com/photo-1467003909585-2f8a7270028d?auto=format&fit=crop&q=80&w=1920", featured: true },
-  { id: 1, category: "Tea", name: "Classic Arabian Blend", price: 1200, description: "Heritage spice infusion with cardamom and rosewater.", image: "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?auto=format&fit=crop&q=80&w=1920", featured: true },
-  
-  // Full Menu
-  { id: 5, category: "Appetizers", name: "Smoky Goat Pepper Soup", price: 3500, description: "Slow-simmered broth, tender smoked goat, native spices.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
-  { id: 2, category: "Tea", name: "Midnight Espresso Tonic", price: 1800, description: "Single-origin espresso, tonic water, orange peel.", image: "https://images.unsplash.com/photo-1517701604599-bb29b5c7dd90?auto=format&fit=crop&q=80&w=800" },
-  { id: 3, category: "Tea", name: "Hibiscus & Ginger Zobo", price: 1500, description: "Hibiscus petals, fresh ginger, organic honey.", image: "https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&q=80&w=800" },
-  { id: 9, category: "Meals", name: "Pesto Shrimp Tagliatelle", price: 6000, description: "Fresh pasta, basil pesto, grilled jumbo shrimp.", image: "https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&q=80&w=800" },
-  { id: 6, category: "Appetizers", name: "Bistro Chicken Satay", price: 2800, description: "Grilled skewers, peanut dipping sauce.", image: "https://images.unsplash.com/photo-1532635241-17e820acc59f?auto=format&fit=crop&q=80&w=800" },
-  { id: 11, category: "Bites", name: "Spiced Meat Samosa", price: 1500, description: "Crispy pastry, spiced minced lamb.", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800" },
-];
-
-const CATEGORIES = ["All", "Tea", "Appetizers", "Meals", "Bites"];
-
-// --- Utilities ---
-const formatPrice = (p) => "₦" + p.toLocaleString();
-
-const generateWhatsAppLink = (cart) => {
-    if (cart.length === 0) return `https://wa.me/${WHATSAPP_NUMBER}`;
-    
-    let message = "Hello Jay's Bistro, I would like to place an order:\n\n";
-    let total = 0;
-    
-    cart.forEach(item => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        message += `▪ ${item.quantity}x ${item.name} - ${formatPrice(itemTotal)}\n`;
-    });
-    
-    message += `\n*Total Order Value: ${formatPrice(total)}*`;
-    message += `\n\nPlease confirm availability and address details.`;
-    
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-};
-
-// --- Components ---
-
-const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) => (
-  <button
-    onClick={onClick}
-    // Using CSS variables for dynamic colors
-    className={`
-      px-8 py-4 font-sans text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300
-      bg-[var(--color-primary-button-bg)] text-[var(--color-primary-button-text)]
-      hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]
-      ${variant === 'outline' ? 'bg-transparent border border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:border-[var(--color-accent)] hover:text-black' : ''}
-      ${className}
-    `}
-  >
-    {children}
-  </button>
-);
-
-const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
-  const cartItem = cart.find(i => i.id === item.id);
-  
-  if (cartItem) {
-    return (
-      // Using CSS variables for dynamic colors
-      <div className="flex items-center justify-between bg-[var(--color-text)] text-[var(--color-bg)] px-3 py-2 w-full animate-pulse">
-        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} className="hover:text-[var(--color-accent)]"><Minus size={14} /></button>
-        <span className="font-sans font-bold text-sm">{cartItem.quantity}</span>
-        <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} className="hover:text-[var(--color-accent)]"><Plus size={14} /></button>
-      </div>
-    );
-  }
-
-  return (
-    // Using CSS variables for dynamic colors
-    <button 
-      onClick={() => addToCart(item)}
-      className="w-full bg-transparent border border-[var(--color-text)] text-[var(--color-text)] py-2 text-xs font-bold uppercase tracking-widest hover:bg-[var(--color-text)] hover:text-[var(--color-bg-secondary)] transition-all duration-300"
-    >
-      Add
-    </button>
-  );
-};
-
-const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
-  // Using CSS variables for dynamic colors
-  <div className="group bg-bg-secondary p-4 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-[var(--color-accent)]/30">
-    <div className="relative overflow-hidden aspect-[4/5] mb-6 bg-[var(--color-border)]">
-      <img 
-        src={item.image} 
-        alt={item.name} 
-        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-      />
-    </div>
-    <div className="text-center mb-4">
-      <h3 className="font-serif text-lg text-primary mb-2">{item.name}</h3>
-      <p className="text-secondary text-xs leading-relaxed mb-3 h-10 line-clamp-2 px-2">{item.description}</p>
-      <span className="block text-accent font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
-    </div>
-    <div className="px-2 pb-2">
-        <AddToCartButton item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
-    </div>
-  </div>
-);
-
-// New Component for Nav Links
-const NavLink = ({ page, current, setPage, scrolled, children, theme }) => {
-    // Determine link color based on scroll/page/theme
-    const isDarkBackground = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    const defaultColor = (scrolled || current !== 'home') ? 'var(--color-text)' : (isDarkBackground ? 'var(--color-text)' : 'white');
-
-    return (
-        <button
-            onClick={() => setPage(page)}
-            className={`
-                text-xs font-bold uppercase tracking-widest transition-colors duration-300 relative pb-1
-                text-[${defaultColor}]
-                ${current === page ? 'text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]' : 'hover:text-[var(--color-accent)]/80'}
-            `}
-            style={{ color: defaultColor }}
-        >
-            {children}
-        </button>
-    );
-};
-
 
 // --- Main Application ---
 const JaysBistro = () => {
@@ -218,8 +218,8 @@ const JaysBistro = () => {
   const [chatInput, setChatInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
-  // NEW: Theme State
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system'); // 'light', 'dark', or 'system'
+  // Theme State: 'light', 'dark', or 'system'
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system'); 
 
   // Hero Slideshow State
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -356,13 +356,14 @@ const JaysBistro = () => {
             <div 
                 key={slide.id}
                 // Use CSS variable for the overlay opacity
-                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'z-10' : 'opacity-0 z-0'}`}
-                style={{ backgroundColor: index === currentSlide ? 'var(--color-hero-overlay)' : ''}}
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                style={{ backgroundColor: index === currentSlide ? 'var(--color-hero-overlay)' : 'transparent'}}
             >
                 <img 
                     src={slide.image} 
                     className={`w-full h-full object-cover ${index === currentSlide ? 'ken-burns' : ''}`} 
                     alt="Hero" 
+                    style={{ opacity: index === currentSlide ? '0.6' : '0' }} // Apply opacity to image, not container
                 />
             </div>
         ))}
@@ -419,8 +420,16 @@ const JaysBistro = () => {
             {/* Compact List Layout with Price and Button side-by-side */}
             <div className="space-y-8 max-w-3xl mx-auto"> 
                 {heroSlides.map(item => ( // Only 3 featured items
-                    <div key={item.id} className="pb-8 border-b border-primary/10">
-                        <div className="flex justify-between items-start mb-2">
+                    <div key={item.id} className="pb-8 border-b border-primary/10 flex items-start gap-4">
+                        
+                        {/* NEW: Mini Picture/Thumbnail */}
+                        <img 
+                            src={item.image} 
+                            alt={item.name} 
+                            className="w-16 h-16 object-cover flex-shrink-0 rounded-sm"
+                        />
+                        
+                        <div className="flex flex-1 justify-between items-start">
                             {/* Dish Name & Description */}
                             <div className="w-full md:w-3/5">
                                 <h3 className="font-serif text-xl font-medium text-primary">{item.name}</h3>
@@ -476,7 +485,6 @@ const JaysBistro = () => {
     return (
         <div className="pt-32 pb-20 min-h-screen view-fade-in container mx-auto px-6">
             <div className="text-center mb-16">
-                {/* Updated Title */}
                 <h1 className="font-serif text-5xl md:text-6xl mb-4 text-primary">The Menu Carte</h1>
                 <p className="text-secondary font-light max-w-xl mx-auto">Discover flavors crafted with passion, from our signature teas to our fusion entrees.</p>
             </div>
@@ -560,7 +568,7 @@ const JaysBistro = () => {
     <div className="min-h-screen font-sans">
       <GlobalStyles />
       
-      {/* Navigation (Redesigned) */}
+      {/* Navigation */}
       <nav 
         className={`fixed top-0 w-full z-50 transition-all duration-700 ease-in-out ${scrolled ? 'py-4 shadow-sm' : 'bg-transparent py-6'}`}
         style={{ backgroundColor: scrolled ? 'var(--color-nav-bg)' : 'transparent' }}
@@ -608,7 +616,7 @@ const JaysBistro = () => {
             {/* RIGHT: Cart/Utility */}
             <div className="flex items-center gap-6">
                 
-                {/* NEW: Theme Toggle Button */}
+                {/* Theme Toggle Button */}
                 <button 
                     onClick={toggleTheme}
                     className="p-2 transition-colors duration-500 hover:text-accent"
@@ -639,12 +647,15 @@ const JaysBistro = () => {
           {renderView()}
       </main>
 
-      {/* Expanded Footer (Updated to use CSS variables) */}
-      <footer className="bg-[var(--color-text)] text-[var(--color-bg)] pt-20 pb-10 border-t border-[var(--color-border)]">
+      {/* Expanded Footer (Hardcoded Dark Theme) */}
+      <footer 
+        className="pt-20 pb-10 border-t" 
+        style={{ backgroundColor: FOOTER_BG, color: FOOTER_TEXT_PRIMARY, borderColor: '#333333' }}
+      >
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="space-y-6">
                 <h3 className="font-serif text-2xl font-bold">Jay's Bistro</h3>
-                <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed">Defining modern dining with a touch of traditional elegance.</p>
+                <p className="text-sm leading-relaxed" style={{ color: FOOTER_TEXT_SECONDARY }}>Defining modern dining with a touch of traditional elegance.</p>
                 <div className="flex gap-4">
                     <Instagram size={20} className="hover:text-accent cursor-pointer" />
                     <Twitter size={20} className="hover:text-accent cursor-pointer" />
@@ -654,11 +665,11 @@ const JaysBistro = () => {
             
             <div>
                 <h4 className="font-serif text-accent text-lg mb-6">Visit Us</h4>
-                <a href={GOOGLE_MAPS_URL} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 group text-[var(--color-text-secondary)] hover:text-[var(--color-bg)] transition-colors mb-4">
+                <a href={GOOGLE_MAPS_URL} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 group hover:text-white transition-colors mb-4" style={{ color: FOOTER_TEXT_SECONDARY }}>
                     <MapPin size={18} className="text-accent mt-1 group-hover:scale-110 transition-transform" />
                     <span>Plot 42, **Victoria Island**,<br/>Lagos, Nigeria</span>
                 </a>
-                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group text-[var(--color-text-secondary)] hover:text-[var(--color-bg)] transition-colors">
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group hover:text-white transition-colors" style={{ color: FOOTER_TEXT_SECONDARY }}>
                     <Phone size={18} className="text-accent group-hover:scale-110 transition-transform" />
                     <span>+234 800 123 4567</span>
                 </a>
@@ -666,7 +677,7 @@ const JaysBistro = () => {
 
             <div>
                 <h4 className="font-serif text-accent text-lg mb-6">Opening Hours</h4>
-                <ul className="space-y-3 text-[var(--color-text-secondary)] text-sm">
+                <ul className="space-y-3 text-sm" style={{ color: FOOTER_TEXT_SECONDARY }}>
                     <li className="flex justify-between"><span>Mon - Fri</span> <span>08:00 - 22:00</span></li>
                     <li className="flex justify-between"><span>Saturday</span> <span>09:00 - 23:00</span></li>
                     <li className="flex justify-between"><span>Sunday</span> <span>10:00 - 22:00</span></li>
@@ -676,17 +687,18 @@ const JaysBistro = () => {
             <div>
                 <h4 className="font-serif text-accent text-lg mb-6">Newsletter</h4>
                 <div className="flex flex-col gap-3">
-                    <input type="email" placeholder="Your email address" className="bg-[var(--color-bg-secondary)] border-none text-[var(--color-text)] px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none" />
+                    {/* Hardcoded inputs for dark mode styling */}
+                    <input type="email" placeholder="Your email address" className="bg-[#2C2C2C] border-none text-white px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none" />
                     <button className="bg-accent text-primary py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors">Subscribe</button>
                 </div>
             </div>
         </div>
-        <div className="text-center text-[var(--color-text-secondary)]/50 text-xs uppercase tracking-widest pt-8 border-t border-[var(--color-border)]">
+        <div className="text-center text-xs uppercase tracking-widest pt-8 border-t" style={{ color: FOOTER_TEXT_SECONDARY, borderColor: '#333333' }}>
             © {new Date().getFullYear()} Jay's Bistro. All rights reserved.
         </div>
       </footer>
 
-      {/* Cart Drawer (Updated to use CSS variables) */}
+      {/* Cart Drawer */}
       <div className={`fixed inset-0 z-[60] ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
          <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsCartOpen(false)} />
          <div className={`absolute top-0 right-0 h-full w-full max-w-md bg-bg-secondary shadow-2xl transform transition-transform duration-500 flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -738,7 +750,7 @@ const JaysBistro = () => {
          </div>
       </div>
 
-      {/* Concierge Chat Bot (Updated to use CSS variables) */}
+      {/* Concierge Chat Bot */}
       <button onClick={() => setIsChatOpen(!isChatOpen)} className="fixed bottom-6 right-6 z-50 bg-accent text-primary p-4 rounded-full shadow-xl hover:bg-primary hover:text-accent transition-colors hover:scale-110 duration-300">
         {isChatOpen ? <X size={24} /> : <Bot size={24} />}
       </button>
