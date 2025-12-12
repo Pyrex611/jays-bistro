@@ -7,26 +7,91 @@ import {
 
 // --- Configuration ---
 const WHATSAPP_NUMBER = "2348062624447"; 
-const GOOGLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Plot+42+Victoria+Island+Lagos";
+const GOOGLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Precious+event+Centre+Makurdi";
 const CHATBOT_API_KEY = ""; 
 
 // --- Data ---
 const MENU_ITEMS = [
   // Curated / Featured (Shown on Hero & Home)
-  { id: 8, category: "Meals", name: "Signature Jollof Risotto", price: 4500, description: "Arborio rice, tomato reduction, grilled beef fillet.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=1920", featured: true },
-  { id: 10, category: "Meals", name: "Pan-Seared Salmon", price: 7500, description: "Atlantic salmon, creamy mash, asparagus.", image: "https://images.unsplash.com/photo-1467003909585-2f8a7270028d?auto=format&fit=crop&q=80&w=1920", featured: true },
-  { id: 1, category: "Tea", name: "Classic Arabian Blend", price: 1200, description: "Heritage spice infusion with cardamom and rosewater.", image: "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?auto=format&fit=crop&q=80&w=1920", featured: true },
+  { id: 8, category: "Meals", name: "Party Jollof Rice", price: 1500, description: "Arborio rice, tomato reduction, grilled beef fillet.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=1920", featured: true },
+  { id: 10, category: "Protein", name: "Isi-ewu", price: 6000, description: "Atlantic salmon, creamy mash, asparagus.", image: "https://images.unsplash.com/photo-1467003909585-2f8a7270028d?auto=format&fit=crop&q=80&w=1920", featured: true },
+  { id: 1, category: "Beverages", name: "Classic Arabian Blend(1L)", price: 3000, description: "Heritage spice infusion with cardamom and rosewater.", image: "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?auto=format&fit=crop&q=80&w=1920", featured: true },
   
   // Full Menu
-  { id: 5, category: "Appetizers", name: "Smoky Goat Pepper Soup", price: 3500, description: "Slow-simmered broth, tender smoked goat, native spices.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
-  { id: 2, category: "Tea", name: "Midnight Espresso Tonic", price: 1800, description: "Single-origin espresso, tonic water, orange peel.", image: "https://images.unsplash.com/photo-1517701604599-bb29b5c7dd90?auto=format&fit=crop&q=80&w=800" },
-  { id: 3, category: "Tea", name: "Hibiscus & Ginger Zobo", price: 1500, description: "Hibiscus petals, fresh ginger, organic honey.", image: "https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&q=80&w=800" },
-  { id: 9, category: "Meals", name: "Pesto Shrimp Tagliatelle", price: 6000, description: "Fresh pasta, basil pesto, grilled jumbo shrimp.", image: "https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&q=80&w=800" },
-  { id: 6, category: "Appetizers", name: "Bistro Chicken Satay", price: 2800, description: "Grilled skewers, peanut dipping sauce.", image: "https://images.unsplash.com/photo-1532635241-17e820acc59f?auto=format&fit=crop&q=80&w=800" },
-  { id: 11, category: "Bites", name: "Spiced Meat Samosa", price: 1500, description: "Crispy pastry, spiced minced lamb.", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800" },
+  { id: 5, category: "Protein", name: "Smoky Goat Pepper Soup", price: 3000, description: "Slow-simmered broth, tender smoked goat, native spices.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
+  { id: 2, category: "Beverages", name: "Double Root(1L)", price: 3500, description: "Single-origin espresso, tonic water, orange peel.", image: "https://images.unsplash.com/photo-1517701604599-bb29b5c7dd90?auto=format&fit=crop&q=80&w=800" },
+  { id: 3, category: "Beverages", name: "Ginger, Lemon & Cinamon Tea", price: 2000, description: "Hibiscus petals, fresh ginger, organic honey.", image: "https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&q=80&w=800" },
+  //{ id: 9, category: "Meals", name: "Pesto Shrimp Tagliatelle", price: 6000, description: "Fresh pasta, basil pesto, grilled jumbo shrimp.", image: "https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&q=80&w=800" },
+  { id: 6, category: "Protein", name: "Bistro Chicken Wings", price: 5000, description: "Grilled skewers, peanut dipping sauce.", image: "https://images.unsplash.com/photo-1532635241-17e820acc59f?auto=format&fit=crop&q=80&w=800" },
+  { id: 11, category: "Starters", name: "Spiced Meat Samosa", price: 1500, description: "Crispy pastry, spiced minced lamb.", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800" },
+  { id: 12, category: "Protein", name: "Full Chicken", price: 20000, description: "From the Flaming grills of Jay's Bistro", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800" },
+  
+  { id: 13, category: "Bites", name: "Fish Roll", price: 1000, description: "Crispy loaded Fish roll.", image: " " },
+  { id: 14, category: "Bites", name: "Doughnut", price: 500, description: "Crispy loaded Fish roll.", image: " " },
+  { id: 15, category: "Bites", name: "Palmia", price: 500, description: "Crispy loaded Fish roll.", image: " " },
+  { id: 16, category: "Bites", name: "Meat Pie", price: 1000, description: "Crispy loaded Fish roll.", image: " " },
+  { id: 17, category: "Bites", name: "6' Pizza", price: 12000, description: "Cheesiest Cheese Pull in town.", image: " " },
+  { id: 18, category: "Bites", name: "12' Pizza", price: 15000, description: "The bigger the better right?.", image: " " },
+  { id: 19, category: "Bites", name: "Chicken Shawarma (SS)", price: 3500, description: "The best Chicken Shawarma you'd get, with Single Sausage.", image: " " },
+  { id: 20, category: "Bites", name: "Chicken Shawarma (DS)", price: 4000, description: "Double Sausage Chicken shawarma with the best Seasonings.", image: " " },
+  { id: 21, category: "Bites", name: "Beef Shawarma", price: 4500, description: "Crispy loaded Fish roll.", image: " " },
+  { id: 22, category: "Bites", name: "Combo Shawarma", price: 6000, description: "Crispy loaded Fish roll.", image: " " },
+  { id: 23, category: "Bites", name: "Chicken Ceasar Salad", price: 7000, description: "Crispy loaded Fish roll.", image: " " },
+  { id: 24, category: "Bites", name: "Coleslaw", price: 1000, description: "Crispy loaded Fish roll.", image: " " },
+  { id: 25, category: "Bites", name: "Vegetable Salad", price: 6000, description: "Crispy loaded Fish roll.", image: " " },
+  
+  { id: 26, category: "Starters", name: "Spring Roll", price: 3000, description: "Crispy rolls, tender and delicious.", image: " " },
+  //{ id: 27, category: "Starters", name: "Samosa", price: 3000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 28, category: "Starters", name: "Puff Puff", price: 1500, description: "Crispy rolls, tender and delicious.", image: " " },
+  
+  { id: 29, category: "Meals", name: "Moi-Moi", price: 3000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 30, category: "Meals", name: "Noodles", price: 2000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 31, category: "Meals", name: "Garnished Noodles", price: 3500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 32, category: "Meals", name: "Fried Rice", price: 1500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 33, category: "Meals", name: "Coconut Rice", price: 2000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 34, category: "Meals", name: "Local Rice", price: 3000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 35, category: "Meals", name: "Beans", price: 1500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 36, category: "Meals", name: "Plantain", price: 1000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 37, category: "Meals", name: "Basmati Fried Rice", price: 3500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 38, category: "Meals", name: "Spaghetti", price: 3500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 39, category: "Meals", name: "Gizz Dodo", price: 4000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 40, category: "Meals", name: "Chips & Omelette", price: 3500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 41, category: "Meals", name: "Porridge Yam", price: 3000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 42, category: "Meals", name: "Masa", price: 1000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 43, category: "Meals", name: "Pounded Yam", price: 1200, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 44, category: "Meals", name: "Semo", price: 1000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 45, category: "Meals", name: "Amala", price: 1000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 46, category: "Meals", name: "Fufu", price: 1000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 47, category: "Meals", name: "Garri", price: 1000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 48, category: "Meals", name: "Yam Stick", price: 1500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 49, category: "Meals", name: "Yam and Egg Sauce", price: 3000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 50, category: "Meals", name: "Eggs", price: 400, description: "Crispy rolls, tender and delicious.", image: " " },
+  
+  { id: 51, category: "Protein", name: "Portion O' Chicken", price: 6000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 52, category: "Protein", name: "Goat Meat", price: 1500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 53, category: "Protein", name: "Beef", price: 1500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 54, category: "Protein", name: "Portion of Beef/Goat", price: 4500, description: "Crispy rolls, tender and delicious.", image: " " },
+  //{ id: 55, category: "Protein", name: "Goat Meat Pepper Soup", price: 3000, description: "Crispy rolls, tender and delicious.", image: " " },
+  //{ id: 56, category: "Protein", name: "Chicken Wings", price: 5000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 57, category: "Protein", name: "Turkey", price: 6000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 58, category: "Protein", name: "Cat Fish(Portion)", price: 1000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 59, category: "Protein", name: "Croaker Fish", price: 4000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 60, category: "Protein", name: "Nkwobi", price: 10000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 61, category: "Protein", name: "Vegetable Chicken", price: 20000, description: "Crispy rolls, tender and delicious.", image: " " },
+  
+  { id: 62, category: "Soups", name: "Egusi", price: 500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 63, category: "Soups", name: "Vegetable Soup", price: 1500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 64, category: "Soups", name: "White Soup", price: 2000, description: "Crispy rolls, tender and delicious.", image: " " },
+  
+  { id: 65, category: "Beverages", name: "Arabian Tea(1/2L)", price: 1500, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 66, category: "Beverages", name: "Arabian Double", price: 2000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 67, category: "Beverages", name: "Honey(1L)", price: 10000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 68, category: "Beverages", name: "Date Powder", price: 30000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 63, category: "Beverages", name: "Arabian Tea Pack", price: 6000, description: "Crispy rolls, tender and delicious.", image: " " },
+  { id: 63, category: "Beverages", name: "Maca Root Pack", price: 6000, description: "Crispy rolls, tender and delicious.", image: " " },
 ];
 
-const CATEGORIES = ["All", "Tea", "Appetizers", "Meals", "Bites"];
+const CATEGORIES = ["All", "Starters", "Beverages", "Meals", "Bites", "Protein", "Soups"];
 
 // Hardcoded colors for the permanent dark footer
 const FOOTER_BG = '#1A1A1A'; 
@@ -655,7 +720,7 @@ const JaysBistro = () => {
                 >
                     <ShoppingBag size={22} />
                     {cartCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-accent text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full animate-bounce">
+                        <span className="absolute -top-1 -right-1 bg-accent text-orange text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full animate-bounce">
                             {cartCount}
                         </span>
                     )}
