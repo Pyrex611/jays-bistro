@@ -124,24 +124,20 @@ const generateWhatsAppLink = (cart) => {
 
 // --- Components ---
 
-const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) => {
-  // Refactored to avoid multi-line template literal which can cause build errors
-  const baseClasses = "px-8 py-4 font-sans text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300 bg-[var(--color-primary-button-bg)] text-[var(--color-primary-button-text)] hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]";
-  
-  const outlineClasses = "bg-transparent border border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:border-[var(--color-accent)] hover:text-black";
-  
-  // Conditionally apply classes using a simple template literal
-  const finalClassName = `${baseClasses} ${variant === 'outline' ? outlineClasses : ''} ${className}`;
-
-  return (
-    <button
-      onClick={onClick}
-      className={finalClassName}
-    >
-      {children}
-    </button>
-  );
-};
+const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) => (
+  <button
+    onClick={onClick}
+    className={`
+      px-8 py-4 font-sans text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300
+      bg-[var(--color-primary-button-bg)] text-[var(--color-primary-button-text)]
+      hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]
+      ${variant === 'outline' ? 'bg-transparent border border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:border-[var(--color-accent)] hover:text-black' : ''}
+      ${className}
+    `}
+  >
+    {children}
+  </button>
+);
 
 const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
   const cartItem = cart.find(i => i.id === item.id);
@@ -593,7 +589,7 @@ const JaysBistro = () => {
 
             {/* Show Full Menu Button */}
             <div className="mt-12 text-center">
-                 <PrimaryButton onClick={() => setCurrentPage('menu')} variant="outline'>
+                 <PrimaryButton onClick={() => setCurrentPage('menu')} variant="outline">
                     Show Full Menu
                     <ArrowRight size={16} className="ml-2 inline" />
                  </PrimaryButton>
@@ -627,21 +623,17 @@ const JaysBistro = () => {
                 <p className="text-secondary font-light max-w-xl mx-auto">Discover flavors crafted with passion, from our signature teas to our fusion entrees.</p>
             </div>
 
-            {/* Sticky Categories FIX: Increased top to 24 (96px) and changed justify-center to justify-start on mobile */}
-            <div className="sticky top-24 z-30 bg-bg/95 backdrop-blur py-4 mb-12 border-b border-accent/20">
-                <div className="flex justify-start gap-4 md:gap-6 overflow-x-auto no-scrollbar">
-                    {CATEGORIES.map(cat => (
-                        <button 
-                            key={cat} 
-                            onClick={() => setActiveCategory(cat)} 
-                            // flex-shrink-0 ensures buttons don't disappear on narrow screens.
-                            className={`text-sm uppercase tracking-widest pb-2 transition-all whitespace-nowrap flex-shrink-0 
-                                ${activeCategory === cat ? 'text-accent border-b-2 border-accent' : 'text-secondary hover:text-primary'}`}
-                        >
-                            {cat}
-                        </button>
-                    ))}
-                </div>
+            {/* Sticky Categories */}
+            <div className="sticky top-16 z-30 bg-bg/95 backdrop-blur py-4 mb-12 flex justify-center gap-6 overflow-x-auto no-scrollbar border-b border-accent/20">
+                {CATEGORIES.map(cat => (
+                    <button 
+                        key={cat} 
+                        onClick={() => setActiveCategory(cat)} 
+                        className={`text-sm uppercase tracking-widest pb-2 transition-all whitespace-nowrap ${activeCategory === cat ? 'text-accent border-b-2 border-accent' : 'text-secondary hover:text-primary'}`}
+                    >
+                        {cat}
+                    </button>
+                ))}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
@@ -841,9 +833,9 @@ const JaysBistro = () => {
             <div>
                 <h4 className="font-serif text-accent text-lg mb-6">Newsletter</h4>
                 <div className="flex flex-col gap-3">
-                    {/* FIX: Using template literals for robust string parsing */}
-                    <input type="email" placeholder="Your email address" className={`bg-[#2C2C2C] border-none text-white px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none`} />
-                    <button className={`bg-accent text-primary py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors`}>Subscribe</button>
+                    {/* Hardcoded inputs for dark mode styling */}
+                    <input type="email" placeholder="Your email address" className="bg-[#2C2C2C] border-none text-white px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none" />
+                    <button className="bg-accent text-primary py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors">Subscribe</button>
                 </div>
             </div>
         </div>
