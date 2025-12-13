@@ -8,7 +8,7 @@ import {
 // --- Configuration ---
 const WHATSAPP_NUMBER = "2348062624447"; 
 const GOOGLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Precious+event+Centre+Makurdi";
-const CHATBOT_API_KEY = ""; 
+const CHATBOT_API_KEY = "PLACEHOLDER_GEMINI_API_KEY_A1B2C3D4E5F6G7H8I9"; // Placeholder key
 
 // --- Data ---
 const MENU_ITEMS = [
@@ -88,56 +88,24 @@ const MENU_ITEMS = [
   { id: 61, category: "Protein", name: "Vegetable Chicken", price: 20000, description: "Chicken stir-fry with mixed vegetables.", image: "https://images.unsplash.com/photo-1598511726623-d09994539a95?auto=format&fit=crop&q=80&w=800" },
 
   // Soups
-  { id: 62, category: "Soups", name: "Egusi", price: 500, description: "Rich melon seed soup with spinach.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" }, // Reusing pepper soup style image for generic soup aesthetic
+  { id: 62, category: "Soups", name: "Egusi", price: 500, description: "Rich melon seed soup with spinach.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" }, 
   { id: 63, category: "Soups", name: "Vegetable Soup", price: 1500, description: "Nutritious Edikang Ikong style soup.", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800" },
   { id: 64, category: "Soups", name: "White Soup", price: 2000, description: "Ofe Nsala - Spicy traditional soup.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=800" },
 ];
 
 const CATEGORIES = ["All", "Starters", "Beverages", "Meals", "Bites", "Protein", "Soups"];
 
-// Hardcoded colors for the permanent dark footer
-const FOOTER_BG = '#1A1A1A'; 
-const FOOTER_TEXT_PRIMARY = '#F9F7F2';
-const FOOTER_TEXT_SECONDARY = '#AAAAAA';
-
-
-// --- Utilities ---
-const formatPrice = (p) => "₦" + p.toLocaleString();
-
-const generateWhatsAppLink = (cart) => {
-    if (cart.length === 0) return `https://wa.me/${WHATSAPP_NUMBER}`;
-    
-    let message = "Hello Jay's Bistro, I would like to place an order:\n\n";
-    let total = 0;
-    
-    cart.forEach(item => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        message += `▪ ${item.quantity}x ${item.name} - ${formatPrice(itemTotal)}\n`;
-    });
-    
-    message += `\n*Total Order Value: ${formatPrice(total)}*`;
-    message += `\n\nPlease confirm availability and address details.`;
-    
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-};
-
 // --- Components ---
 
-const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) => (
-  <button
-    onClick={onClick}
-    className={`
-      px-8 py-4 font-sans text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300
-      bg-[var(--color-primary-button-bg)] text-[var(--color-primary-button-text)]
-      hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]
-      ${variant === 'outline' ? 'bg-transparent border border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:border-[var(--color-accent)] hover:text-black' : ''}
-      ${className}
-    `}
-  >
-    {children}
-  </button>
-);
+const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) => {
+  const baseClasses = "px-8 py-4 font-sans text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300 bg-[var(--color-primary-button-bg)] text-[var(--color-primary-button-text)] hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]";
+  const outlineClasses = "bg-transparent border border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:border-[var(--color-accent)] hover:text-black";
+  const finalClassName = `${baseClasses} ${variant === 'outline' ? outlineClasses : ''} ${className}`;
+
+  return (
+    <button onClick={onClick} className={finalClassName}>{children}</button>
+  );
+};
 
 const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
   const cartItem = cart.find(i => i.id === item.id);
@@ -182,7 +150,6 @@ const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
   </div>
 );
 
-// New Component for Nav Links
 const NavLink = ({ page, current, setPage, scrolled, children, theme }) => {
     const isDarkBackground = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const defaultColor = (scrolled || current !== 'home') ? 'var(--color-text)' : (isDarkBackground ? 'var(--color-text)' : 'white');
@@ -201,21 +168,17 @@ const NavLink = ({ page, current, setPage, scrolled, children, theme }) => {
     );
 };
 
-// --- Styles (Injecting L'Avenue inspired Fonts & Animations) ---
+// --- Styles ---
 const GlobalStyles = () => (
   <style>
     {`
       @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&family=Sacramento&display=swap');
       
-      /* Base Accent Color */
-      :root {
-        --color-accent: #C5A059; /* Gold */
-      }
+      :root { --color-accent: #C5A059; }
       
-      /* LIGHT MODE DEFINITIONS */
       .light-theme {
-        --color-bg: #F9F7F2; /* Cream */
-        --color-text: #1A1A1A; /* Black */
+        --color-bg: #F9F7F2; 
+        --color-text: #1A1A1A; 
         --color-bg-secondary: #FFFFFF;
         --color-text-secondary: #555555;
         --color-border: #EEEEEE;
@@ -225,10 +188,9 @@ const GlobalStyles = () => (
         --color-primary-button-text: #FFFFFF;
       }
 
-      /* DARK MODE DEFINITIONS */
       .dark-theme {
-        --color-bg: #1A1A1A; /* Dark Charcoal */
-        --color-text: #F9F7F2; /* Cream Text */
+        --color-bg: #1A1A1A; 
+        --color-text: #F9F7F2; 
         --color-bg-secondary: #2C2C2C;
         --color-text-secondary: #AAAAAA;
         --color-border: #333333;
@@ -242,7 +204,7 @@ const GlobalStyles = () => (
         background-color: var(--color-bg); 
         color: var(--color-text); 
         overflow-x: hidden; 
-        transition: background-color 0.5s ease; /* Smooth transition */
+        transition: background-color 0.5s ease; 
         -webkit-overflow-scrolling: touch; 
       }
       
@@ -250,29 +212,23 @@ const GlobalStyles = () => (
       .font-sans { font-family: 'Montserrat', sans-serif; }
 	  .font-handwritten { font-family: 'Sacramento', cursive; }
       
-      /* Utility classes using variables */
       .text-primary { color: var(--color-text); }
       .bg-primary { background-color: var(--color-bg); }
       .bg-secondary { background-color: var(--color-bg-secondary); }
       .text-secondary { color: var(--color-text-secondary); }
-      .border-primary { border-color: var(--color-border); }
       .text-accent { color: var(--color-accent); }
       
-      /* Smooth View Transitions (FAST FADE-IN) */
       .view-fade-in { animation: fadeInPage 0.4s ease-out forwards; }
       @keyframes fadeInPage { from { opacity: 0; } to { opacity: 1; } }
 
-      /* Hero Animation FIX: will-change helps mitigate blinking/jank */
       .ken-burns { animation: kenBurns 20s infinite alternate; will-change: transform; }
       @keyframes kenBurns { from { transform: scale(1); } to { transform: scale(1.15); } }
       
-      /* Hide Scrollbar for clean UI */
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     `}
   </style>
 );
-
 
 // --- Main Application ---
 const JaysBistro = () => {
@@ -286,15 +242,11 @@ const JaysBistro = () => {
   const [chatInput, setChatInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
-  // Theme State: 'light', 'dark', or 'system'
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system'); 
 
-  // Hero Slideshow State
   const [currentSlide, setCurrentSlide] = useState(0);
   const heroSlides = MENU_ITEMS.filter(item => item.featured).slice(0, 3); 
 
-  // --- Dynamic Favicon Effect ---
-  // This generates an SVG blob of the logo and sets it as the favicon
   useEffect(() => {
     const svgIcon = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -305,7 +257,6 @@ const JaysBistro = () => {
     `;
     const blob = new Blob([svgIcon], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
-    
     let link = document.querySelector("link[rel~='icon']");
     if (!link) {
         link = document.createElement('link');
@@ -313,11 +264,9 @@ const JaysBistro = () => {
         document.getElementsByTagName('head')[0].appendChild(link);
     }
     link.href = url;
-    
     return () => URL.revokeObjectURL(url);
   }, []);
 
-  // --- Theme Logic ---
   const applyTheme = (mode) => {
     let bodyClass = 'light-theme';
     if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -329,11 +278,9 @@ const JaysBistro = () => {
   const toggleTheme = () => {
     setTheme(prev => {
         let newTheme;
-        // Simple manual cycle: system -> light -> dark -> system
         if (prev === 'system') newTheme = 'light';
         else if (prev === 'light') newTheme = 'dark';
         else newTheme = 'system';
-        
         localStorage.setItem('theme', newTheme);
         return newTheme;
     });
@@ -342,17 +289,11 @@ const JaysBistro = () => {
   useEffect(() => {
     applyTheme(theme);
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = () => {
-        if (theme === 'system') {
-            applyTheme('system');
-        }
-    };
+    const handler = () => { if (theme === 'system') applyTheme('system'); };
     mediaQuery.addListener(handler);
     return () => mediaQuery.removeListener(handler);
   }, [theme]);
 
-  // --- Routing Logic (Pseudo-Router) ---
-  // Handle initial load based on URL
   useEffect(() => {
       const path = window.location.pathname;
       if (path.includes('menu')) setCurrentPage('menu');
@@ -360,35 +301,27 @@ const JaysBistro = () => {
       else setCurrentPage('home');
   }, []);
 
-  // Update URL when state changes
   useEffect(() => {
-      // Basic client-side router
       const path = currentPage === 'home' ? '/' : `/${currentPage}`;
       if (window.location.pathname !== path) {
           window.history.pushState(null, '', path);
       }
-      
-      // Handle back button behavior
       const handlePopState = () => {
           const newPath = window.location.pathname;
           if (newPath.includes('menu')) setCurrentPage('menu');
           else if (newPath.includes('about')) setCurrentPage('about');
           else setCurrentPage('home');
       };
-      
       window.addEventListener('popstate', handlePopState);
       return () => window.removeEventListener('popstate', handlePopState);
   }, [currentPage]);
 
-
-  // Scroll Listener
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Hero Interval
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -396,12 +329,10 @@ const JaysBistro = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  // Chat Scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory, isTyping]);
 
-  // Cart Logic
   const addToCart = (item) => {
     setCart(prev => {
       const exists = prev.find(i => i.id === item.id);
@@ -425,40 +356,30 @@ const JaysBistro = () => {
   const cartTotal = useMemo(() => cart.reduce((t, i) => t + i.price * i.quantity, 0), [cart]);
   const cartCount = useMemo(() => cart.reduce((t, i) => t + i.quantity, 0), [cart]);
 
-  // Chat API Logic
   const handleChatSend = async () => {
     if (!chatInput.trim()) return;
-    
     const userMsg = { role: 'user', text: chatInput };
     setChatHistory(prev => [...prev, userMsg]);
     setChatInput('');
     setIsTyping(true);
 
     const apiKey = CHATBOT_API_KEY; 
-    
-    // Safety check: if no API key is set, give a friendly message.
     if (!apiKey) {
         setChatHistory(prev => [...prev, { role: 'model', text: "I'm a simulated concierge. Unable to use live chat functionality. For orders, please use the WhatsApp link in the cart." }]);
         setIsTyping(false);
         return;
     }
-    
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
-    
     const systemPrompt = `You are the concierge at Jay's Bistro. Answer politely, chic, and sophisticated. Current Menu: ${MENU_ITEMS.map(i => i.name).join(', ')}.`;
     
     try {
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: systemPrompt + "\nUser: " + chatInput }] }]
-            })
+            body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt + "\nUser: " + chatInput }] }] })
         });
-        
         const data = await response.json();
-        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I apologize, I am unable to connect right now. We may be experiencing a high volume of requests.";
-        
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I apologize, I am unable to connect right now.";
         setChatHistory(prev => [...prev, { role: 'model', text: reply }]);
     } catch (e) {
         setChatHistory(prev => [...prev, { role: 'model', text: "I'm having trouble connecting. Please try WhatsApp for immediate service." }]);
@@ -467,53 +388,29 @@ const JaysBistro = () => {
     }
   };
 
-  // --- Views ---
-
   const HeroSection = () => (
     <section className="relative h-screen flex items-end justify-between flex-col py-32 bg-bg-secondary overflow-hidden">
         {heroSlides.map((slide, index) => (
             <div 
                 key={slide.id}
-                // Use CSS variable for the overlay opacity
                 className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
                 style={{ backgroundColor: index === currentSlide ? 'var(--color-hero-overlay)' : 'transparent'}}
             >
-                <img 
-                    src={slide.image} 
-                    className={`w-full h-full object-cover ${index === currentSlide ? 'ken-burns' : ''}`} 
-                    alt="Hero" 
-                    style={{ opacity: index === currentSlide ? '0.6' : '0' }} 
-                />
+                <img src={slide.image} className={`w-full h-full object-cover ${index === currentSlide ? 'ken-burns' : ''}`} alt="Hero" style={{ opacity: index === currentSlide ? '0.6' : '0' }} />
             </div>
         ))}
-        
-        {/* Overlay Content Top - Welcome Message (Larger & Higher up) */}
         <div className="relative z-20 w-full flex flex-col justify-start items-center text-center px-4 mt-4">
-             <p className="text-accent text-sm md:text-base font-bold tracking-[0.3em] uppercase mb-4 animate-[fadeIn_1s_ease-out]">
-                Welcome to
-             </p>
-             {/* Increased size for Welcome text */}
-             <h2 className="font-handwritten text-6xl md:text-8xl text-white animate-[fadeIn_1s_ease-out_0.2s_both]">
-                Jay's Bistro
-             </h2>
+             <p className="text-accent text-sm md:text-base font-bold tracking-[0.3em] uppercase mb-4 animate-[fadeIn_1s_ease-out]">Welcome to</p>
+             <h2 className="font-handwritten text-6xl md:text-8xl text-white animate-[fadeIn_1s_ease-out_0.2s_both]">Jay's Bistro</h2>
         </div>
-
-        {/* Overlay Content Bottom - Food Name (Pushed lower) */}
         <div className="relative z-20 w-full flex flex-col justify-end items-center text-center px-4 mb-24">
-             <h1 className="font-serif text-3xl md:text-5xl text-white leading-tight max-w-4xl mx-auto animate-[fadeIn_1s_ease-out_0.2s_both]">
-                {heroSlides[currentSlide].name}
-             </h1>
+             <h1 className="font-serif text-3xl md:text-5xl text-white leading-tight max-w-4xl mx-auto animate-[fadeIn_1s_ease-out_0.2s_both]">{heroSlides[currentSlide].name}</h1>
         </div>
-
-        {/* Bottom Right Order Button */}
         <div className="absolute bottom-12 right-6 md:right-12 z-30 animate-[slideInRight_0.5s_ease-out]">
             <div className="bg-bg-secondary/10 backdrop-blur-md border border-white/20 p-6 rounded-none max-w-xs text-left">
                 <p className="text-gray-300 text-xs uppercase tracking-widest mb-1">Featured Dish</p>
                 <div className="flex items-center gap-4">
-                    <button 
-                        onClick={() => addToCart(heroSlides[currentSlide])}
-                        className="flex items-center gap-3 bg-accent text-primary px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors"
-                    >
+                    <button onClick={() => addToCart(heroSlides[currentSlide])} className="flex items-center gap-3 bg-accent text-primary px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors">
                         Order Now <ArrowRight size={16} />
                     </button>
                 </div>
@@ -525,84 +422,40 @@ const JaysBistro = () => {
   const HomeView = () => (
     <div className="view-fade-in">
       <HeroSection />
-      
-      {/* Intro */}
       <section className="py-24 px-6 max-w-4xl mx-auto text-center">
         <span className="text-accent text-xs font-bold tracking-[0.2em] uppercase">The Experience</span>
         <h2 className="font-serif text-4xl text-primary mt-4 mb-8">Where atmosphere meets culinary art</h2>
-        <p className="text-secondary leading-loose font-light">
-            Nestled in Makurdi, we offer an escape from the bustling city. Inspired by chic Parisian cafes and the vibrant flavors of Benue State.
-        </p>
+        <p className="text-secondary leading-loose font-light">Nestled in Makurdi, we offer an escape from the bustling city. Inspired by chic Parisian cafes and the vibrant flavors of Benue State.</p>
       </section>
-
-      {/* Favorites (Partial Menu) - COMPACT LIST */}
       <section className="py-20 bg-bg-secondary">
         <div className="container mx-auto px-6">
             <div className="flex justify-between items-end mb-12">
-                <div>
-                    <h2 className="font-serif text-3xl text-primary">Curated Favorites</h2>
-                    <p className="text-secondary text-sm mt-2">A glimpse into our kitchen.</p>
-                </div>
+                <div><h2 className="font-serif text-3xl text-primary">Curated Favorites</h2><p className="text-secondary text-sm mt-2">A glimpse into our kitchen.</p></div>
             </div>
-            
-            {/* Compact List Layout with Price and Button side-by-side (responsive) */}
             <div className="space-y-8 max-w-3xl mx-auto"> 
-                {heroSlides.map(item => ( // Only 3 featured items
+                {heroSlides.map(item => (
                     <div key={item.id} className="pb-8 border-b border-primary/10 flex items-start gap-4">
-                        
-                        {/* Mini Picture/Thumbnail */}
-                        <img 
-                            src={item.image} 
-                            alt={item.name} 
-                            className="w-16 h-16 object-cover flex-shrink-0 rounded-sm"
-                        />
-                        
-                        {/* FIX: Changed parent flex to stack on mobile (flex-col) 
-                                and allowed the text div to take full width on mobile (w-full md:flex-1)
-                        */}
+                        <img src={item.image} alt={item.name} className="w-16 h-16 object-cover flex-shrink-0 rounded-sm" />
                         <div className="flex flex-1 flex-col md:flex-row justify-between items-start"> 
-                            
-                            {/* Dish Name & Description - now takes full width on mobile */}
                             <div className="w-full md:flex-1 mb-4 md:mb-0">
                                 <h3 className="font-serif text-xl font-medium text-primary">{item.name}</h3>
                                 <p className="text-secondary text-sm leading-relaxed mt-1">{item.description}</p>
                             </div>
-
-                            {/* Price and Button Group - is now below the text on mobile */}
                             <div className="flex flex-col items-end gap-2 justify-end md:flex-row md:items-center md:gap-4 md:min-w-[200px] ml-0 md:ml-4 flex-shrink-0 w-full md:w-auto">
-                                {/* Price */}
                                 <span className="text-accent font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
-                                {/* Button Container (fixed width for consistency) */}
-                                <div className="w-24 mt-2 md:mt-0"> 
-                                    <AddToCartButton 
-                                        item={item} 
-                                        cart={cart} 
-                                        addToCart={addToCart} 
-                                        updateQuantity={updateQuantity} 
-                                    />
-                                </div>
+                                <div className="w-24 mt-2 md:mt-0"><AddToCartButton item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} /></div>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
-
-            {/* Show Full Menu Button */}
             <div className="mt-12 text-center">
-                 <PrimaryButton onClick={() => setCurrentPage('menu')} variant="outline">
-                    Show Full Menu
-                    <ArrowRight size={16} className="ml-2 inline" />
-                 </PrimaryButton>
+                 <PrimaryButton onClick={() => setCurrentPage('menu')} variant="outline">Show Full Menu <ArrowRight size={16} className="ml-2 inline" /></PrimaryButton>
             </div>
         </div>
       </section>
-
-      {/* Gallery */}
       <section className="pb-24 px-4 container mx-auto">
-          <div className="text-center mb-12">
-             <span className="text-accent text-xs font-bold tracking-[0.2em] uppercase">Ambience</span>
-             <h2 className="font-serif text-4xl mt-2 text-primary">Visual Chronicle</h2>
-          </div>
+          <div className="text-center mb-12"><span className="text-accent text-xs font-bold tracking-[0.2em] uppercase">Ambience</span><h2 className="font-serif text-4xl mt-2 text-primary">Visual Chronicle</h2></div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 h-[500px]">
               <div className="col-span-2 row-span-2 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
               <div className="col-span-1 row-span-1 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
@@ -623,17 +476,15 @@ const JaysBistro = () => {
                 <p className="text-secondary font-light max-w-xl mx-auto">Discover flavors crafted with passion, from our signature teas to our fusion entrees.</p>
             </div>
 
-            {/* Sticky Categories */}
-            <div className="sticky top-16 z-30 bg-bg/95 backdrop-blur py-4 mb-12 flex justify-center gap-6 overflow-x-auto no-scrollbar border-b border-accent/20">
-                {CATEGORIES.map(cat => (
-                    <button 
-                        key={cat} 
-                        onClick={() => setActiveCategory(cat)} 
-                        className={`text-sm uppercase tracking-widest pb-2 transition-all whitespace-nowrap ${activeCategory === cat ? 'text-accent border-b-2 border-accent' : 'text-secondary hover:text-primary'}`}
-                    >
-                        {cat}
-                    </button>
-                ))}
+            {/* Sticky Categories FIX: Increased top to 28, used theme variable background, and fixed mobile clipping */}
+            <div className="sticky top-28 z-40 bg-[var(--color-bg)]/95 backdrop-blur py-4 mb-12 border-b border-accent/20 -mx-6 px-6">
+                <div className="flex justify-start gap-4 md:gap-6 overflow-x-auto no-scrollbar">
+                    {CATEGORIES.map(cat => (
+                        <button key={cat} onClick={() => setActiveCategory(cat)} className={`text-sm uppercase tracking-widest pb-2 transition-all whitespace-nowrap flex-shrink-0 ${activeCategory === cat ? 'text-accent border-b-2 border-accent' : 'text-secondary hover:text-primary'}`}>
+                            {cat}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
@@ -641,7 +492,6 @@ const JaysBistro = () => {
                     <MenuCard key={item.id} item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
                 ))}
             </div>
-
             <div className="mt-20 text-center border-t border-primary/10 pt-10">
                 <p className="text-secondary mb-6">Need assistance? Speak to our concierge.</p>
                 <button onClick={() => setIsChatOpen(true)} className="text-accent font-serif italic text-xl hover:underline">Chat with Jay</button>
@@ -658,24 +508,14 @@ const JaysBistro = () => {
                 <h1 className="font-serif text-5xl md:text-6xl mb-4 text-primary">Our Story & Philosophy</h1>
                 <p className="text-accent font-light text-sm tracking-widest uppercase">The heart of Jay's Bistro</p>
             </div>
-
             <div className="text-secondary space-y-8 text-lg leading-relaxed">
-                <p>
-                    **Jay's Bistro** was founded on the principle that exceptional food should be complemented by an equally exquisite atmosphere. We drew inspiration from the subtle elegance of Parisian bistros and fused it with the bold, vibrant flavors of West Africa.
-                </p>
-                <p>
-                    Our menu is a curated journey, highlighting locally sourced ingredients transformed through classic and modern culinary techniques. We believe in simplicity, quality, and presentation that delights both the eye and the palate.
-                </p>
-                <p>
-                    Join us for an experience where every cup of tea and every dish tells a story of heritage and sophistication. We look forward to welcoming you to our table.
-                </p>
+                <p>**Jay's Bistro** was founded on the principle that exceptional food should be complemented by an equally exquisite atmosphere. We drew inspiration from the subtle elegance of Parisian bistros and fused it with the bold, vibrant flavors of West Africa.</p>
+                <p>Our menu is a curated journey, highlighting locally sourced ingredients transformed through classic and modern culinary techniques. We believe in simplicity, quality, and presentation that delights both the eye and the palate.</p>
+                <p>Join us for an experience where every cup of tea and every dish tells a story of heritage and sophistication. We look forward to welcoming you to our table.</p>
             </div>
-
             <div className="mt-16 text-center">
                 <p className="text-secondary mb-4">Contact us for reservations and events.</p>
-                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
-                    <PrimaryButton variant="dark">Make a Reservation</PrimaryButton>
-                </a>
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer"><PrimaryButton variant="dark">Make a Reservation</PrimaryButton></a>
             </div>
         </div>
     );
@@ -683,121 +523,56 @@ const JaysBistro = () => {
 
   const renderView = () => {
       switch (currentPage) {
-          case 'menu':
-              return <MenuView />;
-          case 'about':
-              return <AboutView />;
-          case 'home':
-          default:
-              return <HomeView />;
+          case 'menu': return <MenuView />;
+          case 'about': return <AboutView />;
+          case 'home': default: return <HomeView />;
       }
   }
 
-  // Helper to determine icon color (white on transparent hero, black/primary on scroll/sub-pages)
   const isDarkNavText = scrolled || currentPage !== 'home';
   const navTextColor = isDarkNavText ? 'var(--color-text)' : 'white';
-
 
   return (
     <div className="min-h-screen font-sans">
       <GlobalStyles />
-      
-      {/* Navigation */}
       <nav 
         className={`fixed top-0 w-full z-50 transition-all duration-700 ease-in-out ${scrolled ? 'py-4 shadow-sm' : 'bg-transparent py-6'}`}
         style={{ backgroundColor: scrolled ? 'var(--color-nav-bg)' : 'transparent' }}
       >
         <div className="container mx-auto px-6 flex justify-between items-center">
-            
-            {/* LEFT: Logo/Title Group */}
             <div className="flex items-center gap-4">
-                {/* Back Button (Mobile/Sub-Pages) */}
                 {currentPage !== 'home' && (
-                    <button 
-                        onClick={() => setCurrentPage('home')} 
-                        className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors"
-                        style={{ color: navTextColor }}
-                    >
+                    <button onClick={() => setCurrentPage('home')} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors" style={{ color: navTextColor }}>
                         <ChevronLeft size={16} /> 
                     </button>
                 )}
-                
-                {/* Logo & Text */}
-                <div 
-					onClick={() => setCurrentPage('home')}
-					className="cursor-pointer transition-colors duration-500"
-				>
-					{/* New Logo: Handwritten, Two-Lines, Circle */}
-					<div 
-						className={`
-							w-16 h-16 rounded-full border-2 border-accent flex flex-col items-center justify-center 
-							transition-all duration-500 
-							${scrolled ? 'scale-90' : 'scale-100'} 
-							bg-bg-secondary // Ensures the circle is solid against the hero background
-						`}
-						style={{ borderColor: navTextColor }} // Border color changes with scroll/page for visibility
-					>
-						<span 
-							className="font-handwritten leading-none text-xl" 
-							style={{ color: navTextColor }}
-						>
-							Jay's
-						</span>
-						<span 
-							className="font-handwritten leading-none text-xl text-accent"
-						>
-							Bistro
-						</span>
+                <div onClick={() => setCurrentPage('home')} className="cursor-pointer transition-colors duration-500">
+					<div className={`w-16 h-16 rounded-full border-2 border-accent flex flex-col items-center justify-center transition-all duration-500 ${scrolled ? 'scale-90' : 'scale-100'} bg-bg-secondary`} style={{ borderColor: navTextColor }}>
+						<span className="font-handwritten leading-none text-xl" style={{ color: navTextColor }}>Jay's</span>
+						<span className="font-handwritten leading-none text-xl text-accent">Bistro</span>
 					</div>
 				</div>
             </div>
-
-            {/* CENTER: Navigation Links (Desktop Only) */}
             <div className="hidden md:flex items-center gap-10">
                 <NavLink page="home" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>Home</NavLink>
                 <NavLink page="menu" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>Menu</NavLink>
                 <NavLink page="about" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>About Us</NavLink>
             </div>
-
-            {/* RIGHT: Cart/Utility */}
             <div className="flex items-center gap-6">
-                
-                {/* Theme Toggle Button */}
-                <button 
-                    onClick={toggleTheme}
-                    className="p-2 transition-colors duration-500 hover:text-accent"
-                    style={{ color: navTextColor }}
-                    title={`Current theme: ${theme}. Click to switch.`}
-                >
+                <button onClick={toggleTheme} className="p-2 transition-colors duration-500 hover:text-accent" style={{ color: navTextColor }} title={`Current theme: ${theme}`}>
                     {theme === 'dark' || (theme === 'system' && document.body.className === 'dark-theme') ? <Sun size={22} /> : <Moon size={22} />}
                 </button>
-
-                <button 
-                    onClick={() => setIsCartOpen(true)}
-                    className="relative p-2 transition-colors duration-500 hover:text-accent"
-                    style={{ color: navTextColor }}
-                >
+                <button onClick={() => setIsCartOpen(true)} className="relative p-2 transition-colors duration-500 hover:text-accent" style={{ color: navTextColor }}>
                     <ShoppingBag size={22} />
-                    {cartCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-accent text-orange text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full animate-bounce">
-                            {cartCount}
-                        </span>
-                    )}
+                    {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-accent text-orange text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full animate-bounce">{cartCount}</span>}
                 </button>
             </div>
         </div>
       </nav>
 
-      {/* Main Content Area */}
-      <main>
-          {renderView()}
-      </main>
+      <main>{renderView()}</main>
 
-      {/* Expanded Footer (Fixed Dark Theme) */}
-      <footer 
-        className="pt-20 pb-10 border-t" 
-        style={{ backgroundColor: FOOTER_BG, color: FOOTER_TEXT_PRIMARY, borderColor: '#333333' }}
-      >
+      <footer className="pt-20 pb-10 border-t" style={{ backgroundColor: FOOTER_BG, color: FOOTER_TEXT_PRIMARY, borderColor: '#333333' }}>
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="space-y-6">
                 <h3 className="font-serif text-2xl font-bold">Jay's Bistro</h3>
@@ -808,7 +583,6 @@ const JaysBistro = () => {
                     <Facebook size={20} className="hover:text-accent cursor-pointer" />
                 </div>
             </div>
-            
             <div>
                 <h4 className="font-serif text-accent text-lg mb-6">Visit Us</h4>
                 <a href={GOOGLE_MAPS_URL} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 group hover:text-white transition-colors mb-4" style={{ color: FOOTER_TEXT_SECONDARY }}>
@@ -820,7 +594,6 @@ const JaysBistro = () => {
                     <span>+234 806 262 4447</span>
                 </a>
             </div>
-
             <div>
                 <h4 className="font-serif text-accent text-lg mb-6">Opening Hours</h4>
                 <ul className="space-y-3 text-sm" style={{ color: FOOTER_TEXT_SECONDARY }}>
@@ -829,13 +602,11 @@ const JaysBistro = () => {
                     <li className="flex justify-between"><span>Sunday</span> <span>10:00 - 22:00</span></li>
                 </ul>
             </div>
-
             <div>
                 <h4 className="font-serif text-accent text-lg mb-6">Newsletter</h4>
                 <div className="flex flex-col gap-3">
-                    {/* Hardcoded inputs for dark mode styling */}
-                    <input type="email" placeholder="Your email address" className="bg-[#2C2C2C] border-none text-white px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none" />
-                    <button className="bg-accent text-primary py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors">Subscribe</button>
+                    <input type="email" placeholder="Your email address" className={`bg-[#2C2C2C] border-none text-white px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none`} />
+                    <button className={`bg-accent text-primary py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors`}>Subscribe</button>
                 </div>
             </div>
         </div>
@@ -844,7 +615,6 @@ const JaysBistro = () => {
         </div>
       </footer>
 
-      {/* Cart Drawer */}
       <div className={`fixed inset-0 z-[60] ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
          <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsCartOpen(false)} />
          <div className={`absolute top-0 right-0 h-full w-full max-w-md bg-bg-secondary shadow-2xl transform transition-transform duration-500 flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -852,21 +622,14 @@ const JaysBistro = () => {
                 <h2 className="font-serif text-2xl text-primary">Your Selection</h2>
                 <button onClick={() => setIsCartOpen(false)}><X className="text-secondary hover:text-primary" /></button>
             </div>
-            
             <div className="flex-1 overflow-y-auto p-8 space-y-6">
                 {cart.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-secondary">
-                        <ShoppingBag size={48} strokeWidth={1} className="mb-4" />
-                        <p>Your tray is empty.</p>
-                    </div>
+                    <div className="h-full flex flex-col items-center justify-center text-secondary"><ShoppingBag size={48} strokeWidth={1} className="mb-4" /><p>Your tray is empty.</p></div>
                 ) : (
                     cart.map(item => (
                         <div key={item.id} className="flex gap-4 items-center">
                              <img src={item.image} className="w-16 h-16 object-cover bg-border" alt={item.name} />
-                             <div className="flex-1">
-                                 <h4 className="font-serif text-lg text-primary">{item.name}</h4>
-                                 <p className="text-accent text-sm">{formatPrice(item.price * item.quantity)}</p>
-                             </div>
+                             <div className="flex-1"><h4 className="font-serif text-lg text-primary">{item.name}</h4><p className="text-accent text-sm">{formatPrice(item.price * item.quantity)}</p></div>
                              <div className="flex items-center border border-border">
                                  <button onClick={() => updateQuantity(item.id, -1)} className="p-2 hover:bg-border"><Minus size={14} className="text-primary"/></button>
                                  <span className="w-8 text-center text-sm font-bold text-primary">{item.quantity}</span>
@@ -876,51 +639,31 @@ const JaysBistro = () => {
                     ))
                 )}
             </div>
-
             {cart.length > 0 && (
                 <div className="p-8 bg-bg border-t border-border">
-                    <div className="flex justify-between mb-6 text-lg font-bold text-primary">
-                        <span>Total</span>
-                        <span>{formatPrice(cartTotal)}</span>
-                    </div>
-                    <a 
-                        href={generateWhatsAppLink(cart)} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="block w-full bg-[#25D366] text-white text-center py-4 text-xs font-bold uppercase tracking-widest hover:bg-[#128C7E] transition-colors"
-                    >
-                        Checkout on WhatsApp
-                    </a>
+                    <div className="flex justify-between mb-6 text-lg font-bold text-primary"><span>Total</span><span>{formatPrice(cartTotal)}</span></div>
+                    <a href={generateWhatsAppLink(cart)} target="_blank" rel="noopener noreferrer" className="block w-full bg-[#25D366] text-white text-center py-4 text-xs font-bold uppercase tracking-widest hover:bg-[#128C7E] transition-colors">Checkout on WhatsApp</a>
                 </div>
             )}
          </div>
       </div>
 
-      {/* Concierge Chat Bot */}
       <button onClick={() => setIsChatOpen(!isChatOpen)} className="fixed bottom-6 right-6 z-50 bg-accent text-primary p-4 rounded-full shadow-xl hover:bg-primary hover:text-accent transition-colors hover:scale-110 duration-300">
         {isChatOpen ? <X size={24} /> : <Bot size={24} />}
       </button>
 
       {isChatOpen && (
         <div className="fixed bottom-24 right-6 z-50 w-[90vw] max-w-sm bg-bg-secondary shadow-2xl rounded-lg overflow-hidden border border-border animate-[fadeIn_0.3s_ease-out]">
-             {/* Chatbot Header - Inverted Colors for Contrast */}
              <div className="p-4 flex justify-between items-center" style={{ backgroundColor: 'var(--color-text)', color: 'var(--color-bg)' }}>
                  <span className="font-serif italic">Concierge</span>
                  <span className="text-[10px] uppercase tracking-widest bg-green-500/20 text-green-400 px-2 py-1 rounded animate-pulse">Online</span>
              </div>
-             
-             {/* Chat Messages Body - FIX: Changed to bg-bg for solid background and high contrast */}
              <div className="h-64 p-4 bg-bg overflow-y-auto">
                  <div className="space-y-4">
                     {chatHistory.length === 0 && <div className="text-secondary text-center text-xs mt-4">How can I help you today?</div>}
                     {chatHistory.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[85%] p-3 text-sm ${
-                                // FIX: User message is now bg-accent
-                                msg.role === 'user' ? 'bg-accent text-primary' 
-                                // FIX: Model message is now bg-bg-secondary to contrast with body's bg-bg
-                                : 'bg-bg-secondary border border-border text-primary shadow-sm'
-                            }`}>
+                            <div className={`max-w-[85%] p-3 text-sm ${msg.role === 'user' ? 'bg-accent text-primary' : 'bg-bg-secondary border border-border text-primary shadow-sm'}`}>
                                 {msg.text}
                             </div>
                         </div>
@@ -929,16 +672,8 @@ const JaysBistro = () => {
                     {isTyping && <div className="text-xs text-secondary italic">Typing...</div>}
                  </div>
              </div>
-             
-             {/* Chat Input */}
              <div className="p-3 bg-bg-secondary border-t border-border flex gap-2">
-                 <input 
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
-                    placeholder="Ask about our menu..." 
-                    className="flex-1 bg-transparent text-sm outline-none text-primary" 
-                 />
+                 <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleChatSend()} placeholder="Ask about our menu..." className="flex-1 bg-transparent text-sm outline-none text-primary" />
                  <button onClick={handleChatSend} className="text-accent hover:text-primary"><Send size={18} /></button>
              </div>
         </div>
