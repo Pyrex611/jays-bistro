@@ -589,7 +589,7 @@ const JaysBistro = () => {
 
             {/* Show Full Menu Button */}
             <div className="mt-12 text-center">
-                 <PrimaryButton onClick={() => setCurrentPage('menu')} variant="outline">
+                 <PrimaryButton onClick={() => setCurrentPage('menu')} variant="outline'>
                     Show Full Menu
                     <ArrowRight size={16} className="ml-2 inline" />
                  </PrimaryButton>
@@ -835,11 +835,11 @@ const JaysBistro = () => {
             </div>
 
             <div>
-                <h4 className="font-serif text-accent text-lg mb-6}>Newsletter</h4>
+                <h4 className="font-serif text-accent text-lg mb-6">Newsletter</h4>
                 <div className="flex flex-col gap-3">
-                    {/* Hardcoded inputs for dark mode styling */}
-                    <input type="email" placeholder="Your email address" className="bg-[#2C2C2C] border-none text-white px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none" />
-                    <button className="bg-accent text-primary py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors">Subscribe</button>
+                    {/* FIX: Using template literals for robust string parsing */}
+                    <input type="email" placeholder="Your email address" className={`bg-[#2C2C2C] border-none text-white px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none`} />
+                    <button className={`bg-accent text-primary py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors`}>Subscribe</button>
                 </div>
             </div>
         </div>
@@ -928,7 +928,7 @@ const JaysBistro = () => {
                                 {msg.text}
                             </div>
                         </div>
-                    ))}
+                    ))}\
                     <div ref={messagesEndRef} />
                     {isTyping && <div className="text-xs text-secondary italic">Typing...</div>}
                  </div>
