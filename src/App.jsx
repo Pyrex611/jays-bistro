@@ -10,77 +10,87 @@ const WHATSAPP_NUMBER = "2348062624447";
 const GOOGLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Precious+event+Centre+Makurdi";
 const CHATBOT_API_KEY = ""; 
 
-// --- Data (Updated with Images) ---
+// --- Data ---
 const MENU_ITEMS = [
-  // Curated / Featured
-  { id: 8, category: "Meals", name: "Party Jollof Rice", price: 1500, description: "Signature smoky party jollof served with grilled beef.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=1920", featured: true },
-  { id: 10, category: "Protein", name: "Isi-ewu", price: 6000, description: "Traditional spicy goat head delicacy in rich palm oil sauce.", image: "https://images.unsplash.com/photo-1543826173-1beeb97525d8?auto=format&fit=crop&q=80&w=1920", featured: true }, // Used a rich meat stew representation
-  { id: 1, category: "Beverages", name: "Classic Arabian Blend (1L)", price: 3000, description: "Heritage spice infusion with cardamom and rosewater.", image: "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?auto=format&fit=crop&q=80&w=1920", featured: true },
-  
-  // Full Menu - Populated Images
-  { id: 5, category: "Protein", name: "Smoky Goat Pepper Soup", price: 3000, description: "Slow-simmered broth, tender smoked goat, native spices.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
-  { id: 2, category: "Beverages", name: "Double Root (1L)", price: 3500, description: "Powerful herbal blend for vitality.", image: "https://images.unsplash.com/photo-1517701604599-bb29b5c7dd90?auto=format&fit=crop&q=80&w=800" },
-  { id: 3, category: "Beverages", name: "Ginger, Lemon & Cinnamon Tea", price: 2000, description: "Zesty and spicy warming tea.", image: "https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&q=80&w=800" },
-  
-  { id: 6, category: "Protein", name: "Bistro Chicken Wings", price: 5000, description: "Glazed grilled wings with peanut dipping sauce.", image: "https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&q=80&w=800" },
-  { id: 11, category: "Starters", name: "Spiced Meat Samosa", price: 1500, description: "Crispy pastry filled with spiced minced meat.", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800" },
-  { id: 12, category: "Protein", name: "Full Chicken", price: 20000, description: "Whole grilled chicken, marinated in house spices.", image: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&q=80&w=800" },
-  
-  // Bites (Pastries & Fast Food)
-  { id: 13, category: "Bites", name: "Fish Roll", price: 1000, description: "Crispy loaded Fish roll.", image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&q=80&w=800" }, // Pastry rep
-  { id: 14, category: "Bites", name: "Doughnut", price: 500, description: "Fluffy, sugar-glazed doughnut.", image: "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=800" },
-  { id: 15, category: "Bites", name: "Palmia", price: 500, description: "Sweet, crunchy palmier pastry.", image: "https://images.unsplash.com/photo-1612182062633-9524ca862134?auto=format&fit=crop&q=80&w=800" },
-  { id: 16, category: "Bites", name: "Meat Pie", price: 1000, description: "Rich meat filling in a buttery crust.", image: "https://images.unsplash.com/photo-1572383672419-ab47799d1d39?auto=format&fit=crop&q=80&w=800" }, // Pie rep
-  
-  // Pizza & Shawarma
-  { id: 17, category: "Bites", name: "6' Pizza", price: 12000, description: "Personal size, loaded with cheese.", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=800" },
-  { id: 18, category: "Bites", name: "12' Pizza", price: 15000, description: "Family size, ultimate cheesy delight.", image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&q=80&w=800" },
-  { id: 19, category: "Bites", name: "Chicken Shawarma (SS)", price: 3500, description: "Single Sausage Chicken wrap.", image: "https://images.unsplash.com/photo-1633321702518-7feccaf9cdf3?auto=format&fit=crop&q=80&w=800" },
-  { id: 20, category: "Bites", name: "Chicken Shawarma (DS)", price: 4000, description: "Double Sausage, extra creamy.", image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&q=80&w=800" },
-  { id: 21, category: "Bites", name: "Beef Shawarma", price: 4500, description: "Tender spiced beef wrap.", image: "https://images.unsplash.com/photo-1561651881-d3f87a95a328?auto=format&fit=crop&q=80&w=800" },
-  { id: 22, category: "Bites", name: "Combo Shawarma", price: 6000, description: "Mix of Chicken and Beef.", image: "https://images.unsplash.com/photo-1642365924747-8a39ec8bb0dc?auto=format&fit=crop&q=80&w=800" },
-  
-  // Salads
-  { id: 23, category: "Bites", name: "Chicken Caesar Salad", price: 7000, description: "Fresh greens, grilled chicken, croutons.", image: "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&q=80&w=800" },
-  { id: 24, category: "Bites", name: "Coleslaw", price: 1000, description: "Creamy cabbage and carrot mix.", image: "https://images.unsplash.com/photo-1628156627622-426b384f7000?auto=format&fit=crop&q=80&w=800" },
-  { id: 25, category: "Bites", name: "Vegetable Salad", price: 6000, description: "Mixed garden salad.", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800" },
-  
+  // --- Curated / Featured (Shown on Hero) ---
+  { id: 1, category: "Meals", name: "Party Jollof Rice", price: 1500, description: "Signature smoky party jollof served with grilled beef.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=1920", featured: true },
+  { id: 2, category: "Protein", name: "Isi-ewu", price: 6000, description: "Traditional spicy goat head delicacy in rich palm oil sauce.", image: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&q=80&w=1920", featured: true },
+  { id: 3, category: "Beverages", name: "Classic Arabian Blend (1L)", price: 3000, description: "Heritage spice infusion with cardamom and rosewater.", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&q=80&w=1920", featured: true },
+
+  // --- Full Menu ---
+
+  // Beverages
+  { id: 4, category: "Beverages", name: "Double Root (1L)", price: 3500, description: "Powerful herbal blend for vitality and wellness.", image: "https://images.unsplash.com/photo-1544517176-655510493a28?auto=format&fit=crop&q=80&w=800" },
+  { id: 5, category: "Beverages", name: "Ginger, Lemon & Cinnamon Tea", price: 2000, description: "Zesty, spicy, and soothing aromatic tea.", image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&q=80&w=800" },
+  { id: 6, category: "Beverages", name: "Arabian Tea (1/2L)", price: 1500, description: "A smaller portion of our signature spice tea.", image: "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?auto=format&fit=crop&q=80&w=800" },
+  { id: 7, category: "Beverages", name: "Arabian Double", price: 2000, description: "Extra strength Arabian blend for the bold.", image: "https://images.unsplash.com/photo-1563911302283-d2bc129e7c1f?auto=format&fit=crop&q=80&w=800" },
+  { id: 8, category: "Beverages", name: "Pure Honey (1L)", price: 10000, description: "Organic, undiluted locally sourced honey.", image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800" },
+  { id: 9, category: "Beverages", name: "Date Powder", price: 30000, description: "Natural sweetener alternative made from premium dates.", image: "https://images.unsplash.com/photo-1619684693892-3eb4b3020993?auto=format&fit=crop&q=80&w=800" },
+  { id: 10, category: "Beverages", name: "Arabian Tea Pack", price: 6000, description: "Take home the Jay's experience. DIY Tea pack.", image: "https://images.unsplash.com/photo-1564834724105-918b73d1b9e0?auto=format&fit=crop&q=80&w=800" },
+  { id: 11, category: "Beverages", name: "Maca Root Pack", price: 6000, description: "Raw Maca root powder supplement.", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=800" },
+
   // Starters
-  { id: 26, category: "Starters", name: "Spring Roll", price: 3000, description: "Crispy asian-style rolls.", image: "https://images.unsplash.com/photo-1548507200-dd918f830371?auto=format&fit=crop&q=80&w=800" },
-  { id: 28, category: "Starters", name: "Puff Puff", price: 1500, description: "Sweet fried dough balls.", image: "https://images.unsplash.com/photo-1630405433873-91851d45763e?auto=format&fit=crop&q=80&w=800" },
-  
-  // Main Meals
-  { id: 29, category: "Meals", name: "Moi-Moi", price: 3000, description: "Steamed bean pudding with egg.", image: "https://images.unsplash.com/photo-1648417535492-414457d97773?auto=format&fit=crop&q=80&w=800" },
-  { id: 30, category: "Meals", name: "Noodles", price: 2000, description: "Stir-fried noodles.", image: "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&q=80&w=800" },
-  { id: 31, category: "Meals", name: "Garnished Noodles", price: 3500, description: "Noodles with veggies and proteins.", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&q=80&w=800" },
-  { id: 32, category: "Meals", name: "Fried Rice", price: 1500, description: "Classic Nigerian fried rice.", image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&q=80&w=800" },
-  { id: 33, category: "Meals", name: "Coconut Rice", price: 2000, description: "Rice cooked in rich coconut milk.", image: "https://images.unsplash.com/photo-1596560548464-f010549b84d7?auto=format&fit=crop&q=80&w=800" },
-  { id: 34, category: "Meals", name: "Local Rice", price: 3000, description: "Ofada style local rice and sauce.", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&q=80&w=800" },
-  { id: 35, category: "Meals", name: "Beans", price: 1500, description: "Slow cooked honey beans.", image: "https://images.unsplash.com/photo-1633896949673-1e9ee18a2d18?auto=format&fit=crop&q=80&w=800" },
-  { id: 36, category: "Meals", name: "Plantain", price: 1000, description: "Fried sweet plantain (Dodo).", image: "https://images.unsplash.com/photo-1647432924976-47b779b73964?auto=format&fit=crop&q=80&w=800" },
-  { id: 37, category: "Meals", name: "Basmati Fried Rice", price: 3500, description: "Premium long grain fried rice.", image: "https://images.unsplash.com/photo-1603133872878-684f10842619?auto=format&fit=crop&q=80&w=800" },
-  { id: 38, category: "Meals", name: "Spaghetti", price: 3500, description: "Spiced tomato sauce spaghetti.", image: "https://images.unsplash.com/photo-1597393437299-1307682970c3?auto=format&fit=crop&q=80&w=800" },
-  { id: 39, category: "Meals", name: "Gizz Dodo", price: 4000, description: "Gizzard and Plantain mix.", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800" },
-  
-  // Swallows & Traditional
-  { id: 41, category: "Meals", name: "Porridge Yam", price: 3000, description: "Asaro - Yam pottage.", image: "https://images.unsplash.com/photo-1629199347895-320c2b29df99?auto=format&fit=crop&q=80&w=800" },
-  { id: 43, category: "Meals", name: "Pounded Yam", price: 1200, description: "Smooth pounded yam.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" }, // Fufu representation
-  { id: 44, category: "Meals", name: "Semo", price: 1000, description: "Semovita.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
-  { id: 45, category: "Meals", name: "Amala", price: 1000, description: "Dark yam flour dough.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
-  { id: 49, category: "Meals", name: "Yam and Egg Sauce", price: 3000, description: "Boiled yam with garden egg sauce.", image: "https://images.unsplash.com/photo-1629199347895-320c2b29df99?auto=format&fit=crop&q=80&w=800" },
-  
-  // Extra Proteins
-  { id: 51, category: "Protein", name: "Portion O' Chicken", price: 6000, description: "Fried or grilled chicken portion.", image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&q=80&w=800" },
-  { id: 52, category: "Protein", name: "Goat Meat", price: 1500, description: "Tender goat meat.", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6f54262?auto=format&fit=crop&q=80&w=800" },
-  { id: 57, category: "Protein", name: "Turkey", price: 6000, description: "Fried turkey wings.", image: "https://images.unsplash.com/photo-1598511726623-d09994539a95?auto=format&fit=crop&q=80&w=800" },
-  { id: 58, category: "Protein", name: "Cat Fish (Portion)", price: 1000, description: "Fresh catfish slice.", image: "https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?auto=format&fit=crop&q=80&w=800" },
-  { id: 59, category: "Protein", name: "Croaker Fish", price: 4000, description: "Grilled or fried croaker.", image: "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&q=80&w=800" },
-  { id: 60, category: "Protein", name: "Nkwobi", price: 10000, description: "Spicy cow foot delicacy.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
-  
+  { id: 12, category: "Starters", name: "Spiced Meat Samosa", price: 1500, description: "Crispy triangular pastry filled with spiced minced meat.", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800" },
+  { id: 13, category: "Starters", name: "Spring Roll", price: 3000, description: "Crispy rolls filled with fresh vegetables and meat.", image: "https://images.unsplash.com/photo-1548507200-dd918f830371?auto=format&fit=crop&q=80&w=800" },
+  { id: 14, category: "Starters", name: "Puff Puff", price: 1500, description: "Classic Nigerian sweet fried dough balls.", image: "https://images.unsplash.com/photo-1630405433873-91851d45763e?auto=format&fit=crop&q=80&w=800" },
+
+  // Bites (Pastries, Pizza, Shawarma)
+  { id: 15, category: "Bites", name: "Fish Roll", price: 1000, description: "Flaky pastry rolled with a savory fish filling.", image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&q=80&w=800" },
+  { id: 16, category: "Bites", name: "Doughnut", price: 500, description: "Soft, fluffy, sugar-glazed classic doughnut.", image: "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=800" },
+  { id: 17, category: "Bites", name: "Palmia", price: 500, description: "Crunchy, heart-shaped caramelized puff pastry.", image: "https://images.unsplash.com/photo-1612182062633-9524ca862134?auto=format&fit=crop&q=80&w=800" },
+  { id: 18, category: "Bites", name: "Meat Pie", price: 1000, description: "Rich minced meat and potato filling in a buttery crust.", image: "https://images.unsplash.com/photo-1572383672419-ab47799d1d39?auto=format&fit=crop&q=80&w=800" },
+  { id: 19, category: "Bites", name: "6' Pizza", price: 12000, description: "Personal size pizza loaded with cheese and toppings.", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=800" },
+  { id: 20, category: "Bites", name: "12' Pizza", price: 15000, description: "Large family-sized pizza with the cheesiest pull.", image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&q=80&w=800" },
+  { id: 21, category: "Bites", name: "Chicken Shawarma (SS)", price: 3500, description: "Creamy Chicken shawarma with Single Sausage.", image: "https://images.unsplash.com/photo-1633321702518-7feccaf9cdf3?auto=format&fit=crop&q=80&w=800" },
+  { id: 22, category: "Bites", name: "Chicken Shawarma (DS)", price: 4000, description: "Loaded Chicken shawarma with Double Sausage.", image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&q=80&w=800" },
+  { id: 23, category: "Bites", name: "Beef Shawarma", price: 4500, description: "Tender spiced beef strips wrapped in flatbread.", image: "https://images.unsplash.com/photo-1561651881-d3f87a95a328?auto=format&fit=crop&q=80&w=800" },
+  { id: 24, category: "Bites", name: "Combo Shawarma", price: 6000, description: "The ultimate mix of juicy chicken and beef.", image: "https://images.unsplash.com/photo-1642365924747-8a39ec8bb0dc?auto=format&fit=crop&q=80&w=800" },
+  { id: 25, category: "Bites", name: "Chicken Caesar Salad", price: 7000, description: "Fresh greens, grilled chicken breast, and croutons.", image: "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&q=80&w=800" },
+  { id: 26, category: "Bites", name: "Coleslaw", price: 1000, description: "Freshly shredded cabbage and carrots in creamy dressing.", image: "https://images.unsplash.com/photo-1628156627622-426b384f7000?auto=format&fit=crop&q=80&w=800" },
+  { id: 27, category: "Bites", name: "Vegetable Salad", price: 6000, description: "A healthy mix of fresh garden vegetables.", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800" },
+
+  // Meals (Rice, Pasta, Beans, Yam)
+  { id: 28, category: "Meals", name: "Moi-Moi", price: 3000, description: "Rich steamed bean pudding garnished with egg/fish.", image: "https://images.unsplash.com/photo-1648417535492-414457d97773?auto=format&fit=crop&q=80&w=800" },
+  { id: 29, category: "Meals", name: "Noodles", price: 2000, description: "Stir-fried noodles with signature spices.", image: "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&q=80&w=800" },
+  { id: 30, category: "Meals", name: "Garnished Noodles", price: 3500, description: "Noodles stir-fried with vegetables and proteins.", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&q=80&w=800" },
+  { id: 31, category: "Meals", name: "Fried Rice", price: 1500, description: "Classic Nigerian fried rice with mixed veggies.", image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&q=80&w=800" },
+  { id: 32, category: "Meals", name: "Coconut Rice", price: 2000, description: "Rice slow-cooked in fresh, rich coconut milk.", image: "https://images.unsplash.com/photo-1596560548464-f010549b84d7?auto=format&fit=crop&q=80&w=800" },
+  { id: 33, category: "Meals", name: "Local Rice", price: 3000, description: "Traditional Ofada-style rice with distinct aroma.", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&q=80&w=800" },
+  { id: 34, category: "Meals", name: "Beans", price: 1500, description: "Soft, honey beans cooked to perfection.", image: "https://images.unsplash.com/photo-1633896949673-1e9ee18a2d18?auto=format&fit=crop&q=80&w=800" },
+  { id: 35, category: "Meals", name: "Plantain", price: 1000, description: "Sweet fried plantain (Dodo).", image: "https://images.unsplash.com/photo-1647432924976-47b779b73964?auto=format&fit=crop&q=80&w=800" },
+  { id: 36, category: "Meals", name: "Basmati Fried Rice", price: 3500, description: "Premium long-grain Basmati stir-fry.", image: "https://images.unsplash.com/photo-1603133872878-684f10842619?auto=format&fit=crop&q=80&w=800" },
+  { id: 37, category: "Meals", name: "Spaghetti", price: 3500, description: "Spaghetti in a rich, spicy tomato sauce.", image: "https://images.unsplash.com/photo-1597393437299-1307682970c3?auto=format&fit=crop&q=80&w=800" },
+  { id: 38, category: "Meals", name: "Gizz Dodo", price: 4000, description: "Spicy mix of gizzards and fried plantains.", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800" },
+  { id: 39, category: "Meals", name: "Chips & Omelette", price: 3500, description: "Fried potato chips served with a farm-fresh omelette.", image: "https://images.unsplash.com/photo-1599120666014-930d774a350c?auto=format&fit=crop&q=80&w=800" },
+  { id: 40, category: "Meals", name: "Porridge Yam", price: 3000, description: "Asaro - Yam cooked in a rich palm oil sauce.", image: "https://images.unsplash.com/photo-1629199347895-320c2b29df99?auto=format&fit=crop&q=80&w=800" },
+  { id: 41, category: "Meals", name: "Masa", price: 1000, description: "Traditional Northern rice cakes, pan-fried.", image: "https://images.unsplash.com/photo-1626505927329-373a0332308e?auto=format&fit=crop&q=80&w=800" }, // Used a pancake-style image
+  { id: 42, category: "Meals", name: "Pounded Yam", price: 1200, description: "Smooth, stretchy pounded yam.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
+  { id: 43, category: "Meals", name: "Semo", price: 1000, description: "Soft Semovita swallow.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
+  { id: 44, category: "Meals", name: "Amala", price: 1000, description: "Classic dark yam flour swallow.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
+  { id: 45, category: "Meals", name: "Fufu", price: 1000, description: "Fermented cassava dough.", image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&q=80&w=800" },
+  { id: 46, category: "Meals", name: "Garri", price: 1000, description: "Eba - Cassava flakes dough.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
+  { id: 47, category: "Meals", name: "Yam Stick", price: 1500, description: "Fried yam batons, crispy on the outside.", image: "https://images.unsplash.com/photo-1623594611048-3608cc78949f?auto=format&fit=crop&q=80&w=800" },
+  { id: 48, category: "Meals", name: "Yam and Egg Sauce", price: 3000, description: "Boiled yam paired with savory garden egg sauce.", image: "https://images.unsplash.com/photo-1629199347895-320c2b29df99?auto=format&fit=crop&q=80&w=800" },
+  { id: 49, category: "Meals", name: "Eggs", price: 400, description: "Boiled or fried egg.", image: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&q=80&w=800" },
+
+  // Protein (Meats & Fish)
+  { id: 50, category: "Protein", name: "Smoky Goat Pepper Soup", price: 3000, description: "Slow-simmered broth with tender smoked goat.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
+  { id: 51, category: "Protein", name: "Bistro Chicken Wings", price: 5000, description: "Succulent grilled wings in bistro glaze.", image: "https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&q=80&w=800" },
+  { id: 52, category: "Protein", name: "Full Chicken", price: 20000, description: "Whole grilled chicken from the flaming grills.", image: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&q=80&w=800" },
+  { id: 53, category: "Protein", name: "Portion O' Chicken", price: 6000, description: "A generous serving of fried or grilled chicken.", image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&q=80&w=800" },
+  { id: 54, category: "Protein", name: "Goat Meat", price: 1500, description: "Tender, seasoned goat meat.", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6f54262?auto=format&fit=crop&q=80&w=800" },
+  { id: 55, category: "Protein", name: "Beef", price: 1500, description: "Succulent fried beef piece.", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6f54262?auto=format&fit=crop&q=80&w=800" },
+  { id: 56, category: "Protein", name: "Portion of Beef/Goat", price: 4500, description: "A bowl of assorted savory meats.", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6f54262?auto=format&fit=crop&q=80&w=800" },
+  { id: 57, category: "Protein", name: "Turkey", price: 6000, description: "Fried or grilled turkey wings.", image: "https://images.unsplash.com/photo-1598511726623-d09994539a95?auto=format&fit=crop&q=80&w=800" },
+  { id: 58, category: "Protein", name: "Cat Fish (Portion)", price: 1000, description: "Fresh catfish slice in sauce.", image: "https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?auto=format&fit=crop&q=80&w=800" },
+  { id: 59, category: "Protein", name: "Croaker Fish", price: 4000, description: "Whole grilled or fried croaker.", image: "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&q=80&w=800" },
+  { id: 60, category: "Protein", name: "Nkwobi", price: 10000, description: "Spicy cow foot delicacy in native sauce.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
+  { id: 61, category: "Protein", name: "Vegetable Chicken", price: 20000, description: "Chicken stir-fry with mixed vegetables.", image: "https://images.unsplash.com/photo-1598511726623-d09994539a95?auto=format&fit=crop&q=80&w=800" },
+
   // Soups
-  { id: 62, category: "Soups", name: "Egusi", price: 500, description: "Melon seed soup.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
-  { id: 63, category: "Soups", name: "Vegetable Soup", price: 1500, description: "Edikang Ikong style.", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800" },
-  { id: 64, category: "Soups", name: "White Soup", price: 2000, description: "Ofe Nsala.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=800" },
+  { id: 62, category: "Soups", name: "Egusi", price: 500, description: "Rich melon seed soup with spinach.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" }, // Reusing pepper soup style image for generic soup aesthetic
+  { id: 63, category: "Soups", name: "Vegetable Soup", price: 1500, description: "Nutritious Edikang Ikong style soup.", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800" },
+  { id: 64, category: "Soups", name: "White Soup", price: 2000, description: "Ofe Nsala - Spicy traditional soup.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=800" },
 ];
 
 const CATEGORIES = ["All", "Starters", "Beverages", "Meals", "Bites", "Protein", "Soups"];
@@ -174,7 +184,6 @@ const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
 
 // New Component for Nav Links
 const NavLink = ({ page, current, setPage, scrolled, children, theme }) => {
-    // Determine color based on theme and scroll state
     const isDarkBackground = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const defaultColor = (scrolled || current !== 'home') ? 'var(--color-text)' : (isDarkBackground ? 'var(--color-text)' : 'white');
 
@@ -353,9 +362,11 @@ const JaysBistro = () => {
 
   // Update URL when state changes
   useEffect(() => {
+      // Basic client-side router
       const path = currentPage === 'home' ? '/' : `/${currentPage}`;
-      // Use pushState to change URL without reloading
-      window.history.pushState(null, '', path);
+      if (window.location.pathname !== path) {
+          window.history.pushState(null, '', path);
+      }
       
       // Handle back button behavior
       const handlePopState = () => {
@@ -476,19 +487,20 @@ const JaysBistro = () => {
             </div>
         ))}
         
-        {/* Overlay Content Top - Welcome Message */}
-        <div className="relative z-20 w-full flex flex-col justify-start items-center text-center px-4 mt-8">
+        {/* Overlay Content Top - Welcome Message (Larger & Higher up) */}
+        <div className="relative z-20 w-full flex flex-col justify-start items-center text-center px-4 mt-4">
              <p className="text-accent text-sm md:text-base font-bold tracking-[0.3em] uppercase mb-4 animate-[fadeIn_1s_ease-out]">
                 Welcome to
              </p>
-             <h2 className="font-handwritten text-5xl md:text-7xl text-white animate-[fadeIn_1s_ease-out_0.2s_both]">
+             {/* Increased size for Welcome text */}
+             <h2 className="font-handwritten text-6xl md:text-8xl text-white animate-[fadeIn_1s_ease-out_0.2s_both]">
                 Jay's Bistro
              </h2>
         </div>
 
-        {/* Overlay Content Bottom - Food Name */}
-        <div className="relative z-20 w-full flex flex-col justify-end items-center text-center px-4 mb-20">
-             <h1 className="font-serif text-4xl md:text-6xl text-white leading-tight max-w-4xl mx-auto animate-[fadeIn_1s_ease-out_0.2s_both]">
+        {/* Overlay Content Bottom - Food Name (Pushed lower) */}
+        <div className="relative z-20 w-full flex flex-col justify-end items-center text-center px-4 mb-24">
+             <h1 className="font-serif text-3xl md:text-5xl text-white leading-tight max-w-4xl mx-auto animate-[fadeIn_1s_ease-out_0.2s_both]">
                 {heroSlides[currentSlide].name}
              </h1>
         </div>
