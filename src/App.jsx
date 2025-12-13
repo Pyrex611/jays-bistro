@@ -124,20 +124,24 @@ const generateWhatsAppLink = (cart) => {
 
 // --- Components ---
 
-const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) => (
-  <button
-    onClick={onClick}
-    className={`
-      px-8 py-4 font-sans text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300
-      bg-[var(--color-primary-button-bg)] text-[var(--color-primary-button-text)]
-      hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]
-      ${variant === 'outline' ? 'bg-transparent border border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:border-[var(--color-accent)] hover:text-black' : ''}
-      ${className}
-    `}
-  >
-    {children}
-  </button>
-);
+const PrimaryButton = ({ children, onClick, className = '', variant = 'dark' }) => {
+  // Refactored to avoid multi-line template literal which can cause build errors
+  const baseClasses = "px-8 py-4 font-sans text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300 bg-[var(--color-primary-button-bg)] text-[var(--color-primary-button-text)] hover:bg-[var(--color-accent)] hover:text-[var(--color-text)]";
+  
+  const outlineClasses = "bg-transparent border border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:border-[var(--color-accent)] hover:text-black";
+  
+  // Conditionally apply classes using a simple template literal
+  const finalClassName = `${baseClasses} ${variant === 'outline' ? outlineClasses : ''} ${className}`;
+
+  return (
+    <button
+      onClick={onClick}
+      className={finalClassName}
+    >
+      {children}
+    </button>
+  );
+};
 
 const AddToCartButton = ({ item, cart, addToCart, updateQuantity }) => {
   const cartItem = cart.find(i => i.id === item.id);
@@ -928,7 +932,7 @@ const JaysBistro = () => {
                                 {msg.text}
                             </div>
                         </div>
-                    ))}\
+                    ))}
                     <div ref={messagesEndRef} />
                     {isTyping && <div className="text-xs text-secondary italic">Typing...</div>}
                  </div>
