@@ -623,17 +623,21 @@ const JaysBistro = () => {
                 <p className="text-secondary font-light max-w-xl mx-auto">Discover flavors crafted with passion, from our signature teas to our fusion entrees.</p>
             </div>
 
-            {/* Sticky Categories */}
-            <div className="sticky top-16 z-30 bg-bg/95 backdrop-blur py-4 mb-12 flex justify-center gap-6 overflow-x-auto no-scrollbar border-b border-accent/20">
-                {CATEGORIES.map(cat => (
-                    <button 
-                        key={cat} 
-                        onClick={() => setActiveCategory(cat)} 
-                        className={`text-sm uppercase tracking-widest pb-2 transition-all whitespace-nowrap ${activeCategory === cat ? 'text-accent border-b-2 border-accent' : 'text-secondary hover:text-primary'}`}
-                    >
-                        {cat}
-                    </button>
-                ))}
+            {/* Sticky Categories FIX: Increased top to 24 (96px) and changed justify-center to justify-start on mobile */}
+            <div className="sticky top-24 z-30 bg-bg/95 backdrop-blur py-4 mb-12 border-b border-accent/20">
+                <div className="flex justify-start gap-4 md:gap-6 overflow-x-auto no-scrollbar">
+                    {CATEGORIES.map(cat => (
+                        <button 
+                            key={cat} 
+                            onClick={() => setActiveCategory(cat)} 
+                            // flex-shrink-0 ensures buttons don't disappear on narrow screens.
+                            className={`text-sm uppercase tracking-widest pb-2 transition-all whitespace-nowrap flex-shrink-0 
+                                ${activeCategory === cat ? 'text-accent border-b-2 border-accent' : 'text-secondary hover:text-primary'}`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
@@ -831,7 +835,7 @@ const JaysBistro = () => {
             </div>
 
             <div>
-                <h4 className="font-serif text-accent text-lg mb-6">Newsletter</h4>
+                <h4 className="font-serif text-accent text-lg mb-6}>Newsletter</h4>
                 <div className="flex flex-col gap-3">
                     {/* Hardcoded inputs for dark mode styling */}
                     <input type="email" placeholder="Your email address" className="bg-[#2C2C2C] border-none text-white px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none" />
