@@ -153,11 +153,7 @@ const NavLink = ({ page, current, setPage, scrolled, children, theme }) => {
     const isDarkBackground = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const defaultColor = (scrolled || current !== 'home') ? 'var(--color-text)' : (isDarkBackground ? 'var(--color-text)' : 'white');
     return (
-        <button 
-            onClick={() => setPage(page)} 
-            className={`text-xs font-bold uppercase tracking-widest transition-colors duration-300 relative pb-1 ${current === page ? 'text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]' : 'hover:text-[var(--color-accent)]/80'}`} 
-            style={{ color: defaultColor }}
-        >
+        <button onClick={() => setPage(page)} className={`text-xs font-bold uppercase tracking-widest transition-colors duration-300 relative pb-1 ${current === page ? 'text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]' : 'hover:text-[var(--color-accent)]/80'}`} style={{ color: defaultColor }}>
             {children}
         </button>
     );
@@ -205,13 +201,7 @@ const GlobalStyles = () => (
 
 // --- Main Application ---
 const JaysBistro = () => {
-  // Hash Routing Logic
-  const getHashPage = () => {
-      const hash = window.location.hash.replace('#', '');
-      return hash || 'home';
-  };
-
-  const [currentPage, setCurrentPage] = useState(getHashPage());
+  const [currentPage, setCurrentPage] = useState('home');
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
@@ -226,18 +216,6 @@ const JaysBistro = () => {
   // Hero Slides
   const heroSlides = MENU_ITEMS.filter(item => item.featured).slice(0, 3); 
 
-  useEffect(() => {
-    const handleHashChange = () => setCurrentPage(getHashPage());
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  const setPage = (page) => {
-      window.location.hash = page;
-      setCurrentPage(page);
-  };
-
-  // Favicon Effect
   useEffect(() => {
     const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" stroke="#C5A059" stroke-width="4" fill="#1A1A1A" /><text x="50" y="45" font-family="cursive" font-size="24" fill="#F9F7F2" text-anchor="middle" dominant-baseline="middle">Jay's</text><text x="50" y="70" font-family="cursive" font-size="20" fill="#C5A059" text-anchor="middle" dominant-baseline="middle">Bistro</text></svg>`;
     const blob = new Blob([svgIcon], { type: 'image/svg+xml' });
@@ -279,11 +257,17 @@ const JaysBistro = () => {
     return () => mediaQuery.removeListener(handler);
   }, [theme]);
 
+  // Fix Flashing: Only update state if value actually changes
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+        const isScrolled = window.scrollY > 20;
+        if (isScrolled !== scrolled) {
+            setScrolled(isScrolled);
+        }
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [scrolled]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -388,7 +372,7 @@ const JaysBistro = () => {
                 ))}
             </div>
             <div className="mt-12 text-center">
-                 <PrimaryButton onClick={() => setPage('menu')} variant="outline">Show Full Menu <ArrowRight size={16} className="ml-2 inline" /></PrimaryButton>
+                 <PrimaryButton onClick={() => setCurrentPage('menu')} variant="outline">Show Full Menu <ArrowRight size={16} className="ml-2 inline" /></PrimaryButton>
             </div>
         </div>
       </section>
@@ -407,11 +391,10 @@ const JaysBistro = () => {
   const MenuView = () => {
     const [searchQuery, setSearchQuery] = useState("");
     
-    // Filter by BOTH Category AND Search Query
+    // Filter logic: Match Category AND Search by Name Only
     const filtered = MENU_ITEMS.filter(item => {
         const matchesCategory = activeCategory === "All" || item.category === activeCategory;
-        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                              item.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
     
@@ -426,7 +409,7 @@ const JaysBistro = () => {
             <div className="sticky top-[70px] z-30 bg-[var(--color-bg)] py-4 mb-8 border-b border-accent/20 -mx-6 px-6 shadow-sm transition-colors duration-300">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     
-                    {/* Search Bar - Left on desktop, Top on mobile */}
+                    {/* Search Bar - Left on desktop */}
                     <div className="relative w-full md:w-64 flex-shrink-0">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search size={16} className="text-accent" />
@@ -451,7 +434,7 @@ const JaysBistro = () => {
                         </div>
                     </div>
 
-                    {/* Spacer for desktop balance (optional, keeps categories perfectly centered) */}
+                    {/* Spacer for desktop balance */}
                     <div className="hidden md:block w-64"></div>
                 </div>
             </div>
@@ -519,11 +502,11 @@ const JaysBistro = () => {
         <div className="container mx-auto px-6 flex justify-between items-center">
             <div className="flex items-center gap-4">
                 {currentPage !== 'home' && (
-                    <button onClick={() => setPage('home')} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors" style={{ color: navTextColor }}>
+                    <button onClick={() => setCurrentPage('home')} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors" style={{ color: navTextColor }}>
                         <ChevronLeft size={16} /> 
                     </button>
                 )}
-                <div onClick={() => setPage('home')} className="cursor-pointer transition-colors duration-500">
+                <div onClick={() => setCurrentPage('home')} className="cursor-pointer transition-colors duration-500">
 					<div className={`w-16 h-16 rounded-full border-2 border-accent flex flex-col items-center justify-center transition-all duration-300 ${scrolled ? 'scale-90' : 'scale-100'} bg-bg-secondary`} style={{ borderColor: navTextColor }}>
 						<span className="font-handwritten leading-none text-xl" style={{ color: navTextColor }}>Jay's</span>
 						<span className="font-handwritten leading-none text-xl text-accent">Bistro</span>
@@ -531,9 +514,9 @@ const JaysBistro = () => {
 				</div>
             </div>
             <div className="hidden md:flex items-center gap-10">
-                <NavLink page="home" current={currentPage} setPage={setPage} scrolled={scrolled} theme={theme}>Home</NavLink>
-                <NavLink page="menu" current={currentPage} setPage={setPage} scrolled={scrolled} theme={theme}>Menu</NavLink>
-                <NavLink page="about" current={currentPage} setPage={setPage} scrolled={scrolled} theme={theme}>About Us</NavLink>
+                <NavLink page="home" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>Home</NavLink>
+                <NavLink page="menu" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>Menu</NavLink>
+                <NavLink page="about" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>About Us</NavLink>
             </div>
             <div className="flex items-center gap-6">
                 <button onClick={toggleTheme} className="p-2 transition-colors duration-300 hover:text-accent" style={{ color: navTextColor }} title={`Current theme: ${theme}`}>
