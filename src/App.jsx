@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ShoppingBag, X, Plus, Minus, MapPin, Phone, ArrowRight, 
   Bot, Send, Menu as MenuIcon, Instagram, Facebook, Twitter, 
-  ChevronLeft, Star, Clock, Sun, Moon, ChevronRight
+  ChevronLeft, Star, Clock, Sun, Moon, Search
 } from 'lucide-react';
 
 // --- Configuration ---
@@ -15,18 +15,70 @@ const MENU_ITEMS = [
   // --- Curated / Featured (Shown on Hero) ---
   { id: 1, category: "Meals", name: "Party Jollof Rice", price: 1500, description: "Signature smoky party jollof served with grilled beef.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=1920", featured: true },
   { id: 2, category: "Protein", name: "Isi-ewu", price: 6000, description: "Traditional spicy goat head delicacy in rich palm oil sauce.", image: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&q=80&w=1920", featured: true },
-  { id: 3, category: "Beverages", name: "Classic Arabian Blend", price: 3000, description: "Heritage spice infusion with cardamom and rosewater.", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&q=80&w=1920", featured: true },
+  { id: 3, category: "Beverages", name: "Classic Arabian Blend (1L)", price: 3000, description: "Heritage spice infusion with cardamom and rosewater.", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&q=80&w=1920", featured: true },
 
-  // --- Full Menu (Selected items for brevity, ensure all your items are here) ---
+  // --- Full Menu ---
   { id: 4, category: "Beverages", name: "Double Root (1L)", price: 3500, description: "Powerful herbal blend for vitality and wellness.", image: "https://images.unsplash.com/photo-1544517176-655510493a28?auto=format&fit=crop&q=80&w=800" },
+  { id: 5, category: "Beverages", name: "Ginger, Lemon & Cinnamon Tea", price: 2000, description: "Zesty, spicy, and soothing aromatic tea.", image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&q=80&w=800" },
+  { id: 6, category: "Beverages", name: "Arabian Tea (1/2L)", price: 1500, description: "A smaller portion of our signature spice tea.", image: "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?auto=format&fit=crop&q=80&w=800" },
+  { id: 7, category: "Beverages", name: "Arabian Double", price: 2000, description: "Extra strength Arabian blend for the bold.", image: "https://images.unsplash.com/photo-1563911302283-d2bc129e7c1f?auto=format&fit=crop&q=80&w=800" },
+  { id: 8, category: "Beverages", name: "Pure Honey (1L)", price: 10000, description: "Organic, undiluted locally sourced honey.", image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800" },
+  { id: 9, category: "Beverages", name: "Date Powder", price: 30000, description: "Natural sweetener alternative made from premium dates.", image: "https://images.unsplash.com/photo-1619684693892-3eb4b3020993?auto=format&fit=crop&q=80&w=800" },
+  { id: 10, category: "Beverages", name: "Arabian Tea Pack", price: 6000, description: "Take home the Jay's experience. DIY Tea pack.", image: "https://images.unsplash.com/photo-1564834724105-918b73d1b9e0?auto=format&fit=crop&q=80&w=800" },
+  { id: 11, category: "Beverages", name: "Maca Root Pack", price: 6000, description: "Raw Maca root powder supplement.", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=800" },
   { id: 12, category: "Starters", name: "Spiced Meat Samosa", price: 1500, description: "Crispy triangular pastry filled with spiced minced meat.", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=800" },
+  { id: 13, category: "Starters", name: "Spring Roll", price: 3000, description: "Crispy rolls filled with fresh vegetables and meat.", image: "https://images.unsplash.com/photo-1548507200-dd918f830371?auto=format&fit=crop&q=80&w=800" },
+  { id: 14, category: "Starters", name: "Puff Puff", price: 1500, description: "Classic Nigerian sweet fried dough balls.", image: "https://images.unsplash.com/photo-1630405433873-91851d45763e?auto=format&fit=crop&q=80&w=800" },
   { id: 15, category: "Bites", name: "Fish Roll", price: 1000, description: "Flaky pastry rolled with a savory fish filling.", image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&q=80&w=800" },
+  { id: 16, category: "Bites", name: "Doughnut", price: 500, description: "Soft, fluffy, sugar-glazed classic doughnut.", image: "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=800" },
+  { id: 17, category: "Bites", name: "Palmia", price: 500, description: "Crunchy, heart-shaped caramelized puff pastry.", image: "https://images.unsplash.com/photo-1612182062633-9524ca862134?auto=format&fit=crop&q=80&w=800" },
+  { id: 18, category: "Bites", name: "Meat Pie", price: 1000, description: "Rich minced meat and potato filling in a buttery crust.", image: "https://images.unsplash.com/photo-1572383672419-ab47799d1d39?auto=format&fit=crop&q=80&w=800" },
   { id: 19, category: "Bites", name: "6' Pizza", price: 12000, description: "Personal size pizza loaded with cheese and toppings.", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=800" },
+  { id: 20, category: "Bites", name: "12' Pizza", price: 15000, description: "Large family-sized pizza with the cheesiest pull.", image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&q=80&w=800" },
   { id: 21, category: "Bites", name: "Chicken Shawarma (SS)", price: 3500, description: "Creamy Chicken shawarma with Single Sausage.", image: "https://images.unsplash.com/photo-1633321702518-7feccaf9cdf3?auto=format&fit=crop&q=80&w=800" },
+  { id: 22, category: "Bites", name: "Chicken Shawarma (DS)", price: 4000, description: "Loaded Chicken shawarma with Double Sausage.", image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&q=80&w=800" },
+  { id: 23, category: "Bites", name: "Beef Shawarma", price: 4500, description: "Tender spiced beef strips wrapped in flatbread.", image: "https://images.unsplash.com/photo-1561651881-d3f87a95a328?auto=format&fit=crop&q=80&w=800" },
+  { id: 24, category: "Bites", name: "Combo Shawarma", price: 6000, description: "The ultimate mix of juicy chicken and beef.", image: "https://images.unsplash.com/photo-1642365924747-8a39ec8bb0dc?auto=format&fit=crop&q=80&w=800" },
+  { id: 25, category: "Bites", name: "Chicken Caesar Salad", price: 7000, description: "Fresh greens, grilled chicken breast, and croutons.", image: "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&q=80&w=800" },
+  { id: 26, category: "Bites", name: "Coleslaw", price: 1000, description: "Freshly shredded cabbage and carrots in creamy dressing.", image: "https://images.unsplash.com/photo-1628156627622-426b384f7000?auto=format&fit=crop&q=80&w=800" },
+  { id: 27, category: "Bites", name: "Vegetable Salad", price: 6000, description: "A healthy mix of fresh garden vegetables.", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800" },
+  { id: 28, category: "Meals", name: "Moi-Moi", price: 3000, description: "Rich steamed bean pudding garnished with egg/fish.", image: "https://images.unsplash.com/photo-1648417535492-414457d97773?auto=format&fit=crop&q=80&w=800" },
+  { id: 29, category: "Meals", name: "Noodles", price: 2000, description: "Stir-fried noodles with signature spices.", image: "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&q=80&w=800" },
+  { id: 30, category: "Meals", name: "Garnished Noodles", price: 3500, description: "Noodles stir-fried with vegetables and proteins.", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&q=80&w=800" },
+  { id: 31, category: "Meals", name: "Fried Rice", price: 1500, description: "Classic Nigerian fried rice with mixed veggies.", image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&q=80&w=800" },
+  { id: 32, category: "Meals", name: "Coconut Rice", price: 2000, description: "Rice slow-cooked in fresh, rich coconut milk.", image: "https://images.unsplash.com/photo-1596560548464-f010549b84d7?auto=format&fit=crop&q=80&w=800" },
+  { id: 33, category: "Meals", name: "Local Rice", price: 3000, description: "Traditional Ofada-style rice with distinct aroma.", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&q=80&w=800" },
+  { id: 34, category: "Meals", name: "Beans", price: 1500, description: "Soft, honey beans cooked to perfection.", image: "https://images.unsplash.com/photo-1633896949673-1e9ee18a2d18?auto=format&fit=crop&q=80&w=800" },
+  { id: 35, category: "Meals", name: "Plantain", price: 1000, description: "Sweet fried plantain (Dodo).", image: "https://images.unsplash.com/photo-1647432924976-47b779b73964?auto=format&fit=crop&q=80&w=800" },
+  { id: 36, category: "Meals", name: "Basmati Fried Rice", price: 3500, description: "Premium long-grain Basmati stir-fry.", image: "https://images.unsplash.com/photo-1603133872878-684f10842619?auto=format&fit=crop&q=80&w=800" },
+  { id: 37, category: "Meals", name: "Spaghetti", price: 3500, description: "Spaghetti in a rich, spicy tomato sauce.", image: "https://images.unsplash.com/photo-1597393437299-1307682970c3?auto=format&fit=crop&q=80&w=800" },
+  { id: 38, category: "Meals", name: "Gizz Dodo", price: 4000, description: "Spicy mix of gizzards and fried plantains.", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800" },
+  { id: 39, category: "Meals", name: "Chips & Omelette", price: 3500, description: "Fried potato chips served with a farm-fresh omelette.", image: "https://images.unsplash.com/photo-1599120666014-930d774a350c?auto=format&fit=crop&q=80&w=800" },
+  { id: 40, category: "Meals", name: "Porridge Yam", price: 3000, description: "Asaro - Yam cooked in a rich palm oil sauce.", image: "https://images.unsplash.com/photo-1629199347895-320c2b29df99?auto=format&fit=crop&q=80&w=800" },
+  { id: 41, category: "Meals", name: "Masa", price: 1000, description: "Traditional Northern rice cakes, pan-fried.", image: "https://images.unsplash.com/photo-1626505927329-373a0332308e?auto=format&fit=crop&q=80&w=800" },
+  { id: 42, category: "Meals", name: "Pounded Yam", price: 1200, description: "Smooth, stretchy pounded yam.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
+  { id: 43, category: "Meals", name: "Semo", price: 1000, description: "Soft Semovita swallow.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
+  { id: 44, category: "Meals", name: "Amala", price: 1000, description: "Classic dark yam flour swallow.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
+  { id: 45, category: "Meals", name: "Fufu", price: 1000, description: "Fermented cassava dough.", image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&q=80&w=800" },
+  { id: 46, category: "Meals", name: "Garri", price: 1000, description: "Eba - Cassava flakes dough.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
+  { id: 47, category: "Meals", name: "Yam Stick", price: 1500, description: "Fried yam batons, crispy on the outside.", image: "https://images.unsplash.com/photo-1623594611048-3608cc78949f?auto=format&fit=crop&q=80&w=800" },
+  { id: 48, category: "Meals", name: "Yam and Egg Sauce", price: 3000, description: "Boiled yam paired with savory garden egg sauce.", image: "https://images.unsplash.com/photo-1629199347895-320c2b29df99?auto=format&fit=crop&q=80&w=800" },
+  { id: 49, category: "Meals", name: "Eggs", price: 400, description: "Boiled or fried egg.", image: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&q=80&w=800" },
   { id: 50, category: "Protein", name: "Smoky Goat Pepper Soup", price: 3000, description: "Slow-simmered broth with tender smoked goat.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
   { id: 51, category: "Protein", name: "Bistro Chicken Wings", price: 5000, description: "Succulent grilled wings in bistro glaze.", image: "https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&q=80&w=800" },
-  { id: 42, category: "Meals", name: "Pounded Yam", price: 1200, description: "Smooth, stretchy pounded yam.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
+  { id: 52, category: "Protein", name: "Full Chicken", price: 20000, description: "Whole grilled chicken from the flaming grills.", image: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&q=80&w=800" },
+  { id: 53, category: "Protein", name: "Portion O' Chicken", price: 6000, description: "A generous serving of fried or grilled chicken.", image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&q=80&w=800" },
+  { id: 54, category: "Protein", name: "Goat Meat", price: 1500, description: "Tender, seasoned goat meat.", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6f54262?auto=format&fit=crop&q=80&w=800" },
+  { id: 55, category: "Protein", name: "Beef", price: 1500, description: "Succulent fried beef piece.", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6f54262?auto=format&fit=crop&q=80&w=800" },
+  { id: 56, category: "Protein", name: "Portion of Beef/Goat", price: 4500, description: "A bowl of assorted savory meats.", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6f54262?auto=format&fit=crop&q=80&w=800" },
+  { id: 57, category: "Protein", name: "Turkey", price: 6000, description: "Fried or grilled turkey wings.", image: "https://images.unsplash.com/photo-1598511726623-d09994539a95?auto=format&fit=crop&q=80&w=800" },
+  { id: 58, category: "Protein", name: "Cat Fish (Portion)", price: 1000, description: "Fresh catfish slice in sauce.", image: "https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?auto=format&fit=crop&q=80&w=800" },
+  { id: 59, category: "Protein", name: "Croaker Fish", price: 4000, description: "Whole grilled or fried croaker.", image: "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&q=80&w=800" },
+  { id: 60, category: "Protein", name: "Nkwobi", price: 10000, description: "Spicy cow foot delicacy in native sauce.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
+  { id: 61, category: "Protein", name: "Vegetable Chicken", price: 20000, description: "Chicken stir-fry with mixed vegetables.", image: "https://images.unsplash.com/photo-1598511726623-d09994539a95?auto=format&fit=crop&q=80&w=800" },
   { id: 62, category: "Soups", name: "Egusi", price: 500, description: "Rich melon seed soup with spinach.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
+  { id: 63, category: "Soups", name: "Vegetable Soup", price: 1500, description: "Nutritious Edikang Ikong style soup.", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800" },
+  { id: 64, category: "Soups", name: "White Soup", price: 2000, description: "Ofe Nsala - Spicy traditional soup.", image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=800" },
 ];
 
 const CATEGORIES = ["All", "Starters", "Beverages", "Meals", "Bites", "Protein", "Soups"];
@@ -101,7 +153,11 @@ const NavLink = ({ page, current, setPage, scrolled, children, theme }) => {
     const isDarkBackground = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const defaultColor = (scrolled || current !== 'home') ? 'var(--color-text)' : (isDarkBackground ? 'var(--color-text)' : 'white');
     return (
-        <button onClick={() => setPage(page)} className={`text-xs font-bold uppercase tracking-widest transition-colors duration-300 relative pb-1 ${current === page ? 'text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]' : 'hover:text-[var(--color-accent)]/80'}`} style={{ color: defaultColor }}>
+        <button 
+            onClick={() => setPage(page)} 
+            className={`text-xs font-bold uppercase tracking-widest transition-colors duration-300 relative pb-1 ${current === page ? 'text-[var(--color-accent)] border-b-2 border-[var(--color-accent)]' : 'hover:text-[var(--color-accent)]/80'}`} 
+            style={{ color: defaultColor }}
+        >
             {children}
         </button>
     );
@@ -141,7 +197,6 @@ const GlobalStyles = () => (
       @keyframes fadeInPage { from { opacity: 0; } to { opacity: 1; } }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      /* Snap scrolling utilities */
       .snap-x { scroll-snap-type: x mandatory; }
       .snap-center { scroll-snap-align: center; }
     `}
@@ -150,7 +205,13 @@ const GlobalStyles = () => (
 
 // --- Main Application ---
 const JaysBistro = () => {
-  const [currentPage, setCurrentPage] = useState('home');
+  // Hash Routing Logic
+  const getHashPage = () => {
+      const hash = window.location.hash.replace('#', '');
+      return hash || 'home';
+  };
+
+  const [currentPage, setCurrentPage] = useState(getHashPage());
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
@@ -162,9 +223,21 @@ const JaysBistro = () => {
   const messagesEndRef = useRef(null);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system'); 
 
-  // Hero Slides (Filtered)
+  // Hero Slides
   const heroSlides = MENU_ITEMS.filter(item => item.featured).slice(0, 3); 
 
+  useEffect(() => {
+    const handleHashChange = () => setCurrentPage(getHashPage());
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const setPage = (page) => {
+      window.location.hash = page;
+      setCurrentPage(page);
+  };
+
+  // Favicon Effect
   useEffect(() => {
     const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" stroke="#C5A059" stroke-width="4" fill="#1A1A1A" /><text x="50" y="45" font-family="cursive" font-size="24" fill="#F9F7F2" text-anchor="middle" dominant-baseline="middle">Jay's</text><text x="50" y="70" font-family="cursive" font-size="20" fill="#C5A059" text-anchor="middle" dominant-baseline="middle">Bistro</text></svg>`;
     const blob = new Blob([svgIcon], { type: 'image/svg+xml' });
@@ -205,29 +278,6 @@ const JaysBistro = () => {
     mediaQuery.addListener(handler);
     return () => mediaQuery.removeListener(handler);
   }, [theme]);
-
-  // Pseudo-Router logic
-  useEffect(() => {
-      const path = window.location.pathname;
-      if (path.includes('menu')) setCurrentPage('menu');
-      else if (path.includes('about')) setCurrentPage('about');
-      else setCurrentPage('home');
-  }, []);
-
-  useEffect(() => {
-      const path = currentPage === 'home' ? '/' : `/${currentPage}`;
-      if (window.location.pathname !== path) {
-          window.history.pushState(null, '', path);
-      }
-      const handlePopState = () => {
-          const newPath = window.location.pathname;
-          if (newPath.includes('menu')) setCurrentPage('menu');
-          else if (newPath.includes('about')) setCurrentPage('about');
-          else setCurrentPage('home');
-      };
-      window.addEventListener('popstate', handlePopState);
-      return () => window.removeEventListener('popstate', handlePopState);
-  }, [currentPage]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -271,55 +321,36 @@ const JaysBistro = () => {
 
     if (!CHATBOT_API_KEY || CHATBOT_API_KEY.includes('PLACEHOLDER')) {
         setTimeout(() => {
-            setChatHistory(prev => [...prev, { role: 'model', text: "I'm the concierge at Jay's Bistro. I can see you're interested in our menu. While my live connection is currently offline for this demo, I recommend the Signature Jollof Risotto!" }]);
+            setChatHistory(prev => [...prev, { role: 'model', text: "I'm the concierge at Jay's Bistro. I see you're interested in our menu. My live connection is currently offline, but I highly recommend the Signature Jollof Risotto!" }]);
             setIsTyping(false);
         }, 1000);
         return;
     }
     
-    // ... API call logic here if key is valid ...
-    setIsTyping(false); // Fallback for now
+    // API logic would go here
+    setIsTyping(false); 
   };
 
-  // --- Revised Hero Section: Horizontal Scroll (No Flashing) ---
   const HeroSection = () => (
     <section className="relative h-screen w-full bg-bg-secondary overflow-hidden">
-        {/* Fixed "Welcome" Overlay - Stays put while images slide */}
         <div className="absolute top-32 left-0 w-full z-20 flex flex-col items-center justify-center text-center px-4 pointer-events-none">
              <p className="text-accent text-sm md:text-base font-bold tracking-[0.3em] uppercase mb-4 shadow-black drop-shadow-md animate-[fadeIn_1s_ease-out]">Welcome to</p>
              <h2 className="font-handwritten text-6xl md:text-8xl text-white drop-shadow-xl animate-[fadeIn_1s_ease-out_0.2s_both]">Jay's Bistro</h2>
         </div>
-
-        {/* Scroll Container */}
         <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar">
             {heroSlides.map((slide) => (
                 <div key={slide.id} className="relative w-full h-full flex-shrink-0 snap-center">
-                    {/* Image */}
-                    <img 
-                        src={slide.image} 
-                        alt={slide.name} 
-                        className="w-full h-full object-cover" 
-                    />
-                    {/* Dark Overlay per slide to ensure text pop */}
+                    <img src={slide.image} alt={slide.name} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40" />
-                    
-                    {/* Content specific to this slide */}
                     <div className="absolute bottom-24 left-0 w-full flex flex-col items-center justify-end pb-12 px-4 text-center z-20">
-                        <h1 className="font-serif text-3xl md:text-5xl text-white leading-tight max-w-4xl mx-auto mb-8 drop-shadow-lg">
-                            {slide.name}
-                        </h1>
-                        <button 
-                            onClick={() => addToCart(slide)} 
-                            className="flex items-center gap-3 bg-accent text-primary px-8 py-4 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all active:scale-95 shadow-lg"
-                        >
+                        <h1 className="font-serif text-3xl md:text-5xl text-white leading-tight max-w-4xl mx-auto mb-8 drop-shadow-lg">{slide.name}</h1>
+                        <button onClick={() => addToCart(slide)} className="flex items-center gap-3 bg-accent text-primary px-8 py-4 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all active:scale-95 shadow-lg">
                             Order Now <ArrowRight size={16} />
                         </button>
                     </div>
                 </div>
             ))}
         </div>
-        
-        {/* Scroll Indicator Hint */}
         <div className="absolute bottom-6 w-full text-center z-20 animate-bounce pointer-events-none opacity-70">
             <span className="text-white text-[10px] uppercase tracking-widest">Swipe / Scroll</span>
         </div>
@@ -357,7 +388,7 @@ const JaysBistro = () => {
                 ))}
             </div>
             <div className="mt-12 text-center">
-                 <PrimaryButton onClick={() => setCurrentPage('menu')} variant="outline">Show Full Menu <ArrowRight size={16} className="ml-2 inline" /></PrimaryButton>
+                 <PrimaryButton onClick={() => setPage('menu')} variant="outline">Show Full Menu <ArrowRight size={16} className="ml-2 inline" /></PrimaryButton>
             </div>
         </div>
       </section>
@@ -374,31 +405,70 @@ const JaysBistro = () => {
   );
 
   const MenuView = () => {
-    const filtered = activeCategory === "All" ? MENU_ITEMS : MENU_ITEMS.filter(i => i.category === activeCategory);
+    const [searchQuery, setSearchQuery] = useState("");
+    
+    // Filter by BOTH Category AND Search Query
+    const filtered = MENU_ITEMS.filter(item => {
+        const matchesCategory = activeCategory === "All" || item.category === activeCategory;
+        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                              item.description.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
     
     return (
         <div className="pt-32 pb-20 min-h-screen view-fade-in container mx-auto px-6">
-            <div className="text-center mb-16">
+            <div className="text-center mb-12">
                 <h1 className="font-serif text-5xl md:text-6xl mb-4 text-primary">The Menu Carte</h1>
-                <p className="text-secondary font-light max-w-xl mx-auto">Discover flavors crafted with passion, from our signature teas to our fusion entrees.</p>
+                <p className="text-secondary font-light max-w-xl mx-auto">Discover flavors crafted with passion.</p>
             </div>
 
-            {/* Sticky Categories FIX: Increased top to 70px to clear navbar, added shadow & solid bg, aligned left */}
-            <div className="sticky top-[70px] z-30 bg-[var(--color-bg)] py-4 mb-12 border-b border-accent/20 -mx-6 px-6 shadow-sm transition-colors duration-300">
-                <div className="flex justify-start gap-4 md:gap-6 overflow-x-auto no-scrollbar w-full">
-                    {CATEGORIES.map(cat => (
-                        <button key={cat} onClick={() => setActiveCategory(cat)} className={`text-sm uppercase tracking-widest pb-2 transition-all whitespace-nowrap flex-shrink-0 ${activeCategory === cat ? 'text-accent border-b-2 border-accent' : 'text-secondary hover:text-primary'}`}>
-                            {cat}
-                        </button>
-                    ))}
+            {/* Menu Toolbar: Search Left, Categories Centered */}
+            <div className="sticky top-[70px] z-30 bg-[var(--color-bg)] py-4 mb-8 border-b border-accent/20 -mx-6 px-6 shadow-sm transition-colors duration-300">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    
+                    {/* Search Bar - Left on desktop, Top on mobile */}
+                    <div className="relative w-full md:w-64 flex-shrink-0">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search size={16} className="text-accent" />
+                        </div>
+                        <input 
+                            type="text" 
+                            className="w-full pl-10 pr-4 py-2 bg-bg-secondary text-primary border border-primary/10 rounded-full focus:outline-none focus:ring-1 focus:ring-accent text-xs tracking-widest uppercase"
+                            placeholder="What are you craving?"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Categories - Centered */}
+                    <div className="flex-1 flex justify-start md:justify-center overflow-x-auto no-scrollbar w-full md:w-auto">
+                        <div className="flex gap-6">
+                            {CATEGORIES.map(cat => (
+                                <button key={cat} onClick={() => setActiveCategory(cat)} className={`text-sm uppercase tracking-widest pb-1 transition-all whitespace-nowrap flex-shrink-0 ${activeCategory === cat ? 'text-accent border-b-2 border-accent' : 'text-secondary hover:text-primary'}`}>
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Spacer for desktop balance (optional, keeps categories perfectly centered) */}
+                    <div className="hidden md:block w-64"></div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                {filtered.map(item => (
-                    <MenuCard key={item.id} item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
-                ))}
+                {filtered.length > 0 ? (
+                    filtered.map(item => (
+                        <MenuCard key={item.id} item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
+                    ))
+                ) : (
+                    <div className="col-span-full text-center py-20 text-secondary">
+                        <p>No delicious items found matching your craving.</p>
+                        <button onClick={() => {setSearchQuery(''); setActiveCategory('All');}} className="text-accent hover:underline mt-2 text-sm uppercase tracking-widest">View Full Menu</button>
+                    </div>
+                )}
             </div>
+            
             <div className="mt-20 text-center border-t border-primary/10 pt-10">
                 <p className="text-secondary mb-6">Need assistance? Speak to our concierge.</p>
                 <button onClick={() => setIsChatOpen(true)} className="text-accent font-serif italic text-xl hover:underline">Chat with Jay</button>
@@ -449,11 +519,11 @@ const JaysBistro = () => {
         <div className="container mx-auto px-6 flex justify-between items-center">
             <div className="flex items-center gap-4">
                 {currentPage !== 'home' && (
-                    <button onClick={() => setCurrentPage('home')} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors" style={{ color: navTextColor }}>
+                    <button onClick={() => setPage('home')} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors" style={{ color: navTextColor }}>
                         <ChevronLeft size={16} /> 
                     </button>
                 )}
-                <div onClick={() => setCurrentPage('home')} className="cursor-pointer transition-colors duration-500">
+                <div onClick={() => setPage('home')} className="cursor-pointer transition-colors duration-500">
 					<div className={`w-16 h-16 rounded-full border-2 border-accent flex flex-col items-center justify-center transition-all duration-300 ${scrolled ? 'scale-90' : 'scale-100'} bg-bg-secondary`} style={{ borderColor: navTextColor }}>
 						<span className="font-handwritten leading-none text-xl" style={{ color: navTextColor }}>Jay's</span>
 						<span className="font-handwritten leading-none text-xl text-accent">Bistro</span>
@@ -461,9 +531,9 @@ const JaysBistro = () => {
 				</div>
             </div>
             <div className="hidden md:flex items-center gap-10">
-                <NavLink page="home" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>Home</NavLink>
-                <NavLink page="menu" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>Menu</NavLink>
-                <NavLink page="about" current={currentPage} setPage={setCurrentPage} scrolled={scrolled} theme={theme}>About Us</NavLink>
+                <NavLink page="home" current={currentPage} setPage={setPage} scrolled={scrolled} theme={theme}>Home</NavLink>
+                <NavLink page="menu" current={currentPage} setPage={setPage} scrolled={scrolled} theme={theme}>Menu</NavLink>
+                <NavLink page="about" current={currentPage} setPage={setPage} scrolled={scrolled} theme={theme}>About Us</NavLink>
             </div>
             <div className="flex items-center gap-6">
                 <button onClick={toggleTheme} className="p-2 transition-colors duration-300 hover:text-accent" style={{ color: navTextColor }} title={`Current theme: ${theme}`}>
@@ -512,6 +582,7 @@ const JaysBistro = () => {
             <div>
                 <h4 className="font-serif text-accent text-lg mb-6">Newsletter</h4>
                 <div className="flex flex-col gap-3">
+                    {/* Fixed template literals to prevent build errors */}
                     <input type="email" placeholder="Your email address" className={`bg-[#2C2C2C] border-none text-white px-4 py-3 text-sm focus:ring-1 focus:ring-accent outline-none`} />
                     <button className={`bg-accent text-primary py-3 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors`}>Subscribe</button>
                 </div>
