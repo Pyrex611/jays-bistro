@@ -1,12 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  
-  // FIX FOR GITHUB PAGES BLANK SCREEN ISSUE:
-  // Sets the base path to relative ('./') so all assets (CSS, JS) are
-  // referenced correctly from the repository subdirectory, fixing the white screen.
-  base: './' 
+  server: {
+    port: 3000,
+    open: true
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          icons: ['lucide-react']
+        }
+      }
+    }
+  }
 })
