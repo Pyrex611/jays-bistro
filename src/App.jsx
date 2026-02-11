@@ -23,6 +23,7 @@ const CHATBOT_API_KEY = "PLACEHOLDER_GEMINI_API_KEY_A1B2C3D4E5F6G7H8I9";
 // --- Data ---
 const MENU_ITEMS = [
   // --- Curated / Featured (Shown on Hero) ---
+  { id: 36, category: "Meals", name: "Basmati Fried Rice", price: 3500, description: "Premium long-grain Basmati stir-fry.", image: basmatiImg, featured: true },
   { id: 3, category: "Beverages", name: "Classic Arabian Blend (1L)", price: 3000, description: "Heritage spice infusion with cardamom and rosewater.", image: arabianImg, featured: true },
   { id: 1, category: "Meals", name: "Party Jollof Rice", price: 1500, description: "Signature smoky party jollof served with grilled beef.", image: jollofImg, featured: true },
   { id: 2, category: "Protein", name: "Isi-ewu", price: 6000, description: "Traditional spicy goat head delicacy in rich palm oil sauce.", image: isiEwuImg, featured: true },
@@ -60,7 +61,6 @@ const MENU_ITEMS = [
   { id: 33, category: "Meals", name: "Local Rice", price: 3000, description: "Traditional Ofada-style rice with distinct aroma.", image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&q=80&w=800" },
   { id: 34, category: "Meals", name: "Beans", price: 1500, description: "Soft, honey beans cooked to perfection.", image: "https://images.unsplash.com/photo-1633896949673-1e9ee18a2d18?auto=format&fit=crop&q=80&w=800" },
   { id: 35, category: "Meals", name: "Plantain", price: 1000, description: "Sweet fried plantain (Dodo).", image: "https://images.unsplash.com/photo-1647432924976-47b779b73964?auto=format&fit=crop&q=80&w=800" },
-  { id: 36, category: "Meals", name: "Basmati Fried Rice", price: 3500, description: "Premium long-grain Basmati stir-fry.", image: basmatiImg, featured: true },
   { id: 37, category: "Meals", name: "Spaghetti", price: 3500, description: "Spaghetti in a rich, spicy tomato sauce.", image: "https://images.unsplash.com/photo-1597393437299-1307682970c3?auto=format&fit=crop&q=80&w=800" },
   { id: 38, category: "Meals", name: "Gizz Dodo", price: 4000, description: "Spicy mix of gizzards and fried plantains.", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800" },
   { id: 39, category: "Meals", name: "Chips & Omelette", price: 3500, description: "Fried potato chips served with a farm-fresh omelette.", image: "https://images.unsplash.com/photo-1599120666014-930d774a350c?auto=format&fit=crop&q=80&w=800" },
@@ -152,9 +152,7 @@ const MenuCard = ({ item, cart, addToCart, updateQuantity }) => (
       <h3 className="font-serif text-lg text-primary mb-2">{item.name}</h3>
       <p className="text-secondary text-xs leading-relaxed mb-3 h-10 line-clamp-2 px-2">{item.description}</p>
       <span className="block text-accent font-serif font-bold text-lg italic">{formatPrice(item.price)}</span>
-    </div>
-    <div className="px-2 pb-2">
-        <AddToCartButton item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
+      <AddToCartButton item={item} cart={cart} addToCart={addToCart} updateQuantity={updateQuantity} />
     </div>
   </div>
 );
@@ -479,7 +477,7 @@ const JaysBistro = () => {
                 <p className="text-accent font-light text-sm tracking-widest uppercase">The heart of Jay's Bistro</p>
             </div>
             <div className="text-secondary space-y-8 text-lg leading-relaxed">
-                <p>**Jay's Bistro** was founded on the principle that exceptional food should be complemented by an equally exquisite atmosphere. We drew inspiration from the subtle elegance of Parisian bistros and fused it with the bold, vibrant flavors of West Africa.</p>
+                <p>**Jay's Bistro** was founded by CEO, Miss Joy Bulya on the principle that exceptional food should be complemented by an equally exquisite atmosphere. We drew inspiration from the subtle elegance of Parisian bistros and fused it with the bold, vibrant flavors of West Africa.</p>
                 <p>Our menu is a curated journey, highlighting locally sourced ingredients transformed through classic and modern culinary techniques. We believe in simplicity, quality, and presentation that delights both the eye and the palate.</p>
                 <p>Join us for an experience where every cup of tea and every dish tells a story of heritage and sophistication. We look forward to welcoming you to our table.</p>
             </div>
