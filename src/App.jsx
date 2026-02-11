@@ -10,6 +10,8 @@ const WHATSAPP_NUMBER = "2348062624447";
 const GOOGLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Precious+event+Centre+Makurdi";
 const CHATBOT_API_KEY = "PLACEHOLDER_GEMINI_API_KEY_A1B2C3D4E5F6G7H8I9"; 
 
+//yam_url = "resources/IMG_1989.PNG"
+
 // --- Data ---
 const MENU_ITEMS = [
   // --- Curated / Featured (Shown on Hero) ---
@@ -62,7 +64,7 @@ const MENU_ITEMS = [
   { id: 45, category: "Meals", name: "Fufu", price: 1000, description: "Fermented cassava dough.", image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&q=80&w=800" },
   { id: 46, category: "Meals", name: "Garri", price: 1000, description: "Eba - Cassava flakes dough.", image: "https://images.unsplash.com/photo-1643487372226-78a0f8eb5b62?auto=format&fit=crop&q=80&w=800" },
   { id: 47, category: "Meals", name: "Yam Stick", price: 1500, description: "Fried yam batons, crispy on the outside.", image: "https://images.unsplash.com/photo-1623594611048-3608cc78949f?auto=format&fit=crop&q=80&w=800" },
-  { id: 48, category: "Meals", name: "Yam and Egg Sauce", price: 3000, description: "Boiled yam paired with savory garden egg sauce.", image: "https://images.unsplash.com/photo-1629199347895-320c2b29df99?auto=format&fit=crop&q=80&w=800" },
+  { id: 48, category: "Meals", name: "Yam and Egg Sauce", price: 3000, description: "Boiled yam paired with savory egg sauce.", image: "resources/IMG_1989.PNG" },
   { id: 49, category: "Meals", name: "Eggs", price: 400, description: "Boiled or fried egg.", image: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&q=80&w=800" },
   { id: 50, category: "Protein", name: "Smoky Goat Pepper Soup", price: 3000, description: "Slow-simmered broth with tender smoked goat.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
   { id: 51, category: "Protein", name: "Bistro Chicken Wings", price: 5000, description: "Succulent grilled wings in bistro glaze.", image: "https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&q=80&w=800" },
@@ -214,7 +216,7 @@ const JaysBistro = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'system'); 
 
   // Hero Slides
-  const heroSlides = MENU_ITEMS.filter(item => item.featured).slice(0, 3); 
+  const heroSlides = MENU_ITEMS.filter(item => item.featured).slice(0, 5); 
 
   useEffect(() => {
     const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" stroke="#C5A059" stroke-width="4" fill="#1A1A1A" /><text x="50" y="45" font-family="cursive" font-size="24" fill="#F9F7F2" text-anchor="middle" dominant-baseline="middle">Jay's</text><text x="50" y="70" font-family="cursive" font-size="20" fill="#C5A059" text-anchor="middle" dominant-baseline="middle">Bistro</text></svg>`;
@@ -382,7 +384,7 @@ const JaysBistro = () => {
               <div className="col-span-2 row-span-2 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
               <div className="col-span-1 row-span-1 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
               <div className="col-span-1 row-span-2 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&q=80&w=800" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
-              <div className="col-span-1 row-span-1 relative overflow-hidden group"><img src="https://images.unsplash.com/photo-1507914372368-b2b085b925a1?auto=format&fit=crop&q=80&w=800" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Gallery" /></div>
+              <div className="col-span-1 row-span-1 relative overflow-hidden group"><img src="IMG_2113.PNG" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="TEST " /></div>
           </div>
       </section>
     </div>
@@ -615,7 +617,7 @@ const JaysBistro = () => {
 
       {isChatOpen && (
         <div className="fixed bottom-24 right-6 z-50 w-[90vw] max-w-sm bg-bg-secondary shadow-2xl rounded-lg overflow-hidden border border-border animate-[fadeIn_0.3s_ease-out]">
-             <div className="p-4 flex justify-between items-center" style={{ backgroundColor: 'var(--color-text)', color: 'var(--color-bg)' }}>
+             <div className="p-4 flex justify-between items-center" style={{ backgroundColor: '#123456', color: '#123456' }}>
                  <span className="font-serif italic">Concierge</span>
                  <span className="text-[10px] uppercase tracking-widest bg-green-500/20 text-green-400 px-2 py-1 rounded animate-pulse">Online</span>
              </div>
