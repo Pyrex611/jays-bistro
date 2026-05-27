@@ -108,22 +108,19 @@ const TopBar = ({ setIsCartOpen, cartCount, cartBounce }) => (
     </div>
 );
 
-// Floating Black Bottom Navigation (Reference Image Replica)
-const BottomNav = ({ isCartOpen, setIsCartOpen, isChatOpen, setIsChatOpen, cartCount }) => {
+// Floating Black Bottom Navigation 
+const BottomNav = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const pathname = location.pathname;
 
-    const NavItem = ({ icon, label, active, onClick, badge }) => (
+    const NavItem = ({ icon, label, active, onClick }) => (
         <button 
             onClick={onClick}
             className={`relative flex items-center gap-2 p-3 rounded-full transition-all duration-300 ${active ? 'bg-white text-stone-900 px-5' : 'text-stone-400 hover:text-white'}`}
         >
             {icon}
             {active && <span className="text-sm font-bold tracking-wide animate-[fadeIn_0.2s_ease-in]">{label}</span>}
-            {!active && badge > 0 && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-            )}
         </button>
     );
 
@@ -131,9 +128,6 @@ const BottomNav = ({ isCartOpen, setIsCartOpen, isChatOpen, setIsChatOpen, cartC
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1A1A1A] p-2 rounded-full flex items-center gap-1 sm:gap-2 z-40 shadow-2xl">
             <NavItem icon={<HomeIcon size={20} />} label="Home" active={pathname === '/'} onClick={() => navigate('/')} />
             <NavItem icon={<MenuIcon size={20} />} label="Menu" active={pathname === '/menu'} onClick={() => navigate('/menu')} />
-            <NavItem icon={<Search size={20} />} label="Search" active={false} onClick={() => { navigate('/menu'); setTimeout(() => document.getElementById('menu-search')?.focus(), 100); }} />
-            <NavItem icon={<ShoppingBag size={20} />} label="Cart" active={isCartOpen} onClick={() => setIsCartOpen(true)} badge={cartCount} />
-            <NavItem icon={<Bot size={20} />} label="AI" active={isChatOpen} onClick={() => setIsChatOpen(true)} />
         </div>
     );
 };
@@ -390,7 +384,7 @@ const AppContent = () => {
     });
   };
 
-  // Chatbot logic state inside Main App so it can share Cart state easily
+  // Chatbot logic state 
   const [chatHistory, setChatHistory] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [isChatTyping, setIsChatTyping] = useState(false);
@@ -476,7 +470,16 @@ const AppContent = () => {
             <Route path="/menu" element={<MenuView cart={cart} updateQuantity={updateQuantity} navigate={navigate} />} />
         </Routes>
 
-        <BottomNav isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} isChatOpen={isChatOpen} setIsChatOpen={setIsChatOpen} cartCount={cartCount} />
+        {/* Cleaned Bottom Navigation Bar */}
+        <BottomNav />
+
+        {/* Floating AI Button at Bottom Right */}
+        <button 
+            onClick={() => setIsChatOpen(true)} 
+            className={`fixed bottom-6 right-6 z-[50] p-4 rounded-full shadow-2xl transition-all duration-300 bg-[#1A1A1A] text-white hover:scale-110 hover:bg-stone-800 flex items-center justify-center ${isChatOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100 pointer-events-auto'}`}
+        >
+            <Bot size={28} className="text-[#E1ECA9]" />
+        </button>
 
         {/* Cart Drawer */}
         <div className={`fixed inset-0 z-[60] ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
@@ -532,7 +535,7 @@ const AppContent = () => {
              </div>
         </div>
 
-        {/* AI Chatbot Window (Triggered by Bottom Nav) */}
+        {/* AI Chatbot Window (Triggered by Floating Icon) */}
         {isChatOpen && (
             <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center p-4 pointer-events-none">
                 <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm pointer-events-auto" onClick={() => setIsChatOpen(false)} />
