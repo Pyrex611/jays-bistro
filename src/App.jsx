@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet'; // Enterprise SEO Manager
 import { 
   ShoppingBag, X, Plus, Minus, MapPin, 
   Bot, Send, Search, Home as HomeIcon, 
@@ -19,6 +20,7 @@ import yamEggImg from './assets/images/IMG_1989.PNG';
 // --- Configuration & Data ---
 const WHATSAPP_NUMBER = "2348062624447"; 
 const CHATBOT_API_KEY = "PLACEHOLDER_GEMINI_API_KEY_A1B2C3D4E5F6G7H8I9"; 
+const SITE_URL = "https://pyrex611.github.io/jays-bistro";
 
 const CATEGORIES = [
   { name: "All", icon: "🍽️" },
@@ -45,7 +47,6 @@ const MENU_ITEMS = [
   { id: 62, category: "Soups", name: "Egusi Soup", price: 500, description: "Traditional rich and loaded melon soup.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=800" },
 ];
 
-// Pastel colors for the popular food cards matching the reference image
 const CARD_COLORS = ['bg-[#E6EEA9]', 'bg-[#C3E0F5]', 'bg-[#FDE2B4]', 'bg-[#FAD9D5]'];
 
 // --- Utility Functions ---
@@ -65,6 +66,63 @@ const generateWhatsAppLink = (cart) => {
 };
 
 // ==========================================
+// ENTERPRISE SEO COMPONENT (JSON-LD & Meta)
+// ==========================================
+const SEODirectives = ({ title, description, url, isMenu = false }) => {
+    const localBusinessSchema = {
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        "name": "Jay's Bistro",
+        "image": `${SITE_URL}/jsys_logo.jpg`,
+        "@id": SITE_URL,
+        "url": SITE_URL,
+        "telephone": `+${WHATSAPP_NUMBER}`,
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Precious Events Centre",
+            "addressLocality": "Makurdi",
+            "addressRegion": "Benue",
+            "addressCountry": "NG"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 7.7322,
+            "longitude": 8.5223
+        },
+        "openingHoursSpecification": [
+            { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "08:00", "closes": "22:00" },
+            { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Saturday"], "opens": "09:00", "closes": "23:00" }
+        ],
+        "servesCuisine": ["Nigerian", "Intercontinental", "Fast Food"],
+        "priceRange": "₦₦",
+        "hasMenu": `${SITE_URL}/menu`
+    };
+
+    const menuSchema = {
+        "@context": "https://schema.org",
+        "@type": "Menu",
+        "name": "Jay's Bistro Official Menu",
+        "url": `${SITE_URL}/menu`,
+        "mainEntityOfPage": `${SITE_URL}/menu`
+    };
+
+    return (
+        <Helmet>
+            <title>{title}</title>
+            <meta name="description" content={description} />
+            <link rel="canonical" href={url} />
+            <meta property="og:title" content={title} />
+            <meta property="og:description" content={description} />
+            <meta property="og:url" content={url} />
+            <script type="application/ld+json">
+                {JSON.stringify(isMenu ? [localBusinessSchema, menuSchema] : localBusinessSchema)}
+            </script>
+        </Helmet>
+    );
+};
+
+
+// ==========================================
 // SHARED COMPONENTS
 // ==========================================
 
@@ -81,12 +139,10 @@ const FoodImage = ({ src, alt, className }) => {
     );
 };
 
-// Top Navigation Bar (Avatar, Location, Cart Top-right)
 const TopBar = ({ setIsCartOpen, cartCount, cartBounce }) => (
-    <div className="flex justify-between items-center py-4 px-6 bg-[#F9F8F4] sticky top-0 z-30">
+    <header className="flex justify-between items-center py-4 px-6 bg-[#F9F8F4] sticky top-0 z-30">
         <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-stone-200 bg-white shadow-sm flex items-center justify-center">
-            {/* User requested jsys_logo.jpg for the logo/favicon replacement */}
-            <img src="/jsys_logo.jpg" alt="Logo" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/100x100/1A1A1A/FFFFFF?text=JB"; }} />
+            <img src="/jsys_logo.jpg" alt="Jay's Bistro Logo" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/100x100/1A1A1A/FFFFFF?text=JB"; }} />
         </div>
         
         <div className="flex flex-col items-center justify-center">
@@ -96,6 +152,7 @@ const TopBar = ({ setIsCartOpen, cartCount, cartBounce }) => (
         
         <button 
             onClick={() => setIsCartOpen(true)} 
+            aria-label="Open Cart"
             className="w-12 h-12 rounded-full bg-white border border-stone-200 flex items-center justify-center relative shadow-sm hover:shadow-md transition-shadow"
         >
             <ShoppingBag size={20} className="text-stone-800" />
@@ -105,10 +162,9 @@ const TopBar = ({ setIsCartOpen, cartCount, cartBounce }) => (
                 </span>
             )}
         </button>
-    </div>
+    </header>
 );
 
-// Floating Black Bottom Navigation 
 const BottomNav = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -117,6 +173,7 @@ const BottomNav = () => {
     const NavItem = ({ icon, label, active, onClick }) => (
         <button 
             onClick={onClick}
+            aria-label={label}
             className={`relative flex items-center gap-2 p-3 rounded-full transition-all duration-300 ${active ? 'bg-white text-stone-900 px-5' : 'text-stone-400 hover:text-white'}`}
         >
             {icon}
@@ -125,10 +182,10 @@ const BottomNav = () => {
     );
 
     return (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1A1A1A] p-2 rounded-full flex items-center gap-1 sm:gap-2 z-40 shadow-2xl">
+        <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1A1A1A] p-2 rounded-full flex items-center gap-1 sm:gap-2 z-40 shadow-2xl">
             <NavItem icon={<HomeIcon size={20} />} label="Home" active={pathname === '/'} onClick={() => navigate('/')} />
             <NavItem icon={<MenuIcon size={20} />} label="Menu" active={pathname === '/menu'} onClick={() => navigate('/menu')} />
-        </div>
+        </nav>
     );
 };
 
@@ -140,7 +197,13 @@ const HomeView = ({ cart, updateQuantity, navigate }) => {
     const popularItems = MENU_ITEMS.filter(item => item.featured).slice(0, 4);
 
     return (
-        <div className="pb-32 px-6 max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl view-fade-in">
+        <main className="pb-32 px-6 max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl view-fade-in">
+            <SEODirectives 
+                title="Jay's Bistro | Order Premium Food in Makurdi"
+                description="Get your favorite dishes delivered fresh. Jay's Bistro offers the best Nigerian and Intercontinental meals in Makurdi, Benue State."
+                url={`${SITE_URL}/`}
+            />
+
             {/* Main Hero Text */}
             <div className="mt-4 mb-6">
                 <h1 className="text-4xl md:text-5xl font-bold text-stone-900 leading-[1.1] tracking-tight">
@@ -163,7 +226,7 @@ const HomeView = ({ cart, updateQuantity, navigate }) => {
             </div>
 
             {/* Promo Banner */}
-            <div className="bg-gradient-to-r from-[#E1ECA9] to-[#F1F0C4] rounded-3xl p-6 flex items-center justify-between shadow-sm mb-8 relative overflow-hidden">
+            <section className="bg-gradient-to-r from-[#E1ECA9] to-[#F1F0C4] rounded-3xl p-6 flex items-center justify-between shadow-sm mb-8 relative overflow-hidden">
                 <div className="z-10 w-2/3">
                     <h2 className="text-2xl font-bold text-stone-900 leading-tight mb-4">
                         Order a set With<br/>40% discount
@@ -173,12 +236,12 @@ const HomeView = ({ cart, updateQuantity, navigate }) => {
                     </button>
                 </div>
                 <div className="absolute -right-10 top-1/2 -translate-y-1/2 w-48 h-48 opacity-90">
-                    <FoodImage src={bunsImg} className="w-full h-full object-contain drop-shadow-2xl" alt="Promo" />
+                    <FoodImage src={bunsImg} className="w-full h-full object-contain drop-shadow-2xl" alt="Promo Puff Puff" />
                 </div>
-            </div>
+            </section>
 
             {/* Categories Section */}
-            <div className="mb-8">
+            <section className="mb-8">
                 <div className="flex justify-between items-end mb-4">
                     <h3 className="font-bold text-xl text-stone-900">Category</h3>
                     <button onClick={() => navigate('/menu')} className="text-xs font-bold text-stone-500 hover:text-stone-900">See All</button>
@@ -197,10 +260,10 @@ const HomeView = ({ cart, updateQuantity, navigate }) => {
                         </button>
                     ))}
                 </div>
-            </div>
+            </section>
 
             {/* Popular Food Section */}
-            <div>
+            <section>
                 <div className="flex justify-between items-end mb-4">
                     <h3 className="font-bold text-xl text-stone-900">Popular Food</h3>
                     <button onClick={() => navigate('/menu')} className="text-xs font-bold text-stone-500 hover:text-stone-900">See All</button>
@@ -211,7 +274,7 @@ const HomeView = ({ cart, updateQuantity, navigate }) => {
                         const quantity = cart.find(i => i.id === item.id)?.quantity || 0;
                         
                         return (
-                            <div key={item.id} className={`${bgClass} rounded-[2rem] p-4 flex flex-col relative overflow-hidden group shadow-sm transition-transform hover:scale-[1.02]`}>
+                            <article key={item.id} className={`${bgClass} rounded-[2rem] p-4 flex flex-col relative overflow-hidden group shadow-sm transition-transform hover:scale-[1.02]`}>
                                 <div className="h-32 mb-4 mt-2 w-full flex items-center justify-center relative">
                                     <FoodImage src={item.image} alt={item.name} className="w-28 h-28 object-cover rounded-full shadow-lg group-hover:scale-110 transition-transform duration-500" />
                                 </div>
@@ -224,29 +287,29 @@ const HomeView = ({ cart, updateQuantity, navigate }) => {
                                         {quantity === 0 ? (
                                             <button 
                                                 onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1, item); }}
+                                                aria-label={`Add ${item.name} to cart`}
                                                 className="w-10 h-10 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center shadow-md hover:bg-stone-800 transition-colors"
                                             >
                                                 <ShoppingBag size={16} />
                                             </button>
                                         ) : (
                                             <div className="flex items-center bg-[#1A1A1A] text-white rounded-full p-1 shadow-md">
-                                                <button onClick={() => updateQuantity(item.id, -1)} className="p-1 hover:text-amber-500"><Minus size={14}/></button>
+                                                <button onClick={() => updateQuantity(item.id, -1)} aria-label="Decrease quantity" className="p-1 hover:text-amber-500"><Minus size={14}/></button>
                                                 <span className="text-xs font-bold px-1">{quantity}</span>
-                                                <button onClick={() => updateQuantity(item.id, 1)} className="p-1 hover:text-amber-500"><Plus size={14}/></button>
+                                                <button onClick={() => updateQuantity(item.id, 1)} aria-label="Increase quantity" className="p-1 hover:text-amber-500"><Plus size={14}/></button>
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </article>
                         );
                     })}
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     );
 };
 
-// Dedicated Menu View for QR Code routing
 const MenuView = ({ cart, updateQuantity, navigate }) => {
     const location = useLocation();
     const initialCategory = location.state?.category || "All";
@@ -262,32 +325,39 @@ const MenuView = ({ cart, updateQuantity, navigate }) => {
     }, [activeCategory, searchQuery]);
 
     return (
-        <div className="pb-32 min-h-screen bg-[#F9F8F4] view-fade-in max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl px-6">
-            <div className="flex items-center gap-4 py-4 mb-2">
-                <button onClick={() => navigate(-1)} className="w-10 h-10 bg-white border border-stone-200 rounded-full flex items-center justify-center shadow-sm hover:bg-stone-50">
+        <main className="pb-32 min-h-screen bg-[#F9F8F4] view-fade-in max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl px-6">
+            <SEODirectives 
+                title="Jay's Bistro Menu | Explore our Dishes"
+                description="Browse Jay's Bistro menu. From Party Jollof to Chicken Caesar Salads, order online for delivery or pickup in Makurdi."
+                url={`${SITE_URL}/menu`}
+                isMenu={true}
+            />
+
+            <header className="flex items-center gap-4 py-4 mb-2">
+                <button onClick={() => navigate(-1)} aria-label="Go Back" className="w-10 h-10 bg-white border border-stone-200 rounded-full flex items-center justify-center shadow-sm hover:bg-stone-50">
                     <ChevronLeft size={20} className="text-stone-800" />
                 </button>
                 <h1 className="text-2xl font-bold text-stone-900">Full Menu</h1>
-            </div>
+            </header>
 
             <div className="bg-white rounded-full p-1 pl-4 flex items-center shadow-sm border border-stone-100 mb-6 sticky top-4 z-20">
                 <Search size={20} className="text-stone-400" />
                 <input 
                     id="menu-search"
-                    type="text" 
+                    type="search" 
                     placeholder="Search dishes..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 bg-transparent border-none outline-none px-3 py-3 text-stone-800 font-sans"
                 />
                 {searchQuery && (
-                    <button onClick={() => setSearchQuery('')} className="p-2 text-stone-400 hover:text-stone-800 mr-1">
+                    <button onClick={() => setSearchQuery('')} aria-label="Clear Search" className="p-2 text-stone-400 hover:text-stone-800 mr-1">
                         <X size={16} />
                     </button>
                 )}
             </div>
 
-            <div className="flex overflow-x-auto no-scrollbar gap-3 mb-8 -mx-6 px-6">
+            <nav aria-label="Menu Categories" className="flex overflow-x-auto no-scrollbar gap-3 mb-8 -mx-6 px-6">
                 {CATEGORIES.map(cat => (
                     <button 
                         key={cat.name} 
@@ -301,14 +371,14 @@ const MenuView = ({ cart, updateQuantity, navigate }) => {
                         <span className="text-base">{cat.icon}</span> {cat.name}
                     </button>
                 ))}
-            </div>
+            </nav>
 
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredMenu.length > 0 ? (
                     filteredMenu.map(item => {
                         const quantity = cart.find(i => i.id === item.id)?.quantity || 0;
                         return (
-                            <div key={item.id} className="bg-white rounded-[2rem] p-3 flex flex-col shadow-sm border border-stone-100">
+                            <article key={item.id} className="bg-white rounded-[2rem] p-3 flex flex-col shadow-sm border border-stone-100">
                                 <div className="h-32 w-full bg-stone-50 rounded-2xl mb-3 overflow-hidden">
                                     <FoodImage src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                 </div>
@@ -320,20 +390,21 @@ const MenuView = ({ cart, updateQuantity, navigate }) => {
                                         {quantity === 0 ? (
                                             <button 
                                                 onClick={() => updateQuantity(item.id, 1, item)}
+                                                aria-label={`Add ${item.name}`}
                                                 className="w-8 h-8 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center hover:bg-stone-800 transition-colors"
                                             >
                                                 <Plus size={16} />
                                             </button>
                                         ) : (
                                             <div className="flex items-center bg-[#1A1A1A] text-white rounded-full p-1">
-                                                <button onClick={() => updateQuantity(item.id, -1)} className="p-1"><Minus size={12}/></button>
+                                                <button onClick={() => updateQuantity(item.id, -1)} aria-label="Decrease" className="p-1"><Minus size={12}/></button>
                                                 <span className="text-xs font-bold px-1">{quantity}</span>
-                                                <button onClick={() => updateQuantity(item.id, 1)} className="p-1"><Plus size={12}/></button>
+                                                <button onClick={() => updateQuantity(item.id, 1)} aria-label="Increase" className="p-1"><Plus size={12}/></button>
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </article>
                         )
                     })
                 ) : (
@@ -342,7 +413,7 @@ const MenuView = ({ cart, updateQuantity, navigate }) => {
                     </div>
                 )}
             </div>
-        </div>
+        </main>
     );
 };
 
@@ -470,12 +541,12 @@ const AppContent = () => {
             <Route path="/menu" element={<MenuView cart={cart} updateQuantity={updateQuantity} navigate={navigate} />} />
         </Routes>
 
-        {/* Cleaned Bottom Navigation Bar */}
         <BottomNav />
 
         {/* Floating AI Button at Bottom Right */}
         <button 
             onClick={() => setIsChatOpen(true)} 
+            aria-label="Open AI Concierge"
             className={`fixed bottom-6 right-6 z-[50] p-4 rounded-full shadow-2xl transition-all duration-300 bg-[#1A1A1A] text-white hover:scale-110 hover:bg-stone-800 flex items-center justify-center ${isChatOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100 pointer-events-auto'}`}
         >
             <Bot size={28} className="text-[#E1ECA9]" />
@@ -485,12 +556,12 @@ const AppContent = () => {
         <div className={`fixed inset-0 z-[60] ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
              <div className={`absolute inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity duration-300 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsCartOpen(false)} />
              
-             <div className={`absolute top-0 right-0 h-full w-full max-w-md bg-[#F9F8F4] shadow-2xl transform transition-transform duration-300 flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+             <aside className={`absolute top-0 right-0 h-full w-full max-w-md bg-[#F9F8F4] shadow-2xl transform transition-transform duration-300 flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 
-                <div className="p-6 flex justify-between items-center bg-white rounded-b-3xl shadow-sm z-10">
+                <header className="p-6 flex justify-between items-center bg-white rounded-b-3xl shadow-sm z-10">
                     <h2 className="font-serif text-2xl font-bold text-stone-900">Your Cart</h2>
-                    <button onClick={() => setIsCartOpen(false)} className="w-10 h-10 flex items-center justify-center bg-stone-100 hover:bg-stone-200 rounded-full transition-colors"><X size={18} className="text-stone-600" /></button>
-                </div>
+                    <button onClick={() => setIsCartOpen(false)} aria-label="Close Cart" className="w-10 h-10 flex items-center justify-center bg-stone-100 hover:bg-stone-200 rounded-full transition-colors"><X size={18} className="text-stone-600" /></button>
+                </header>
                 
                 <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
                     {cart.length === 0 ? (
@@ -503,26 +574,26 @@ const AppContent = () => {
                         </div>
                     ) : (
                         cart.map(item => (
-                            <div key={item.id} className="flex gap-4 items-center bg-white p-3 rounded-[2rem] shadow-sm border border-stone-100">
+                            <article key={item.id} className="flex gap-4 items-center bg-white p-3 rounded-[2rem] shadow-sm border border-stone-100">
                                  <FoodImage src={item.image} className="w-20 h-20 object-cover rounded-2xl" alt={item.name} />
                                  <div className="flex-1 min-w-0">
                                     <h4 className="font-serif font-bold text-stone-900 truncate">{item.name}</h4>
                                     <p className="text-stone-500 text-sm font-bold mb-2">{formatPrice(item.price)}</p>
                                     <div className="flex items-center gap-4">
                                         <div className="flex items-center bg-stone-100 rounded-full p-1">
-                                            <button onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm text-stone-900"><Minus size={12}/></button>
+                                            <button onClick={() => updateQuantity(item.id, -1)} aria-label="Decrease quantity" className="w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm text-stone-900"><Minus size={12}/></button>
                                             <span className="w-8 text-center text-sm font-bold text-stone-900">{item.quantity}</span>
-                                            <button onClick={() => updateQuantity(item.id, 1)} className="w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm text-stone-900"><Plus size={12}/></button>
+                                            <button onClick={() => updateQuantity(item.id, 1)} aria-label="Increase quantity" className="w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm text-stone-900"><Plus size={12}/></button>
                                         </div>
                                     </div>
                                  </div>
-                            </div>
+                            </article>
                         ))
                     )}
                 </div>
                 
                 {cart.length > 0 && (
-                    <div className="p-6 bg-white rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+                    <footer className="p-6 bg-white rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
                         <div className="flex justify-between items-center mb-6">
                             <span className="font-sans font-medium text-stone-500">Total Payment</span>
                             <span className="font-sans font-bold text-2xl text-stone-900">{formatPrice(cartTotal)}</span>
@@ -530,18 +601,18 @@ const AppContent = () => {
                         <a href={generateWhatsAppLink(cart)} target="_blank" rel="noopener noreferrer" className="w-full bg-[#1A1A1A] text-white flex items-center justify-center gap-2 py-4 rounded-full font-bold text-lg hover:bg-stone-800 transition-transform active:scale-[0.98] shadow-lg">
                             Checkout Order <Check size={20} strokeWidth={3} />
                         </a>
-                    </div>
+                    </footer>
                 )}
-             </div>
+             </aside>
         </div>
 
-        {/* AI Chatbot Window (Triggered by Floating Icon) */}
+        {/* AI Chatbot Window */}
         {isChatOpen && (
             <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center p-4 pointer-events-none">
                 <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm pointer-events-auto" onClick={() => setIsChatOpen(false)} />
-                <div className="w-full max-w-sm bg-white shadow-2xl rounded-[2rem] overflow-hidden border border-stone-100 flex flex-col h-[500px] z-10 pointer-events-auto animate-[fadeIn_0.2s_ease-out]">
+                <aside className="w-full max-w-sm bg-white shadow-2xl rounded-[2rem] overflow-hidden border border-stone-100 flex flex-col h-[500px] z-10 pointer-events-auto animate-[fadeIn_0.2s_ease-out]">
                      
-                     <div className="p-5 bg-white border-b border-stone-100 flex justify-between items-center">
+                     <header className="p-5 bg-white border-b border-stone-100 flex justify-between items-center">
                          <div className="flex items-center gap-3">
                              <div className="w-10 h-10 bg-[#E1ECA9] rounded-full flex items-center justify-center">
                                  <Bot size={20} className="text-stone-900" />
@@ -551,8 +622,8 @@ const AppContent = () => {
                                  <span className="text-[10px] uppercase font-bold text-green-500 tracking-wider">● Online</span>
                              </div>
                          </div>
-                         <button onClick={() => setIsChatOpen(false)} className="w-8 h-8 flex items-center justify-center bg-stone-100 rounded-full hover:bg-stone-200"><X size={16}/></button>
-                     </div>
+                         <button onClick={() => setIsChatOpen(false)} aria-label="Close Chat" className="w-8 h-8 flex items-center justify-center bg-stone-100 rounded-full hover:bg-stone-200"><X size={16}/></button>
+                     </header>
                      
                      <div className="flex-1 p-5 bg-[#F9F8F4] overflow-y-auto flex flex-col gap-4 no-scrollbar">
                         {chatHistory.length === 0 && (
@@ -576,7 +647,7 @@ const AppContent = () => {
                          <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleChatSend()} placeholder="Ask something..." className="flex-1 bg-stone-100 px-4 py-3 rounded-full text-sm outline-none font-sans" />
                          <button onClick={handleChatSend} disabled={!chatInput.trim() || isChatTyping} className="bg-[#1A1A1A] text-white rounded-full disabled:opacity-50 flex items-center justify-center w-12 h-12 shadow-md"><Send size={18} /></button>
                      </div>
-                </div>
+                </aside>
             </div>
         )}
     </div>
