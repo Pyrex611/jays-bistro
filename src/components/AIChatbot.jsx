@@ -1,174 +1,223 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, X, Send } from 'lucide-react';
-import { MENU_ITEMS } from '../data/menu.js';
+import { useStore } from '../context/StoreContext.jsx';
+import { Bot, X, Send, Sparkles } from 'lucide-react';
+import { CHATBOT_API_KEY } from '../data/menu.js';
 
-const AIChatbot = ({ cart, setCart, isChatOpen, setIsChatOpen, CHATBOT_API_KEY, onCartUpdated }) => {
-    const [chatHistory, setChatHistory] = useState([]);
-    const [chatInput, setChatInput] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
-    const messagesEndRef = useRef(null);
+const AIChatbot = () => {
+  const { isChatOpen, setIsChatOpen, products, cart, updateQuantity, addToCart } = useStore();
+  const [chatHistory, setChatHistory] = useState([
+    {
+      role: 'model',
+      text: "Hello! I am Jay's Virtual Concierge. I can suggest spice pairings, answer questions, or add dishes directly to your tray!"
+    }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [chatHistory, isTyping]);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatHistory, isTyping]);
 
-    const handleChatSend = async () => {
-        if (!chatInput.trim()) return;
-        const userMsg = { role: 'user', text: chatInput };
-        
-        setChatHistory(prev => [...prev, userMsg]);
-        setChatInput('');
-        setIsTyping(true);
-    
-        if (!CHATBOT_API_KEY || CHATBOT_API_KEY.includes('PLACEHOLDER')) {
-            setTimeout(() => {
-                setChatHistory(prev => [...prev, { 
-                    role: 'model', 
-                    text: "I'm currently in demo mode. Add your Gemini API key in the configuration to activate my brain. I recommend the Party Jollof Rice!" 
-                }]);
-                setIsTyping(false);
-            }, 1500);
-            return;
+  const handleSend = async () => {
+    if (!chatInput.trim() || isTyping) return;
+    const userText = chatInput.trim();
+    setChatHistory(prev => [...prev, { role: 'user', text: userText }]);
+    setChatInput('');
+    setIsTyping(true);
+
+    // Demo Mode Check if API key is not configured
+    if (!CHATBOT_API_KEY || CHATBOT_API_KEY.includes('PLACEHOLDER')) {
+      setTimeout(() => {
+        let reply = "I highly recommend our wood-smoked Party Jollof Rice or the Basmati Fried Rice with grilled chicken!";
+        if (userText.toLowerCase().includes('add') || userText.toLowerCase().includes('jollof')) {
+          addToCart(1); // Auto-add Jollof
+          reply = "I've added 1x Party Jollof Rice (₦1,500) to your tray for you!";
+        } else if (userText.toLowerCase().includes('tea') || userText.toLowerCase().includes('arabian')) {
+          addToCart(3);
+          reply = "I've added our signature Classic Arabian Blend (₦3,000) to your tray!";
         }
-        
-        try {
-            const systemPrompt = `You are Jay's Bistro's virtual concierge.
-            Your job is to assist customers with their orders, answer menu questions, and manage their cart. Keep responses short, elegant and very friendly.
-            Menu:
-            ${MENU_ITEMS.map(i => `ID ${i.id}: ${i.name} (₦${i.price})`).join('\n')}
-            
-            Current Cart:
-            ${cart.length > 0 ? cart.map(i => `ID ${i.id}: ${i.name} (x${i.quantity})`).join('\n') : "Empty"}
-            
-            You MUST respond ONLY with a JSON object format. Do not use markdown tags like \`\`\`json. Only pure JSON string.
-            {
-              "message": "Your conversational reply here",
-              "actions": [{"action": "add" | "remove", "id": number, "quantity": number}]
-            }
-            If no cart changes are needed, actions should be [].`;
-    
-            const contents = chatHistory.map(msg => ({
-                role: msg.role === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.role === 'model' ? JSON.stringify({ message: msg.text, actions: [] }) : msg.text }]
-            }));
-            
-            contents.push({ role: 'user', parts: [{ text: userMsg.text }] });
-    
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${CHATBOT_API_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    contents,
-                    generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
-                })
-            });
-    
-            if (!response.ok) throw new Error(`API Error: ${response.status}`);
-            const data = await response.json();
-            
-            const rawText = data.candidates[0].content.parts[0].text;
-            const cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-            const parsed = JSON.parse(cleanText);
-    
-            if (parsed.actions && parsed.actions.length > 0) {
-                setCart(prevCart => {
-                    let newCart = [...prevCart];
-                    parsed.actions.forEach(action => {
-                        const item = MENU_ITEMS.find(i => i.id === action.id);
-                        if (!item) return;
-                        
-                        const existingIdx = newCart.findIndex(i => i.id === item.id);
-                        if (action.action === 'add') {
-                            if (existingIdx >= 0) {
-                                newCart[existingIdx].quantity += action.quantity;
-                            } else {
-                                newCart.push({ ...item, quantity: action.quantity });
-                            }
-                        } else if (action.action === 'remove') {
-                            if (existingIdx >= 0) {
-                                newCart[existingIdx].quantity -= action.quantity;
-                                if (newCart[existingIdx].quantity <= 0) {
-                                    newCart.splice(existingIdx, 1);
-                                }
-                            }
-                        }
-                    });
-                    return newCart;
-                });
-                onCartUpdated(); 
-            }
-    
-            setChatHistory(prev => [...prev, { role: 'model', text: parsed.message }]);
-    
-        } catch (error) {
-            console.error("Chat API Error:", error);
-            setChatHistory(prev => [...prev, { role: 'model', text: "Sorry, I'm having trouble connecting to my brain right now. Please try again." }]);
-        } finally {
-            setIsTyping(false);
-        }
-    };
+        setChatHistory(prev => [...prev, { role: 'model', text: reply }]);
+        setIsTyping(false);
+      }, 900);
+      return;
+    }
 
-    return (
-        <>
-            <button onClick={() => setIsChatOpen(!isChatOpen)} className={`fixed bottom-6 right-6 z-[70] p-4 rounded-full shadow-2xl transition-all duration-300 ${isChatOpen ? 'bg-[var(--color-text)] text-[var(--color-bg)] scale-90' : 'bg-accent text-[#1A1A1A] hover:bg-[var(--color-text)] hover:text-[var(--color-bg)] hover:scale-110'}`}>
-                {isChatOpen ? <X size={24} /> : <Bot size={28} />}
-            </button>
+    try {
+      const systemPrompt = `You are Jay's Bistro's virtual concierge in Makurdi, Nigeria.
+Assist customers with their orders, dietary queries, and add/remove dishes to their cart.
+Menu Catalog:
+${products.map(p => `ID ${p.id}: ${p.name} (₦${p.price}, ${p.category}) - ${p.description}`).join('\n')}
 
-            {isChatOpen && (
-                <div className="fixed bottom-24 right-6 z-[70] w-[90vw] max-w-sm bg-[var(--color-bg-secondary)] shadow-2xl rounded-2xl overflow-hidden border border-[var(--color-border)] flex flex-col animate-[fadeIn_0.3s_ease-out]">
-                     
-                     <div className="p-4 flex justify-between items-center bg-[var(--color-text)] text-[var(--color-bg)]">
-                         <div className="flex items-center gap-2">
-                             <Bot size={20} className="text-accent" />
-                             <span className="font-serif italic font-bold text-lg">Jay's Concierge</span>
-                         </div>
-                         <span className="text-[9px] uppercase tracking-widest bg-green-500/20 text-green-400 px-2 py-1 rounded-full animate-pulse border border-green-500/30">Online</span>
-                     </div>
-                     
-                     <div className="h-72 p-4 bg-[var(--color-bg)] overflow-y-auto custom-scrollbar flex flex-col">
-                            {chatHistory.length === 0 && (
-                                <div className="text-[var(--color-text-secondary)] text-center text-xs mt-6 px-4">
-                                    Welcome! I can help you find dishes, build your order, or answer any questions about our menu.
-                                </div>
-                            )}
-                            {chatHistory.map((msg, idx) => (
-                                <div key={idx} className={`flex w-full mb-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[85%] p-3 text-sm leading-relaxed rounded-2xl ${msg.role === 'user' ? 'bg-accent text-[#1A1A1A] rounded-br-sm' : 'bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text)] rounded-tl-sm shadow-sm'}`}>
-                                        {msg.text}
-                                    </div>
-                                </div>
-                            ))}
-                            {isTyping && (
-                                <div className="flex w-full mb-4 justify-start">
-                                    <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text-secondary)] p-3 text-xs rounded-2xl rounded-tl-sm shadow-sm flex gap-1 items-center">
-                                        <span className="animate-bounce">●</span><span className="animate-bounce" style={{animationDelay: '0.2s'}}>●</span><span className="animate-bounce" style={{animationDelay: '0.4s'}}>●</span>
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={messagesEndRef} />
-                     </div>
-                     
-                     <div className="p-3 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border)] flex gap-2 items-center">
-                         <input 
-                            value={chatInput} 
-                            onChange={(e) => setChatInput(e.target.value)} 
-                            onKeyDown={(e) => e.key === 'Enter' && handleChatSend()} 
-                            placeholder="E.g. Add 2 Jollof Rice..." 
-                            className="flex-1 bg-[var(--color-bg)] px-4 py-2 rounded-full text-sm outline-none text-[var(--color-text)] border border-[var(--color-border)] focus:border-accent transition-colors placeholder:text-[var(--color-text-secondary)]/50" 
-                         />
-                         <button 
-                            onClick={handleChatSend} 
-                            disabled={!chatInput.trim() || isTyping}
-                            className="p-2 bg-accent text-[#1A1A1A] rounded-full hover:bg-[var(--color-text)] hover:text-[var(--color-bg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                         >
-                             <Send size={18} className="ml-1" />
-                         </button>
-                     </div>
+Current Cart:
+${cart.length > 0 ? cart.map(i => `ID ${i.id}: ${i.name} (x${i.quantity})`).join('\n') : "Tray is empty"}
+
+YOU MUST RESPOND ONLY with valid JSON (no markdown ticks):
+{
+  "message": "Your polite, warm reply here",
+  "actions": [{"action": "add" | "remove", "id": number, "quantity": number}]
+}`;
+
+      const contents = chatHistory.map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }]
+      }));
+      contents.push({ role: 'user', parts: [{ text: userText }] });
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${CHATBOT_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents,
+          generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
+        })
+      });
+
+      if (!res.ok) throw new Error(`API Error: ${res.status}`);
+      const data = await res.json();
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+      const clean = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(clean);
+
+      if (parsed.actions && Array.isArray(parsed.actions)) {
+        parsed.actions.forEach(act => {
+          if (act.action === 'add') {
+            updateQuantity(act.id, act.quantity || 1);
+          } else if (act.action === 'remove') {
+            updateQuantity(act.id, -(act.quantity || 1));
+          }
+        });
+      }
+
+      setChatHistory(prev => [...prev, { role: 'model', text: parsed.message || "I've updated that for you!" }]);
+    } catch (e) {
+      console.error("Chat error:", e);
+      setChatHistory(prev => [...prev, { role: 'model', text: "I'm having a brief connection hitch, but our kitchen is fully ready for your order!" }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  return (
+    <>
+      {/* Floating Toggle Icon */}
+      <button
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        aria-label="Open AI Concierge"
+        className="fixed bottom-5 right-5 z-40 p-3.5 rounded-full bg-stone-900 text-white shadow-2xl hover:bg-caramel-600 transition-all active:scale-95 flex items-center justify-center border-2 border-caramel-400"
+      >
+        {isChatOpen ? <X size={22} /> : <Bot size={22} className="text-caramel-300" />}
+      </button>
+
+      {/* Slide-Up Chat Window */}
+      {isChatOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-3 pointer-events-none animate-[fadeIn_0.2s_ease-out]">
+          <div
+            onClick={() => setIsChatOpen(false)}
+            className="absolute inset-0 bg-black/40 backdrop-blur-xs pointer-events-auto"
+          />
+
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-2xl border border-stone-200 flex flex-col h-[480px] pointer-events-auto"
+          >
+            {/* Header */}
+            <div className="p-4 bg-stone-900 text-white flex justify-between items-center">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-caramel-500/20 text-caramel-400 flex items-center justify-center border border-caramel-500/40">
+                  <Bot size={18} />
                 </div>
-            )}
-        </>
-    );
+                <div>
+                  <h3 className="font-bold text-sm leading-none">Jay's Concierge</h3>
+                  <span className="text-[9px] uppercase tracking-wider text-caramel-300 font-semibold">
+                    AI Food Assistant
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsChatOpen(false)}
+                className="text-stone-400 hover:text-white transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Quick Suggestions */}
+            <div className="px-3 py-2 bg-stone-100 border-b border-stone-200 flex gap-1.5 overflow-x-auto scrollbar-hide">
+              <button
+                onClick={() => setChatInput("Add 1 Party Jollof Rice")}
+                className="text-[10px] bg-white border border-stone-300 px-2.5 py-1 rounded-full text-stone-700 whitespace-nowrap hover:bg-caramel-50 hover:text-caramel-900"
+              >
+                + Party Jollof
+              </button>
+              <button
+                onClick={() => setChatInput("What drinks pair well with Isi-Ewu?")}
+                className="text-[10px] bg-white border border-stone-300 px-2.5 py-1 rounded-full text-stone-700 whitespace-nowrap hover:bg-caramel-50 hover:text-caramel-900"
+              >
+                Pairing for Isi-Ewu
+              </button>
+              <button
+                onClick={() => setChatInput("Recommend vegetarian options")}
+                className="text-[10px] bg-white border border-stone-300 px-2.5 py-1 rounded-full text-stone-700 whitespace-nowrap hover:bg-caramel-50 hover:text-caramel-900"
+              >
+                Veggie food
+              </button>
+            </div>
+
+            {/* Message Thread */}
+            <div className="flex-1 p-4 bg-stone-50 overflow-y-auto space-y-3 text-xs scrollbar-hide">
+              {chatHistory.map((m, idx) => (
+                <div
+                  key={idx}
+                  className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[82%] p-3 rounded-2xl leading-relaxed ${
+                      m.role === 'user'
+                        ? 'bg-caramel-600 text-white rounded-br-none'
+                        : 'bg-white text-stone-800 border border-stone-200 shadow-sm rounded-bl-none'
+                    }`}
+                  >
+                    {m.text}
+                  </div>
+                </div>
+              ))}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-stone-200 text-stone-400 p-2.5 rounded-2xl text-[11px] flex gap-1 items-center shadow-sm">
+                    <span className="animate-bounce">●</span>
+                    <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>●</span>
+                    <span className="animate-bounce" style={{ animationDelay: '0.4s' }}>●</span>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Bar */}
+            <div className="p-2.5 bg-white border-t border-stone-200 flex gap-2">
+              <input
+                type="text"
+                placeholder="Ask or say: 'Add 2 Basmati Rice'..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                className="flex-1 bg-stone-100 px-3.5 py-2 text-xs rounded-full outline-none focus:ring-1 focus:ring-caramel-500"
+              />
+              <button
+                onClick={handleSend}
+                disabled={!chatInput.trim() || isTyping}
+                className="p-2 bg-stone-900 text-white rounded-full hover:bg-caramel-600 transition disabled:opacity-40"
+              >
+                <Send size={15} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 };
 
 export default AIChatbot;

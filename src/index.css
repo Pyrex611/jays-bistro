@@ -1,3 +1,67 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #e7e5e4;
+  color: #1c1917;
+  overflow-x: hidden;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Bonti Custom Shadows */
+.card-shadow {
+  box-shadow:
+    0 12px 24px -10px rgba(78, 47, 25, 0.38),
+    0 4px 10px -4px rgba(78, 47, 25, 0.22);
+}
+
+.card-shadow-hover:hover {
+  box-shadow:
+    0 18px 32px -12px rgba(78, 47, 25, 0.5),
+    0 6px 14px -4px rgba(78, 47, 25, 0.28);
+}
+
+.pearl-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.pearl-card-hover:hover {
+  transform: translateY(-2px);
+}
+
+.frame-shadow {
+  box-shadow:
+    0 0 0 1px rgba(120, 80, 50, 0.08),
+    0 20px 50px -20px rgba(78, 47, 25, 0.25),
+    0 8px 20px -10px rgba(78, 47, 25, 0.15);
+}
+
+/* Drawer & Modal Transitions */
+.drawer-backdrop {
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.drawer-panel {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite ease-in-out;
+}
