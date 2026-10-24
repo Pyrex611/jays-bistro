@@ -1,4 +1,3 @@
-// --- Image Assets from Repository ---
 import isiEwuImg from '../assets/images/Isi-Ewu.jpg';
 import arabianImg from '../assets/images/classic-arabian.jpg';
 import ceasarImg from '../assets/images/IMG_2113.PNG';
@@ -12,37 +11,51 @@ export const WHATSAPP_NUMBER = "2348062624447";
 export const CHATBOT_API_KEY = "PLACEHOLDER_GEMINI_API_KEY_A1B2C3D4E5F6G7H8I9";
 
 export const CATEGORIES = [
-  { key: "All", label: "All", icon: "🍽️" },
-  { key: "Meals", label: "Meals", icon: "🍛" },
-  { key: "Beverages", label: "Beverages", icon: "🥤" },
-  { key: "Protein", label: "Protein", icon: "🥩" },
-  { key: "Starters", label: "Starters", icon: "🥟" },
-  { key: "Bites", label: "Bites", icon: "🍔" },
-  { key: "Soups", label: "Soups", icon: "🥣" },
+  { key: "All", label: "All" },
+  { key: "Meals", label: "Meals" },
+  { key: "Beverages", label: "Beverages" },
+  { key: "Protein", label: "Protein" },
+  { key: "Starters", label: "Starters" },
+  { key: "Bites", label: "Bites" },
+  { key: "Soups", label: "Soups" },
 ];
 
 export const INITIAL_MENU_ITEMS = [
-  /* HERO SPOTLIGHT DISHES */
+  /* ============================================================
+     MAIN HERO CAROUSEL SPECIALS (Defaults: Shawarma, Wings, Basmati, Jollof, Isi-Ewu)
+     ============================================================ */
   {
-    id: 36,
-    name: "Basmati Fried Rice",
-    tagline: "Premium aromatic stir-fry",
-    category: "Meals",
+    id: 21,
+    name: "Chicken Shawarma (SS)",
+    tagline: "Juicy wrap with single sausage & garlic glaze",
+    category: "Bites",
     price: 3500,
-    description: "Premium long-grain Basmati stir-fried with farm-fresh garden peas, sweet corn, diced carrots, liver, and rich herb seasoning.",
-    image: basmatiImg,
+    description: "Thinly sliced grilled chicken fillet wrapped in freshly baked flatbread with creamy garlic sauce, crisp cabbage, and a smoky sausage.",
+    image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&q=80&w=800",
     isHero: true,
     isDualGrid: null,
     featured: true
   },
   {
-    id: 3,
-    name: "Classic Arabian Blend",
-    tagline: "Heritage cardamom & rose infusion",
-    category: "Beverages",
-    price: 3000,
-    description: "Our signature 1L heritage spice infusion slowly steeped with crushed green cardamom, saffron threads, dried rosewater petals, and organic honey.",
-    image: arabianImg,
+    id: 51,
+    name: "Bistro Chicken Wings",
+    tagline: "Succulent grilled wings in spiced honey glaze",
+    category: "Protein",
+    price: 5000,
+    description: "Jumbo chicken wings marinated in scotch bonnet, ginger, garlic, and wild honey, fire-grilled to crispy caramelized perfection.",
+    image: "https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&q=80&w=800",
+    isHero: true,
+    isDualGrid: null,
+    featured: true
+  },
+  {
+    id: 36,
+    name: "Basmati Fried Rice",
+    tagline: "Premium aromatic stir-fry with liver & sweet peas",
+    category: "Meals",
+    price: 3500,
+    description: "Premium long-grain Basmati stir-fried with farm-fresh garden peas, sweet corn, diced carrots, seasoned liver, and rich herb broth.",
+    image: basmatiImg,
     isHero: true,
     isDualGrid: null,
     featured: true
@@ -50,10 +63,10 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 1,
     name: "Party Jollof Rice",
-    tagline: "Firewood smoky Lagos recipe",
+    tagline: "Firewood smoky Lagos recipe with seasoned beef",
     category: "Meals",
     price: 1500,
-    description: "Authentic wood-smoked party jollof rice simmered in rich tomato-habanero reduction, served with seasoned fried beef.",
+    description: "Authentic wood-smoked party jollof rice simmered in rich tomato-habanero reduction, served with succulent seasoned beef.",
     image: jollofImg,
     isHero: true,
     isDualGrid: null,
@@ -62,7 +75,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 2,
     name: "Isi-Ewu Royal",
-    tagline: "Traditional goat head delicacy",
+    tagline: "Traditional goat head delicacy with utazi leaves",
     category: "Protein",
     price: 6000,
     description: "Tender goat head slow-cooked and simmered in a spiced potash, palm oil, and calabash nutmeg sauce, garnished with fresh utazi leaves.",
@@ -72,46 +85,41 @@ export const INITIAL_MENU_ITEMS = [
     featured: true
   },
 
-  /* DUAL SPOTLIGHT CARDS */
+  /* ============================================================
+     SUB-HERO DUAL SPOTLIGHT (Defaults: Classic Arabian Blend & Double Root)
+     ============================================================ */
   {
-    id: 21,
-    name: "Chicken Shawarma (SS)",
-    tagline: "Juicy wrap with single sausage",
-    category: "Bites",
-    price: 3500,
-    description: "Thinly sliced grilled chicken fillet wrapped in freshly baked pita with garlic mayo cream, cabbage crunch, and a smoky sausage.",
-    image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&q=80&w=800",
+    id: 3,
+    name: "Classic Arabian Blend",
+    tagline: "Heritage cardamom & rosewater infusion (1L)",
+    category: "Beverages",
+    price: 3000,
+    description: "Our signature 1L heritage spice infusion slowly steeped with crushed green cardamom, saffron threads, dried rosewater petals, and organic honey.",
+    image: arabianImg,
     isHero: false,
     isDualGrid: "left",
     featured: true
   },
   {
-    id: 51,
-    name: "Bistro Chicken Wings",
-    tagline: "Succulent grilled wings in bistro glaze",
-    category: "Protein",
-    price: 5000,
-    description: "Six jumbo chicken wings marinated in scotch bonnet, ginger, garlic, and wild honey, fire-grilled to crispy caramelized perfection.",
-    image: "https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&q=80&w=800",
+    id: 4,
+    name: "Double Root (1L)",
+    tagline: "Vitality herbal blend for strength & wellness",
+    category: "Beverages",
+    price: 3500,
+    description: "Potent traditional root tonic brewed with ginger root, ginseng extract, and natural botanical bark.",
+    image: "https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&q=80&w=800",
     isHero: false,
     isDualGrid: "right",
     featured: true
   },
 
-  /* REMAINING CATALOG ITEMS (ALL 64 COMPLETE) */
-  {
-    id: 4,
-    name: "Double Root (1L)",
-    tagline: "Vitality herbal blend",
-    category: "Beverages",
-    price: 3500,
-    description: "Potent traditional root tonic brewed with ginger root, ginseng extract, and natural botanical bark.",
-    image: "https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&q=80&w=800"
-  },
+  /* ============================================================
+     CATALOG ITEMS (Complete and Unabridged)
+     ============================================================ */
   {
     id: 5,
     name: "Ginger, Lemon & Cinnamon Tea",
-    tagline: "Zesty & soothing",
+    tagline: "Zesty, spicy, and soothing",
     category: "Beverages",
     price: 2000,
     description: "Hot comforting aromatic tea infused with crushed ginger, fresh lemon slices, and Ceylon cinnamon.",
@@ -120,7 +128,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 6,
     name: "Arabian Tea (1/2L)",
-    tagline: "Smaller portion signature tea",
+    tagline: "Half-liter signature spiced tea",
     category: "Beverages",
     price: 1500,
     description: "A half-liter serving of our famous aromatic spiced blend, lightly sweetened with honey.",
@@ -129,7 +137,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 7,
     name: "Arabian Double",
-    tagline: "Extra strength spiced blend",
+    tagline: "Extra strength spiced tea",
     category: "Beverages",
     price: 2000,
     description: "Double-steeped Arabian spice blend crafted for tea enthusiasts seeking bold herbal warmth.",
@@ -138,7 +146,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 8,
     name: "Pure Honey (1L)",
-    tagline: "100% Raw unprocessed honey",
+    tagline: "Raw organic Makurdi honey",
     category: "Beverages",
     price: 10000,
     description: "Directly harvested from Makurdi bee farms, unfiltered and naturally sweet.",
@@ -183,7 +191,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 13,
     name: "Spring Roll",
-    tagline: "Crunchy vegetable & minced beef roll",
+    tagline: "Crunchy vegetable & beef roll",
     category: "Starters",
     price: 3000,
     description: "Golden fried rolls filled with julienned cabbage, carrots, minced beef, and sweet soy notes.",
@@ -219,7 +227,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 17,
     name: "Palmia",
-    tagline: "Heart-shaped caramelized puff pastry",
+    tagline: "Caramelized heart-shaped puff pastry",
     category: "Bites",
     price: 500,
     description: "French style elephant-ear pastry baked till golden and crunchy with caramelized sugar.",
@@ -246,7 +254,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 20,
     name: "12' Family Pizza",
-    tagline: "Generous pizza with extra cheese pull",
+    tagline: "Large pizza with double cheese pull",
     category: "Bites",
     price: 15000,
     description: "Large 12-inch pizza loaded with pepperoni, grilled chicken slices, black olives, and double mozzarella.",
@@ -282,7 +290,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 25,
     name: "Chicken Caesar Salad",
-    tagline: "Crisp romaine with grilled chicken & parmesan",
+    tagline: "Crisp romaine with grilled chicken & croutons",
     category: "Bites",
     price: 7000,
     description: "Crispy salad greens tossed with creamy Caesar dressing, garlic croutons, and grilled chicken breast.",
@@ -291,7 +299,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 26,
     name: "Creamy Coleslaw",
-    tagline: "Shredded cabbage and carrots",
+    tagline: "Shredded cabbage and carrots in dressing",
     category: "Bites",
     price: 1000,
     description: "Crunchy green cabbage, purple cabbage, and sweet carrots tossed in house cream dressing.",
@@ -300,7 +308,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 27,
     name: "Garden Vegetable Salad",
-    tagline: "Fresh harvest greens & vinaigrette",
+    tagline: "Fresh harvest greens with vinaigrette",
     category: "Bites",
     price: 6000,
     description: "Cucumbers, cherry tomatoes, sweet bell peppers, red onions, and sweet corn on crisp lettuce.",
@@ -318,7 +326,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 29,
     name: "Classic Noodles",
-    tagline: "Stir-fried noodles with herbs",
+    tagline: "Stir-fried noodles with scallions",
     category: "Meals",
     price: 2000,
     description: "Noodles flash-cooked in rich broth with scallions and chili seasoning.",
@@ -327,7 +335,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 30,
     name: "Garnished Noodles",
-    tagline: "Noodles with beef, sausage & veggies",
+    tagline: "Noodles with beef sausages & vegetables",
     category: "Meals",
     price: 3500,
     description: "Indomie noodles stir-fried with diced hotdog sausages, carrots, sweet peas, and fried egg.",
@@ -336,7 +344,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 31,
     name: "Nigerian Fried Rice",
-    tagline: "Classic party fried rice",
+    tagline: "Classic party fried rice with vegetables",
     category: "Meals",
     price: 1500,
     description: "Seasoned rice tossed with curry, thyme, beef liver bits, carrots, and sweet green peas.",
@@ -345,7 +353,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 32,
     name: "Coconut Rice",
-    tagline: "Slow-cooked in fresh coconut milk",
+    tagline: "Rice slow-cooked in fresh coconut milk",
     category: "Meals",
     price: 2000,
     description: "Aromatic white rice simmered in freshly extracted rich coconut milk with dry fish flakes and chili.",
@@ -354,7 +362,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 33,
     name: "Local Ofada Rice",
-    tagline: "Aromatic unpolished rice",
+    tagline: "Indigenous unpolished rice with ayamase",
     category: "Meals",
     price: 3000,
     description: "Indigenous fermented grain rice celebrated for its earthy fragrance, served with Ayamase relish.",
@@ -363,7 +371,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 34,
     name: "Honey Beans (Ewa)",
-    tagline: "Sweet tender brown beans",
+    tagline: "Soft honey beans in palm oil sauce",
     category: "Meals",
     price: 1500,
     description: "Slow-cooked honey beans stewed in spicy red palm oil reduction.",
@@ -372,7 +380,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 35,
     name: "Fried Sweet Plantain (Dodo)",
-    tagline: "Golden caramelized plantain slices",
+    tagline: "Caramelized ripe plantain slices",
     category: "Meals",
     price: 1000,
     description: "Ripe plantains sliced and fried to a deep golden, caramelized sweetness.",
@@ -381,7 +389,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 37,
     name: "Spicy Bistro Spaghetti",
-    tagline: "Pasta in spicy tomato & beef sauce",
+    tagline: "Spaghetti in spicy beef & pepper sauce",
     category: "Meals",
     price: 3500,
     description: "Italian spaghetti tossed in a fiery Nigerian pepper puree with minced beef and fresh basil.",
@@ -408,7 +416,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 40,
     name: "Asaro (Porridge Yam)",
-    tagline: "Mashed yam in rich palm oil sauce",
+    tagline: "Mashed yam simmered with palm oil & fish",
     category: "Meals",
     price: 3000,
     description: "Yam tubers boiled and simmered in palm oil with dried smoked fish, crayfish, and aromatic spinach.",
@@ -480,7 +488,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 48,
     name: "Boiled Yam & Egg Sauce",
-    tagline: "Steamed yam with spicy egg sauce",
+    tagline: "Steamed yam with spicy egg relish",
     category: "Meals",
     price: 3000,
     description: "Fluffy white yam slices accompanied by scrambled eggs in sautéed tomato and habanero relish.",
@@ -489,7 +497,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 49,
     name: "Fresh Farm Eggs (2)",
-    tagline: "Fried or boiled eggs",
+    tagline: "Two fried or boiled eggs",
     category: "Meals",
     price: 400,
     description: "Two farm-fresh eggs prepared sunny side up, boiled, or scrambled with onions.",
@@ -498,7 +506,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 50,
     name: "Smoky Goat Pepper Soup",
-    tagline: "Hot aromatic pepper broth",
+    tagline: "Hot aromatic pepper broth with tender goat",
     category: "Protein",
     price: 3000,
     description: "Rich herbal broth infused with alligator pepper, uziza seeds, and tender chunks of goat meat.",
@@ -516,7 +524,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 53,
     name: "Portion O' Chicken",
-    tagline: "Quarter grilled or fried chicken",
+    tagline: "Generous quarter fried or grilled chicken",
     category: "Protein",
     price: 6000,
     description: "A large portion of succulent chicken breast or thigh, spiced and grilled to perfection.",
@@ -552,7 +560,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 57,
     name: "Golden Fried Turkey",
-    tagline: "Huge crispy seasoned turkey wing",
+    tagline: "Generous seasoned turkey wing",
     category: "Protein",
     price: 6000,
     description: "Generous meaty turkey wing seasoned in garlic, ginger, and bouillon, fried crispy.",
@@ -561,7 +569,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 58,
     name: "Cat Fish Cutlet",
-    tagline: "Fresh catfish slice in sauce",
+    tagline: "Fresh catfish slice in aromatic sauce",
     category: "Protein",
     price: 1000,
     description: "Fresh Benue River catfish cutlet steamed in spicy aromatic sauce.",
@@ -606,7 +614,7 @@ export const INITIAL_MENU_ITEMS = [
   {
     id: 63,
     name: "Vegetable Soup (Edikang Ikong)",
-    tagline: "Waterleaf & fluted pumpkin soup",
+    tagline: "Nutritious ugu and waterleaf soup",
     category: "Soups",
     price: 1500,
     description: "Nutritious combination of fresh ugu and waterleaf leaves simmered with dried fish and periwinkles.",

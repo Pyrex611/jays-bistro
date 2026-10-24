@@ -7,6 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Warm Caramel Palette (Firewood, roasting, savory warmth)
         caramel: {
           50:  '#FBF4EC',
           100: '#F5E6D0',
@@ -19,6 +20,20 @@ export default {
           800: '#6B4122',
           900: '#4E2F19',
         },
+        // Botanical Bistro Green Palette (Logo herb & tea identity)
+        bistro: {
+          50:  '#F2F7F0',
+          100: '#E1EEDD',
+          200: '#C3DCBA',
+          300: '#9FC593',
+          400: '#73A766',
+          500: '#4E8740', // Core Bistro Green
+          600: '#3D6D32',
+          700: '#2F5326', // Deep Forest Herb
+          800: '#233C1D',
+          900: '#172714',
+        },
+        // Pearl Charcoal & Neutral Palette
         pearl: {
           50:  '#F4EDE6',
           100: '#E5D3C2',
@@ -31,10 +46,6 @@ export default {
           800: '#2C1A10',
           900: '#1E110A',
         },
-        stone: {
-          850: '#201E1D',
-          950: '#121110',
-        }
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],

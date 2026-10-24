@@ -10,7 +10,6 @@ const HeroCarousel = () => {
   const trackRef = useRef(null);
   const isInteractingRef = useRef(false);
 
-  // Auto-scroll Timer
   useEffect(() => {
     if (!heroProducts || heroProducts.length === 0) return;
 
@@ -65,8 +64,9 @@ const HeroCarousel = () => {
         <p className="text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">
           Welcome, Foodie.
         </p>
-        <span className="text-[10px] font-bold text-caramel-600 bg-caramel-100 px-2 py-0.5 rounded-full">
-          Featured Specials
+        <span className="text-[10px] font-bold text-bistro-700 bg-bistro-100 border border-bistro-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-bistro-500 animate-pulse"></span>
+          Hero Specials
         </span>
       </div>
 
@@ -86,7 +86,7 @@ const HeroCarousel = () => {
             data-slide
             onClick={() => setSelectedProductId(p.id)}
             className="relative flex-shrink-0 w-[59%] h-full snap-center cursor-pointer rounded-2xl overflow-hidden
-                       bg-gradient-to-br from-caramel-300 to-caramel-500
+                       bg-gradient-to-br from-caramel-300 via-caramel-400 to-caramel-500
                        card-shadow card-shadow-hover transition-all duration-300"
           >
             <div className="flex items-stretch h-full p-2 gap-2.5">
@@ -95,7 +95,7 @@ const HeroCarousel = () => {
               </div>
               <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                 <div className="min-w-0">
-                  <h2 className="text-xs font-black uppercase tracking-tight text-caramel-900 leading-tight truncate">
+                  <h2 className="text-xs font-black uppercase tracking-tight text-caramel-950 leading-tight truncate">
                     {p.name}
                   </h2>
                   <p className="text-[9.5px] text-caramel-900/80 leading-tight line-clamp-2 mt-0.5 font-medium">
@@ -111,7 +111,7 @@ const HeroCarousel = () => {
         ))}
       </div>
 
-      {/* Dots Indicator */}
+      {/* Slide Dots Indicator */}
       <div className="flex justify-center gap-1.5 mt-1">
         {heroProducts.map((_, i) => (
           <button

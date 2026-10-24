@@ -7,11 +7,11 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-200 transition-all">
-      <div className="w-full flex justify-between items-center px-4 py-2">
+      <div className="w-full flex justify-between items-center px-4 py-2.5">
         
-        {/* Brand / Logo */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-caramel-300 shadow-sm flex items-center justify-center bg-caramel-100 flex-shrink-0">
+        {/* Brand / Logo (BISTRO tag removed cleanly) */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full overflow-hidden border border-bistro-300 shadow-sm flex items-center justify-center bg-bistro-50 flex-shrink-0">
             <img 
               src="/jsys_logo.jpg" 
               alt="Jay's Bistro" 
@@ -23,40 +23,39 @@ const Header = () => {
             />
           </div>
           <div>
-            <div className="flex items-center gap-1">
-              <span className="font-extrabold text-base tracking-tight text-stone-900 leading-none">Jay's Bistro</span>
-              <span className="text-[9px] uppercase font-black tracking-widest px-1.5 py-0.5 rounded bg-caramel-100 text-caramel-800">BISTRO</span>
-            </div>
-            <p className="text-[10px] text-stone-500 font-medium flex items-center gap-0.5 mt-0.5">
-              <MapPin size={10} className="text-caramel-600 flex-shrink-0" />
+            <span className="font-extrabold text-base tracking-tight text-stone-900 leading-none">
+              Jay's Bistro
+            </span>
+            <p className="text-[10px] text-stone-500 font-medium flex items-center gap-1 mt-0.5">
+              <MapPin size={10} className="text-bistro-600 flex-shrink-0" />
               <span>Makurdi, Benue</span>
             </p>
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Controls */}
         <div className="flex items-center gap-1.5">
-          {/* Admin Toggle */}
+          {/* Store Management Portal Toggle */}
           <button
             onClick={() => setIsAdminOpen(true)}
-            aria-label="Store Admin"
+            aria-label="Merchant Dashboard"
             title="Open Store Management & Analytics"
-            className="w-8 h-8 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-700 hover:bg-caramel-100 hover:text-caramel-800 transition"
+            className="w-8 h-8 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-700 hover:bg-bistro-100 hover:text-bistro-800 transition"
           >
             <SlidersHorizontal size={15} />
           </button>
 
-          {/* Notifications */}
+          {/* Notifications Trigger */}
           <button
             onClick={() => setIsNotificationsOpen(true)}
             aria-label="Notifications"
             className="relative w-8 h-8 rounded-full bg-white border border-stone-200 flex items-center justify-center hover:bg-stone-50 transition"
           >
             <Bell size={16} className="text-stone-700" />
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-caramel-500 ring-2 ring-white"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-bistro-500 ring-2 ring-white"></span>
           </button>
 
-          {/* Tray / Cart */}
+          {/* Tray Trigger */}
           <button
             onClick={() => setIsCartOpen(true)}
             aria-label="Open tray"

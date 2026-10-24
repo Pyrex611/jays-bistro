@@ -22,16 +22,16 @@ body {
   scrollbar-width: none;
 }
 
-/* Bonti Custom Shadows */
+/* Bonti Precision Depth Shadows */
 .card-shadow {
   box-shadow:
-    0 12px 24px -10px rgba(78, 47, 25, 0.38),
+    0 12px 24px -10px rgba(47, 83, 38, 0.28),
     0 4px 10px -4px rgba(78, 47, 25, 0.22);
 }
 
 .card-shadow-hover:hover {
   box-shadow:
-    0 18px 32px -12px rgba(78, 47, 25, 0.5),
+    0 18px 32px -12px rgba(47, 83, 38, 0.4),
     0 6px 14px -4px rgba(78, 47, 25, 0.28);
 }
 
@@ -44,17 +44,9 @@ body {
 
 .frame-shadow {
   box-shadow:
-    0 0 0 1px rgba(120, 80, 50, 0.08),
-    0 20px 50px -20px rgba(78, 47, 25, 0.25),
+    0 0 0 1px rgba(47, 83, 38, 0.08),
+    0 20px 50px -20px rgba(47, 83, 38, 0.22),
     0 8px 20px -10px rgba(78, 47, 25, 0.15);
-}
-
-/* Drawer & Modal Transitions */
-.drawer-backdrop {
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.drawer-panel {
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes pulse-subtle {

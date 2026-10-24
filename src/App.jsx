@@ -10,21 +10,22 @@ import CartDrawer from './components/CartDrawer.jsx';
 import NotificationsModal from './components/NotificationsModal.jsx';
 import AIChatbot from './components/AIChatbot.jsx';
 import AdminDashboard from './components/admin/AdminDashboard.jsx';
+import { Instagram, Facebook, Twitter, MessageCircle, MapPin, Phone } from 'lucide-react';
 
 const Storefront = () => {
   return (
-    <div className="mx-auto max-w-md bg-stone-50 min-h-screen border-x border-stone-300 frame-shadow flex flex-col relative pb-20">
+    <div className="mx-auto max-w-md bg-stone-50 min-h-screen border-x border-stone-300 frame-shadow flex flex-col relative pb-16">
       
-      {/* 1. NAVBAR */}
+      {/* 1. TOP NAVBAR */}
       <Header />
 
-      {/* 2. HERO CAROUSEL */}
+      {/* 2. HERO CAROUSEL (Defaults: Shawarma, Wings, Basmati, Jollof, Isi-Ewu) */}
       <HeroCarousel />
 
-      {/* 3. DUAL SPOTLIGHT HALF-HERO */}
+      {/* 3. SUB-HERO DUAL SPOTLIGHT (Defaults: Arabian Blend Left, Double Root Right) */}
       <DualSpotlight />
 
-      {/* 4. PILLS + SEARCH + BODY GRID */}
+      {/* 4. CATEGORY PILLS + SEARCH + BODY GRID */}
       <section className="px-4 pb-12 flex-1">
         <CategoryPills />
         <div className="mt-4">
@@ -32,17 +33,66 @@ const Storefront = () => {
         </div>
       </section>
 
-      {/* Footer Branding */}
-      <footer className="px-4 py-6 border-t border-stone-200 text-center bg-stone-100 mt-auto">
-        <p className="text-[11px] font-bold text-stone-600 tracking-wide">
-          JAY'S BISTRO • MAKURDI
-        </p>
-        <p className="text-[10px] text-stone-400 mt-0.5">
-          Handcrafted Jollof, Grills, Arabian Spices & Continental Bites.
-        </p>
+      {/* 5. FOOTER WITH CLICKABLE SOCIALS & BRANDING */}
+      <footer className="px-4 py-8 border-t border-stone-200 bg-stone-100 text-center mt-auto space-y-4">
+        
+        {/* Social Icons */}
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            className="w-8 h-8 rounded-full bg-white border border-stone-200 text-stone-700 hover:text-caramel-600 hover:border-caramel-400 flex items-center justify-center transition shadow-sm"
+          >
+            <Instagram size={15} />
+          </a>
+
+          <a
+            href="https://facebook.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+            className="w-8 h-8 rounded-full bg-white border border-stone-200 text-stone-700 hover:text-bistro-700 hover:border-bistro-400 flex items-center justify-center transition shadow-sm"
+          >
+            <Facebook size={15} />
+          </a>
+
+          <a
+            href="https://twitter.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Twitter / X"
+            className="w-8 h-8 rounded-full bg-white border border-stone-200 text-stone-700 hover:text-stone-950 hover:border-stone-400 flex items-center justify-center transition shadow-sm"
+          >
+            <Twitter size={15} />
+          </a>
+
+          <a
+            href="https://wa.me/2348062624447"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp Hotline"
+            className="w-8 h-8 rounded-full bg-white border border-stone-200 text-stone-700 hover:text-green-600 hover:border-green-400 flex items-center justify-center transition shadow-sm"
+          >
+            <MessageCircle size={15} />
+          </a>
+        </div>
+
+        <div>
+          <p className="text-[11px] font-bold text-stone-800 tracking-wider uppercase">
+            Jay's Bistro • Makurdi
+          </p>
+          <p className="text-[10px] text-stone-500 mt-0.5">
+            Precious Events Centre, Makurdi, Benue State
+          </p>
+          <p className="text-[9px] text-stone-400 mt-1">
+            © {new Date().getFullYear()} Jay's Bistro. All rights reserved.
+          </p>
+        </div>
       </footer>
 
-      {/* 5. OVERLAYS & MODALS */}
+      {/* 6. OVERLAYS, MODALS & REINSTATED FLOATING AI CONCIERGE */}
       <ProductModal />
       <CartDrawer />
       <NotificationsModal />

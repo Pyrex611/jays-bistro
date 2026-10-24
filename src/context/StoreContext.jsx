@@ -2,32 +2,33 @@ import React, { createContext, useContext, useState, useEffect, useMemo } from '
 import { INITIAL_MENU_ITEMS, WHATSAPP_NUMBER } from '../data/menu.js';
 
 const StoreContext = createContext(null);
+const STORAGE_KEY = 'jays_menu_items_v3';
 
 export const StoreProvider = ({ children }) => {
   // Products Catalog with LocalStorage persistence
   const [products, setProducts] = useState(() => {
     try {
-      const stored = localStorage.getItem('jays_menu_items_v2');
+      const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {
-      console.warn("Could not load products from storage, using defaults", e);
+      console.warn("Could not load products, fallback to default", e);
     }
     return INITIAL_MENU_ITEMS;
   });
 
-  // Cart State with LocalStorage persistence
+  // Cart State
   const [cart, setCart] = useState(() => {
     try {
-      const stored = localStorage.getItem('jays_cart_v2');
+      const stored = localStorage.getItem('jays_cart_v3');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {
-      console.warn("Could not load cart from storage", e);
+      console.warn("Could not load cart, fallback to empty", e);
     }
     return [];
   });
@@ -44,7 +45,7 @@ export const StoreProvider = ({ children }) => {
   // Sync to LocalStorage
   useEffect(() => {
     try {
-      localStorage.setItem('jays_menu_items_v2', JSON.stringify(products));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
     } catch (e) {
       console.error("Storage error for products", e);
     }
@@ -52,7 +53,7 @@ export const StoreProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('jays_cart_v2', JSON.stringify(cart));
+      localStorage.setItem('jays_cart_v3', JSON.stringify(cart));
     } catch (e) {
       console.error("Storage error for cart", e);
     }
@@ -62,17 +63,20 @@ export const StoreProvider = ({ children }) => {
   const cartCount = useMemo(() => cart.reduce((t, i) => t + i.quantity, 0), [cart]);
   const cartTotal = useMemo(() => cart.reduce((t, i) => t + i.price * i.quantity, 0), [cart]);
 
+  // Hero Products (Defaults: 21 Shawarma, 51 Wings, 36 Basmati, 1 Jollof, 2 Isi-Ewu)
   const heroProducts = useMemo(() => {
     const heroes = products.filter(p => p.isHero);
-    return heroes.length > 0 ? heroes : products.slice(0, 4);
+    return heroes.length > 0 ? heroes : products.slice(0, 5);
   }, [products]);
 
+  // Sub-hero Dual Spotlight (Defaults: 3 Arabian Blend Left, 4 Double Root Right)
   const dualSpotlight = useMemo(() => {
-    const left = products.find(p => p.isDualGrid === 'left') || products.find(p => p.id === 21) || products[0];
-    const right = products.find(p => p.isDualGrid === 'right') || products.find(p => p.id === 51) || products[1];
+    const left = products.find(p => p.isDualGrid === 'left') || products.find(p => p.id === 3) || products[0];
+    const right = products.find(p => p.isDualGrid === 'right') || products.find(p => p.id === 4) || products[1];
     return { left, right };
   }, [products]);
 
+  // Catalog Filter
   const filteredProducts = useMemo(() => {
     let list = products;
     if (selectedCategory !== "All") {
@@ -80,7 +84,11 @@ export const StoreProvider = ({ children }) => {
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      list = list.filter(p => p.name.toLowerCase().includes(q) || p.tagline?.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
+      list = list.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.tagline?.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q)
+      );
     }
     return list;
   }, [products, selectedCategory, searchQuery]);
@@ -133,6 +141,12 @@ export const StoreProvider = ({ children }) => {
 
   const clearCart = () => setCart([]);
 
+  // Reset to Defaults (Merchandising resets on demand or fresh load)
+  const resetToDefaults = () => {
+    setProducts(INITIAL_MENU_ITEMS);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   // Admin Catalog Mutations
   const addProduct = (newProduct) => {
     const maxId = products.reduce((max, p) => (p.id > max ? p.id : max), 100);
@@ -165,20 +179,18 @@ export const StoreProvider = ({ children }) => {
     }));
   };
 
-  // Mock Sales Analytics Tracker with LocalStorage
+  // Sales Records & Analytics
   const [salesRecords, setSalesRecords] = useState(() => {
     try {
-      const stored = localStorage.getItem('jays_sales_records_v1');
+      const stored = localStorage.getItem('jays_sales_records_v3');
       if (stored) return JSON.parse(stored);
-    } catch (e) {
-      console.warn("Could not load sales analytics", e);
-    }
+    } catch (e) {}
     return [
-      { id: 'ORD-101', total: 14500, itemsCount: 4, timestamp: Date.now() - 86400000 * 2 },
-      { id: 'ORD-102', total: 9500, itemsCount: 2, timestamp: Date.now() - 86400000 * 1.5 },
-      { id: 'ORD-103', total: 22000, itemsCount: 6, timestamp: Date.now() - 86400000 * 0.5 },
-      { id: 'ORD-104', total: 8500, itemsCount: 3, timestamp: Date.now() - 3600000 * 4 },
-      { id: 'ORD-105', total: 17500, itemsCount: 5, timestamp: Date.now() - 3600000 * 1 }
+      { id: 'ORD-901', total: 14500, itemsCount: 4, timestamp: Date.now() - 86400000 * 2.5 },
+      { id: 'ORD-902', total: 9500, itemsCount: 2, timestamp: Date.now() - 86400000 * 2 },
+      { id: 'ORD-903', total: 22000, itemsCount: 6, timestamp: Date.now() - 86400000 * 1.2 },
+      { id: 'ORD-904', total: 8500, itemsCount: 3, timestamp: Date.now() - 86400000 * 0.5 },
+      { id: 'ORD-905', total: 17500, itemsCount: 5, timestamp: Date.now() - 3600000 * 2 }
     ];
   });
 
@@ -194,7 +206,7 @@ export const StoreProvider = ({ children }) => {
     const updated = [newRecord, ...salesRecords];
     setSalesRecords(updated);
     try {
-      localStorage.setItem('jays_sales_records_v1', JSON.stringify(updated));
+      localStorage.setItem('jays_sales_records_v3', JSON.stringify(updated));
     } catch (e) {}
   };
 
@@ -208,16 +220,16 @@ export const StoreProvider = ({ children }) => {
       averageOrderValue: aov,
       recentOrders: salesRecords.slice(0, 10),
       topDishes: [
-        { name: "Party Jollof Rice", orders: 48, revenue: 72000 },
-        { name: "Basmati Fried Rice", orders: 36, revenue: 126000 },
-        { name: "Bistro Chicken Wings", orders: 29, revenue: 145000 },
-        { name: "Classic Arabian Blend", orders: 24, revenue: 72000 },
-        { name: "Chicken Shawarma (SS)", orders: 22, revenue: 77000 },
+        { name: "Party Jollof Rice", orders: 54, revenue: 81000 },
+        { name: "Basmati Fried Rice", orders: 42, revenue: 147000 },
+        { name: "Bistro Chicken Wings", orders: 38, revenue: 190000 },
+        { name: "Chicken Shawarma (SS)", orders: 35, revenue: 122500 },
+        { name: "Classic Arabian Blend", orders: 28, revenue: 84000 },
       ]
     };
   }, [salesRecords]);
 
-  // WhatsApp Order Link Generator
+  // WhatsApp Checkout Link Generator
   const generateWhatsAppLink = () => {
     if (cart.length === 0) return `https://wa.me/${WHATSAPP_NUMBER}`;
     let msg = "Hello Jay's Bistro, I would like to order:\n\n";
@@ -259,6 +271,7 @@ export const StoreProvider = ({ children }) => {
       updateQuantity,
       removeFromCart,
       clearCart,
+      resetToDefaults,
       addProduct,
       updateProduct,
       deleteProduct,
