@@ -14,5 +14,8 @@ Migrate the layout inside the existing Vite stack. No framework change in Sprint
 - ✅ Architecture seams (`useMenu`, `lib/`, `services/`) keep a later move cheap — only `pages/` and routing are framework-specific.
 - ⚠️ SPA SEO is weaker than server rendering for a local restaurant. JSON-LD and meta tags are kept, but crawlers see little HTML.
 
-## Phase 2 gate (decide before S2)
+## Gate (revisit in Sprint 3)
+Sprint 2 added Vercel Functions (`/api`) and stayed on Vite. The question is now only about SEO prerendering.
+
+## Original gate text
 Choose one: **(a)** stay on Vite and add build-time prerender for `/` and `/menu`; **(b)** migrate to Next.js (App Router, ISR for the menu, Route Handlers for the AI proxy). Criteria: organic search matters to the owner · cost of migration (~1 sprint, mostly routing/metadata) · single-repo simplicity for the dashboard. Record the outcome as ADR-0001a.

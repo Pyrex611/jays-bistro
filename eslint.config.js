@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', '.local-data']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
@@ -23,7 +23,13 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Capitalised names are JSX components (e.g. `icon: Icon` rendered as <Icon />), which the rule can't see.
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^[A-Z_]' }],
     },
+  },
+  {
+    // Server code, dev tooling, scripts, configs and tests run in Node.
+    files: ['api/**/*.js', 'dev/**/*.js', 'scripts/**/*.{js,mjs}', 'src/__tests__/**/*.{js,jsx}', '*.config.js'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
 ])

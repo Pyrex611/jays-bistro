@@ -1,7 +1,46 @@
-# Data model (Phase 2–3 design)
+# Data model (Sprint 2: JSON in S3)
 
-Postgres on Supabase. Money is **integer naira** (`int`), consistent with the front-end. Every table has RLS enabled in the migration that creates it.
+> **Postgres/Supabase design (Sprint 1 draft) is superseded by [ADR-0005](adr/0005-s3-storage-and-password-lock.md).** It is kept at the bottom as an archive.
 
+## Objects
+
+### `data/menu.json` — the published menu (one versioned document)
+```json
+{
+  "version": 3, "updatedAt": "2026-10-26T09:00:00Z",
+  "categories": [{ "name": "Meals", "icon": "meals" }],
+  "items": [{ "id": 1, "category": "Meals", "name": "Party Jollof Rice", "price": 1500, "description": "…",
+              "image": "menu/party-jollof-rice.png | https://…/images/x.webp", "imageStyle": "cutout|photo",
+              "featured": true, "isActive": true, "isAvailable": true }],
+  "layout": { "heroIds": [1, 36], "subheroIds": [21, 51] },
+  "settings": { "acceptingOrders": true, "deliveryEnabled": true, "deliveryFee": 0, "minOrder": 0 }
+}
+```
+Validated by `src/lib/menuDoc.js` (browser + server). Limits: name 2–80, description ≤ 280, whole-naira price, https/`menu/` images only, hero ≤ 6, sub-hero ≤ 2, ≤ 500 items. Saves need the `baseVersion` the editor loaded (409 otherwise).
+
+### `invoices/pending/<id>.json` → `receipts/<yyyy>/<mm>/<id>.json`
+```json
+{ "id": "20261026abcdefghijklmnop", "code": "JB-ABCDE", "status": "pending|paid", "channel": "web|whatsapp",
+  "createdAt": "…", "expiresAt": "… (+24h)",
+  "items": [{ "id": 1, "name": "…", "unitPrice": 1500, "quantity": 2, "lineTotal": 3000 }],
+  "subtotal": 3000, "deliveryFee": 500, "total": 3500, "fulfilment": "pickup|delivery",
+  "customer": { "name": "", "email": "", "phone": "234…", "address": "", "note": "" },
+  "attempts": [{ "reference": "<id>-1", "at": "…", "fulfilment": "…", "deliveryFee": 0, "total": 3500, "amountKobo": 350000 }],
+  "payment": { "reference": "<id>-1", "channel": "card|bank_transfer|ussd|…", "paidAt": "…", "amount": 3500, "currency": "NGN", "mode": "live|mock" } }
+```
+`id` = date (8 digits) + 16 base32 chars (80 random bits). Item names and prices are **snapshotted** so receipts never change when the menu does.
+
+### `config/merchant.json`
+`{ "algo": "scrypt", "N": 16384, "r": 8, "p": 1, "salt": "<b64>", "hash": "<b64>", "updatedAt": "…" }`
+
+## Lifecycle rules (S3)
+`invoices/pending/` → expire after 3 days · `config/attempts/` → expire after 1 day · everything else kept.
+
+## Analytics definitions (Orders tab)
+Sales = Σ `total` of receipts in range · Orders = count · Average = sales ÷ orders · Top sellers = Σ quantity and revenue per item · Daily = by Lagos date of `payment.paidAt`. Unpaid invoices never count.
+
+---
+## Archive: Sprint 1 Postgres draft (superseded)
 ## Tables
 
 ```sql

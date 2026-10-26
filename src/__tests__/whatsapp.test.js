@@ -29,4 +29,12 @@ describe("buildWhatsAppLink", () => {
     expect(text).toContain("▪ 1x Isi-ewu - ₦6,000");
     expect(text).toContain("*Total Order Value: ₦9,000*");
   });
+
+  it("appends the expiring invoice link and honours a total that includes delivery", () => {
+    const lines = [{ item: { name: "Isi-ewu" }, quantity: 1, lineTotal: 6000 }];
+    const url = buildWhatsAppLink(lines, "2348062624447", { invoiceUrl: "https://jays-bistro.vercel.app/invoice/abc", total: 7000 });
+    const text = decodeURIComponent(url.split("?text=")[1]);
+    expect(text).toContain("*Total Order Value: ₦7,000*");
+    expect(text).toContain("Invoice (valid 24h, pay online): https://jays-bistro.vercel.app/invoice/abc");
+  });
 });

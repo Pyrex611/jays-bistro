@@ -78,4 +78,11 @@ describe("prompt + history", () => {
     expect(JSON.parse(contents[1].parts[0].text)).toEqual({ message: "hello", actions: [] });
     expect(contents[2].parts[0].text).toBe("add jollof");
   });
+
+  it("marks sold-out dishes in the prompt and never lets the model add them", () => {
+    const soldOut = { 1: { ...byId[1], isAvailable: false }, 2: byId[2] };
+    expect(buildSystemPrompt(Object.values(soldOut), [])).toContain("ID 1: Party Jollof Rice (₦1500) [SOLD OUT today - do not add]");
+    const out = sanitizeActions([{ action: "add", id: 1, quantity: 1 }, { action: "add", id: 2, quantity: 1 }, { action: "remove", id: 1, quantity: 1 }], soldOut);
+    expect(out.map((a) => `${a.action}:${a.id}`)).toEqual(["add:2", "remove:1"]);
+  });
 });

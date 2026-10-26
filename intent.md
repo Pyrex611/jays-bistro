@@ -11,7 +11,7 @@
 - **Product:** Jay's Bistro online ordering (Makurdi, Benue State, Nigeria)
 - **Repo:** `github.com/Pyrex611/jays-bistro` · **Live:** `jays-bistro.vercel.app`
 - **Owner / lead engineer:** Pyrexx
-- **Intent version:** 1.0 — 2026-10-24
+- **Intent version:** 1.1 — 2026-10-26
 
 ---
 
@@ -44,12 +44,21 @@ Jay's Bistro takes food orders over WhatsApp. The current storefront works, but:
 
 **Non-goals:** any backend, auth, dashboard, analytics, payments, new routes beyond `/` and `/menu`.
 
-### Phase 2 — Menu management backend + dashboard (Sprints 2–4)
+### Phase 2 — Brand, commerce and merchant portal (Sprint 2) ✅ delivered
+**Goal:** theme from the logo; the full 64-item catalogue with search; pay online with Paystack; WhatsApp orders become expiring invoices that turn into receipts; a password-locked merchant console to run the menu, home layout, store switches and see paid orders. No customer accounts and no third-party auth provider.
+
+**Non-goals:** customer accounts, order-status tracking, loyalty, multi-branch.
+
+### Phase 3 — Hardening, SEO and growth (Sprint 3+)
+SEO prerendering decision, AI concierge behind the API, kitchen notifications, order statuses, reorder, popular row, E2E/Lighthouse CI. See PLAN.md.
+
+### (Original Phase 2/3 text, kept for history)
+### Phase 2 (original) — Menu management backend + dashboard
 **Goal:** Owner can add, edit, hide, archive and reorder items, upload photos, and control hero / sub-hero content from an authenticated dashboard. Customers see changes within a minute.
 
 **Non-goals:** payments, delivery logistics, multi-branch.
 
-### Phase 3 — Orders and sales analytics (Sprints 5–6)
+### Phase 3 (original) — Orders and sales analytics
 **Goal:** Capture every order the storefront produces and turn it into trustworthy sales analytics (revenue, top items, funnel, peak times).
 
 **Non-goals:** automated payment reconciliation (a later option via Paystack), loyalty programmes.
@@ -89,7 +98,24 @@ Jay's Bistro takes food orders over WhatsApp. The current storefront works, but:
 - Chatbot actions from the model are validated (unknown items, bad quantities and unknown verbs are dropped).
 - Pinch-zoom re-enabled (legacy viewport blocked it — accessibility).
 
-## 7. Scope — Phase 2 and 3 (summary; full detail in [docs/CONCEPTS.md](docs/CONCEPTS.md))
+## 6b. Scope — Sprint 2 requirements (traceable)
+
+| ID | Requirement | Status |
+|---|---|---|
+| R2.1 | Palette, favicon and avatars derived from the logo (green `#286334`, orange `#E4830E`, cream `#FBF8EE`) | ✅ |
+| R2.2 | Full catalogue (64) active; menu shown as titled category sections; sticky pills with line-art icons | ✅ |
+| R2.3 | Search (accent/case-insensitive, all words must match, ranked) | ✅ |
+| R2.4 | Canonical domain `jays-bistro.vercel.app` in config, OG tags, sitemap, robots | ✅ |
+| R2.5 | Tray footer: main **Checkout** (Paystack) with a small round **WhatsApp** button to its left | ✅ |
+| R2.6 | WhatsApp message carries an expiring (24 h) invoice link; the same URL becomes the receipt when paid | ✅ |
+| R2.7 | Success state + receipt (animation, torn-paper receipt, PAID stamp, PDF/share/WhatsApp) | ✅ |
+| R2.8 | Paystack key supplied via env var; server-side verification; exact-amount settlement; webhook backstop | ✅ |
+| R2.9 | Merchant console at `/merchant`: password lock without an auth provider, S3-backed | ✅ |
+| R2.10 | Console: add/edit/delete dishes, photo upload, in-stock switch, categories, hero + sub-hero with live preview, settings, orders + sales analytics, password change | ✅ |
+| R2.11 | Open/closed status, pause-orders switch, delivery fee, minimum order | ✅ |
+| R2.12 | UX research + audit + three-version comparison documented | ✅ ([docs/UX_RESEARCH.md](docs/UX_RESEARCH.md)) |
+
+## 7. Scope — original Phase 2/3 summary (superseded where Sprint 2 differs; see docs/CONCEPTS.md)
 
 **Menu dashboard (`/admin`)** — Auth (owner, staff) · item CRUD with archive instead of delete · "sold out today" quick toggle ·
 category management and ordering · image upload with automatic compression · cutout/photo flag ·
@@ -111,7 +137,7 @@ concierge-assisted share, CSV export.
 
 ## 9. Assumptions (verify; amend INTENT if wrong)
 
-- A1. `IMG_*.PNG` assets are transparent cutouts; `.jpg` and Unsplash images are photos.
+- A1. `IMG_*.PNG` assets are transparent cutouts; `.jpg` and Unsplash images are photos (the console lets the owner switch per dish). The 56 other dishes use Unsplash stock photos that should be replaced with real photos over time.
 - A2. The live menu is the 12 items in the legacy `App.jsx`; the other 52 in the legacy `menu.js` are catalogue only.
 - A3. Vercel is the primary host (`jays-bistro.vercel.app`); GitHub Pages is legacy.
 - A4. One branch, one kitchen, one WhatsApp number.
@@ -130,14 +156,17 @@ concierge-assisted share, CSV export.
 
 | # | Question | Default used in Sprint 1 |
 |---|---|---|
-| Q1 | Show the full 64-item catalogue or only the live 12? | Live 12 (the rest are `isActive:false`; one flag flips each) |
-| Q2 | Keep a search bar? (legacy had it; Bonti does not) | Not included |
+| Q1 | Full catalogue or live 12? | ✅ **Decided 2026-10-26: full catalogue** |
+| Q2 | Keep a search bar? | ✅ **Decided: yes, back** |
 | Q3 | Keep the "40% discount" banner? | Not included; becomes a **promo slide** in Phase 2 |
 | Q4 | Are the `IMG_*.PNG` files transparent cutouts? | Assumed yes (A1) |
-| Q5 | Canonical domain: Vercel, custom domain, or GitHub Pages? | `SITE.url` unchanged (GitHub Pages) — update with sitemap/robots |
+| Q5 | Canonical domain | ✅ **Decided: `jays-bistro.vercel.app`** |
 | Q6 | Who gets dashboard access, and should staff see prices? | Owner only (Phase 2 design supports staff) |
 | Q7 | Delivery or pickup, delivery fee, minimum order? | Not modelled |
-| Q8 | Payments (Paystack) timeline? | Out of scope |
+| Q8 | Payments (Paystack) timeline? | ✅ **Built in Sprint 2** (test key first, then live) |
+| Q9 | Delivery or pickup? Fee and minimum? | Both offered; fee/minimum default to ₦0 and are set in the console. **Owner to confirm real values and delivery area** |
+| Q10 | Who is told when an order is paid? | Nobody automatically yet: the Orders tab shows it. Options: WhatsApp/email/SMS alert to the kitchen |
+| Q11 | Delivery area/zones and prep time to show customers? | Not modelled |
 
 ## 12. Change control
 Amend this file with a dated entry below; never silently edit history.
@@ -145,3 +174,4 @@ Amend this file with a dated entry below; never silently edit history.
 | Date | Change | By |
 |---|---|---|
 | 2026-10-24 | v1.0 created: Phase 1 delivered, Phases 2–3 defined | Pyrexx + AI |
+| 2026-10-26 | v1.1: Supabase plan replaced by S3 + password-locked console (ADR-0005); Paystack, invoices, receipts (ADR-0006); full catalogue, search, canonical domain decided; logo-based theme | Pyrexx + AI |

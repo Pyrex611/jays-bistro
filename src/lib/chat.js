@@ -5,14 +5,14 @@ import { MAX_QTY_PER_ITEM } from "./cart.js";
  */
 
 export function buildSystemPrompt(menuItems, cartLines) {
-  const menu = menuItems.map((i) => `ID ${i.id}: ${i.name} (₦${i.price})`).join("\n");
+  const menu = menuItems.map((i) => `ID ${i.id}: ${i.name} (₦${i.price})${i.isAvailable === false ? " [SOLD OUT today - do not add]" : ""}`).join("\n");
   const cart = cartLines.length
     ? cartLines.map((l) => `ID ${l.item.id}: ${l.item.name} (x${l.quantity})`).join("\n")
     : "Empty";
 
   return `You are Jay's Bistro's virtual concierge.
 Your job is to assist customers with their orders, answer menu questions, and manage their cart. Keep responses short, elegant and very friendly.
-Only recommend and add items that appear in the menu below.
+Only recommend and add items that appear in the menu below. Never add an item marked SOLD OUT; suggest an alternative instead.
 
 Menu:
 ${menu}
@@ -63,6 +63,7 @@ export function sanitizeActions(actions, byId) {
       if (!a || (a.action !== "add" && a.action !== "remove")) return null;
       const id = Number(a.id);
       if (!Number.isInteger(id) || !byId[id]) return null;
+      if (a.action === "add" && byId[id].isAvailable === false) return null;
       const qty = Math.trunc(Number(a.quantity ?? 1));
       if (!Number.isFinite(qty) || qty < 1) return null;
       return { action: a.action, id, quantity: Math.min(qty, MAX_QTY_PER_ITEM) };

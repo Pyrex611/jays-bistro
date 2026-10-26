@@ -1,6 +1,6 @@
 # ADR-0003: Move the AI concierge behind a server-side proxy
 
-- **Status:** Proposed (interim mitigation shipped in Sprint 1)
+- **Status:** Proposed — now cheap to do: the `/api` layer exists (Sprint 3, task T3.1)
 - **Date:** 2026-10-24
 
 ## Context

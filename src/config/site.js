@@ -6,13 +6,15 @@
 export const SITE = {
   name: "Jay's Bistro",
   shortName: "Jay's",
-  // NOTE: still the GitHub Pages URL from the legacy site. Update to the Vercel
-  // domain (or custom domain) together with public/sitemap.xml and public/robots.txt.
-  url: "https://pyrex611.github.io/jays-bistro",
+  // Canonical domain. If this ever changes, also update public/sitemap.xml, public/robots.txt and the OG tags in index.html.
+  url: "https://jays-bistro.vercel.app",
   whatsappNumber: "2348062624447",
   locationLabel: "Makurdi, NG",
   greeting: "Welcome to Jay's Bistro",
-  logoPath: "jsys_logo.jpg",
+  tagline: "Arabian Tea · Nigerian & Intercontinental",
+  logoPath: "logo-mark-192.png", // emblem crop of the logo, for avatars (header, receipt, login)
+  faviconPath: "favicon-64.png",
+  ogImagePath: "jsys_logo.jpg", // full logo, for link previews
   address: {
     street: "Precious Events Centre",
     locality: "Makurdi",

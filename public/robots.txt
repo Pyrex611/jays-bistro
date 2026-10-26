@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /merchant
+Disallow: /invoice/
+Disallow: /api/
 
-Sitemap: https://pyrex611.github.io/jays-bistro/sitemap.xml
+Sitemap: https://jays-bistro.vercel.app/sitemap.xml

@@ -9,7 +9,7 @@ export default function SeoHead({ title, description, path = "/", isMenu = false
     "@context": "https://schema.org",
     "@type": "Restaurant",
     name: SITE.name,
-    image: `${SITE.url}/${SITE.logoPath}`,
+    image: `${SITE.url}/${SITE.ogImagePath}`,
     "@id": SITE.url,
     url: SITE.url,
     telephone: `+${SITE.whatsappNumber}`,
@@ -48,9 +48,9 @@ export default function SeoHead({ title, description, path = "/", isMenu = false
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
-      <meta property="og:image" content={`${SITE.url}/${SITE.logoPath}`} />
+      <meta property="og:image" content={`${SITE.url}/${SITE.ogImagePath}`} />
       <script type="application/ld+json">{JSON.stringify(isMenu ? [restaurant, menu] : restaurant)}</script>
-      <link rel="icon" type="image/jpeg" href={assetUrl(SITE.logoPath)} />
+      <link rel="icon" type="image/png" href={assetUrl(SITE.faviconPath)} />
     </Helmet>
   );
 }
