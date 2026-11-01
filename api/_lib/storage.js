@@ -139,6 +139,19 @@ export function memoryDriver() {
 
 let current;
 
+/**
+ * Is a real storage backend available? When false the platform runs in DEMO MODE: the console and checkout use the
+ * browser-local demo backend (src/demo) and the API refuses data calls with 503. Set DEMO_MODE=1 to force it locally.
+ */
+export function storageConfigured() {
+  if (process.env.DEMO_MODE === "1") return false;
+  if (current) return true;
+  const wanted = env("STORAGE_DRIVER");
+  if (wanted === "memory" || wanted === "fs") return true;
+  if (env("S3_BUCKET")) return true;
+  return !(process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production");
+}
+
 export function getStorage() {
   if (current) return current;
   const wanted = env("STORAGE_DRIVER");

@@ -1,6 +1,6 @@
 # CLAUDE.md — Agent instructions for Jay's Bistro
 
-Read [INTENT.md](INTENT.md) and [PLAN.md](PLAN.md) before changing code. Work only on the current sprint's tasks unless told otherwise.
+Read [INTENT.md](INTENT.md), [PLAN.md](PLAN.md) and [TASK.md](TASK.md) (the open work list, with decisions pending) before changing code. Work only on the current sprint's tasks unless told otherwise.
 
 ## Project snapshot
 Mobile-first food-ordering storefront for Jay's Bistro (Makurdi, NG) at `jays-bistro.vercel.app`.
@@ -22,7 +22,7 @@ npm run images:migrate # one-time: copy bundled photos to public/menu
 **Before declaring any task done:** `npm run lint && npm test && npm run build` must pass.
 
 ## Architecture rules
-1. **Layers:** `lib/` = pure functions (no React, no I/O) · `services/` = network I/O · `hooks/` = React state · `components/` = presentation · `pages/` = composition · `data/` = static data · `config/` = constants.
+1. **Layers:** `lib/` = pure functions (no React, no I/O) · `demo/` = browser-local mock backend (mirrors the API; see docs/DEMO_MODE.md) · `services/` = network I/O (routes to real or demo by capability) · `hooks/` = React state · `components/` = presentation · `pages/` = composition · `data/` = static data · `config/` = constants.
 2. **Menu data only through `useMenu()`.** Never import `data/menu.js` in components (it is only the seed/fallback; the live menu is `data/menu.json` in storage via `/api/menu`).
 3. **Cart lines store `{ id, quantity }` only** (persisted in localStorage). Name/price/image are resolved from the menu at read time.
 3a. **The server decides money.** Prices, availability, delivery fee, minimum order come from the live menu in `api/checkout.js`; the browser sends ids and quantities only. `lib/pricing.js` and `lib/menuDoc.js` are shared by both sides.
@@ -33,6 +33,9 @@ npm run images:migrate # one-time: copy bundled photos to public/menu
 5. **Never trust model output.** Chatbot actions go through `sanitizeActions` before touching the cart.
 6. **Prices are integer naira.** Format with `formatPrice` only at the edge (UI, WhatsApp message).
 7. **Brand tokens, not hex codes.** Use `leaf-*` (logo green), `sun-*` (logo orange), `cream-*` (logo background) and `ink-*` (text). Orange never carries white text. WhatsApp green `#25D366` only on WhatsApp buttons.
+7a. **Brand-aware soft pastel.** Surfaces (cards, tiles, banners, chips, no-photo tiles) use pastel tints of the brand hues with a soft "cloud" gradient; actions (buttons, active pill, tray, stepper, prices) keep saturated `leaf-700`/`sun-500`; text on pastel is `leaf-900`/`ink-*` (≥ 4.5:1). See docs/DESIGN_SYSTEM.md and TASK.md §0.
+7b. **Demo parity.** Every integration (storage, payments, email, order status) has a real and a demo implementation chosen by `capabilities` (`services/runtime.js`). Business rules live in shared `lib/` code used by both; never fork a rule into `src/demo/`. Components must not branch on "demo" except to show honest labels. A new feature ships with its demo behaviour and a test in `demo.test.js`.
+7c. **No wrong photos.** A dish without an accurate photo uses `menu/placeholder.svg` (renders the category icon tile). `menu.test.js` fails if two different dishes share a photo outside its allow-list.
 8. **Analytics via `track()` only.** Do not call third-party trackers.
 9. **Images:** `imageStyle: "cutout"` (transparent PNG, contained, drop shadow) or `"photo"` (cover). Use `FoodImage`; never a bare `<img>` for food.
 
@@ -63,10 +66,18 @@ npm run images:migrate # one-time: copy bundled photos to public/menu
 - When behaviour changes: update INTENT (requirement status), PLAN (tick tasks, decision log), and ARCHITECTURE/DATA_MODEL if touched. Significant choices get an ADR in `docs/adr/`.
 - Do not delete user content or assets without being asked. Legacy files are removed only in the dedicated cleanup commit (see `docs/SPRINT-1-RUNBOOK.md` §6).
 
+## Sprint 3 additions to know
+- Storefront menu is one continuous grid: never reintroduce per-category headings; the first card of each group carries `data-group-start` (scroll anchor) and the pill bar follows via `useScrollSpy`.
+- Settings are normalised on publish (`normalizeSettings`): invalid hours close the day, an invalid WhatsApp number falls back to the default. Console components receive the raw draft, so they show the warning first.
+- Demo credentials: setup password `jays-setup`; demo data keys start `jb:demo:`. In demo mode data is per browser.
+- Photo workflow: `npm run photos:curate` then `npm run photos:apply` (docs/SPRINT-3-RUNBOOK.md §4); logic is in `scripts/lib/photoTools.mjs` and unit-tested.
+- Hobby plan is non-commercial: do not take real payments on it (ADR-0007).
+
 ## Known gotchas
 - `vercel.json` rewrites every non-`/api`, non-`/menu/` (images), non-`/assets/` path to `index.html`. Dish photos live in `public/menu/` (stable URLs the console can reference); do not rename them.
 - The 8 bundled photos reach `public/menu/` via `npm run images:migrate` (one time). Merchant uploads go to S3 `images/`.
 - Production without S3 variables: storefront works from the bundled menu; `/merchant`, invoices and orders do not.
 - Mock payments only run when there is no Paystack key AND the deployment is not production.
 - `react-helmet` (v6) logs a legacy-lifecycle warning under React 19 in dev; harmless.
-- The Gemini key is still browser-exposed (ADR-0003, Sprint 3).
+- The Gemini key is still browser-exposed (ADR-0003, go-live backlog T3.16).
+- On a Vercel **Preview** deployment `storageConfigured()` is true (only *production* without storage is demo): set `DEMO_MODE=1` there to demo.

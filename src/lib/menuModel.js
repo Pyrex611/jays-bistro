@@ -29,6 +29,7 @@ export function buildMenuModel({ items, categories, heroIds = [], subheroIds = [
     activeItems,
     byId,
     categories: [ALL_CATEGORY, ...visibleCategories],
+    groups: visibleCategories, // storefront pills (no "All": the menu is one continuous list)
     iconByCategory,
     hero: pick(heroIds),
     subhero: pick(subheroIds).slice(0, 2),

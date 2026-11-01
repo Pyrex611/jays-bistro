@@ -1,8 +1,9 @@
 import { Helmet } from "react-helmet";
 import { SITE, assetUrl } from "../../config/site.js";
+import { toSlots } from "../../lib/hours.js";
 
 /** Per-route meta tags and schema.org JSON-LD (carried over from the legacy site). */
-export default function SeoHead({ title, description, path = "/", isMenu = false }) {
+export default function SeoHead({ title, description, path = "/", isMenu = false, settings }) {
   const url = `${SITE.url}${path}`;
 
   const restaurant = {
@@ -12,7 +13,7 @@ export default function SeoHead({ title, description, path = "/", isMenu = false
     image: `${SITE.url}/${SITE.ogImagePath}`,
     "@id": SITE.url,
     url: SITE.url,
-    telephone: `+${SITE.whatsappNumber}`,
+    telephone: `+${settings?.business.whatsapp ?? SITE.whatsappNumber}`,
     address: {
       "@type": "PostalAddress",
       streetAddress: SITE.address.street,
@@ -21,7 +22,7 @@ export default function SeoHead({ title, description, path = "/", isMenu = false
       addressCountry: SITE.address.country,
     },
     geo: { "@type": "GeoCoordinates", latitude: SITE.geo.latitude, longitude: SITE.geo.longitude },
-    openingHoursSpecification: SITE.hours.map((h) => ({
+    openingHoursSpecification: toSlots(settings?.hours ?? SITE.hours).map((h) => ({
       "@type": "OpeningHoursSpecification",
       dayOfWeek: h.days,
       opens: h.opens,

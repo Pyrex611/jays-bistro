@@ -2,7 +2,6 @@ import { useCallback, useState } from "react";
 import { api } from "../services/api.js";
 import { buildWhatsAppLink } from "../lib/whatsapp.js";
 import { saveCustomer } from "../lib/cartStorage.js";
-import { SITE } from "../config/site.js";
 import { track } from "../lib/track.js";
 
 const payload = (lines) => lines.map((l) => ({ id: l.item.id, quantity: l.quantity }));
@@ -13,21 +12,21 @@ const payload = (lines) => lines.map((l) => ({ id: l.item.id, quantity: l.quanti
  *   shareOnWhatsApp()→ creates an expiring invoice and opens WhatsApp with the order + invoice link
  *                      (falls back to a plain message if the invoice can't be created, so ordering never breaks).
  */
-export function useCheckout({ lines, total }) {
+export function useCheckout({ lines, total, whatsapp }) {
   const [busy, setBusy] = useState(null); // "pay" | "whatsapp" | null
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
   const payOnline = useCallback(
-    async ({ customer, fulfilment }) => {
+    async ({ customer, fulfilment, zoneId }) => {
       setBusy("pay");
       setError("");
       setFieldErrors({});
       try {
         saveCustomer(customer);
         track("checkout_click", { channel: "paystack", total });
-        const res = await api.checkout({ items: payload(lines), fulfilment, intent: "pay", customer });
-        window.location.assign(res.authorizationUrl);
+        const res = await api.checkout({ items: payload(lines), fulfilment, zoneId, intent: "pay", customer });
+        window.location.assign(res.authorizationUrl); // Paystack's hosted page (or the demo payment page)
         return true; // leaving the page; keep the spinner up
       } catch (e) {
         setFieldErrors(e.data?.fields ?? {});
@@ -51,20 +50,20 @@ export function useCheckout({ lines, total }) {
 
       try {
         const inv = await api.checkout({ items: payload(lines), fulfilment, intent: "invoice" });
-        go(buildWhatsAppLink(lines, SITE.whatsappNumber, { invoiceUrl: inv.invoiceUrl, total: inv.total }));
+        go(buildWhatsAppLink(lines, whatsapp, { invoiceUrl: inv.invoiceUrl, total: inv.total }));
       } catch (e) {
         // Business rules (paused store, sold out, minimum order) must be shown, not bypassed.
         if (e.status && [403, 409, 400].includes(e.status) && e.data?.code) {
           tab?.close();
           setError(e.message);
         } else {
-          go(buildWhatsAppLink(lines, SITE.whatsappNumber)); // network trouble: plain WhatsApp order still works
+          go(buildWhatsAppLink(lines, whatsapp)); // network trouble: plain WhatsApp order still works
         }
       } finally {
         setBusy(null);
       }
     },
-    [lines, total],
+    [lines, total, whatsapp],
   );
 
   const reset = useCallback(() => {

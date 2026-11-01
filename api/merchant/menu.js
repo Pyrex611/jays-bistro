@@ -1,4 +1,5 @@
 import { allow, fail, ok, parseBody, requireAjax } from "../_lib/http.js";
+import { requireStorage } from "../_lib/guard.js";
 import { requireMerchant } from "../_lib/auth.js";
 import { loadMenuDoc, MenuConflict, MenuInvalid, saveMenuDoc } from "../_lib/menuStore.js";
 
@@ -9,6 +10,7 @@ import { loadMenuDoc, MenuConflict, MenuInvalid, saveMenuDoc } from "../_lib/men
  */
 export default async function handler(req, res) {
   if (!allow(req, res, ["GET", "PUT"])) return;
+  if (!requireStorage(res)) return;
   if (!(await requireMerchant(req, res))) return;
 
   if (req.method === "GET") return ok(res, await loadMenuDoc({ strict: true }));

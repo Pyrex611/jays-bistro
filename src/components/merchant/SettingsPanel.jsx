@@ -1,81 +1,55 @@
-import { useState } from "react";
-import { KeyRound, LogOut } from "lucide-react";
-import { Card, Switch, btnGhost, btnPrimary } from "./ui.jsx";
-import { Field } from "../ui/FormField.jsx";
-import { inputClass } from "../ui/formStyles.js";
-import { api } from "../../services/api.js";
+import { useEffect } from "react";
+import OrderingSettings from "./settings/OrderingSettings.jsx";
+import DeliverySettings from "./settings/DeliverySettings.jsx";
+import FeeSettings from "./settings/FeeSettings.jsx";
+import HoursSettings from "./settings/HoursSettings.jsx";
+import BusinessSettings from "./settings/BusinessSettings.jsx";
+import AlertsSettings from "./settings/AlertsSettings.jsx";
+import IntegrationsPanel from "./settings/IntegrationsPanel.jsx";
+import SecuritySettings from "./settings/SecuritySettings.jsx";
 
-const Row = ({ title, hint, children }) => (
-  <div className="flex items-center justify-between gap-3 py-3">
-    <div className="min-w-0"><p className="text-sm font-bold">{title}</p>{hint && <p className="text-[11px] text-ink-500">{hint}</p>}</div>
-    {children}
-  </div>
-);
+const SECTIONS = [
+  ["ordering", "Ordering"], ["delivery", "Delivery"], ["fees", "Fees"], ["hours", "Hours"],
+  ["business", "Business"], ["alerts", "Alerts"], ["integrations", "Go live"], ["security", "Security"],
+];
 
-const NumberField = ({ id, value, onChange }) => (
-  <div className="relative w-28 flex-shrink-0">
-    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink-500">₦</span>
-    <input id={id} inputMode="numeric" value={value} onChange={(e) => onChange(Number(e.target.value.replace(/[^\d]/g, "")) || 0)} className={`${inputClass(false)} !h-11 pl-7 text-right`} />
-  </div>
-);
+/**
+ * Settings, split into cards with a section strip. Public settings (ordering, delivery, fees, hours, business) edit the draft
+ * and go live with Publish. Alerts and security are private and save on their own.
+ */
+export default function SettingsPanel({ draft, setDraft, capabilities, demo, section, forcePasswordChange, onPasswordChanged, onLogout }) {
+  const settings = draft.settings;
+  const set = (patch) => setDraft((d) => ({ ...d, settings: { ...d.settings, ...patch } }));
 
-/** Store switches (published with the menu) and password management (applies immediately). */
-export default function SettingsPanel({ draft, setDraft, forcePasswordChange, onPasswordChanged, onLogout }) {
-  const s = draft.settings;
-  const setS = (patch) => setDraft((d) => ({ ...d, settings: { ...d.settings, ...patch } }));
-  const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
-  const [msg, setMsg] = useState({ type: "", text: "" });
-  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (section) document.getElementById(`settings-${section}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [section]);
 
-  const change = async (e) => {
-    e.preventDefault();
-    if (pw.next !== pw.confirm) return setMsg({ type: "error", text: "The new passwords don't match." });
-    setBusy(true);
-    setMsg({ type: "", text: "" });
-    try {
-      await api.merchant.changePassword(pw.current, pw.next);
-      setPw({ current: "", next: "", confirm: "" });
-      setMsg({ type: "ok", text: "Password changed. Other devices have been signed out." });
-      onPasswordChanged();
-    } catch (err) {
-      setMsg({ type: "error", text: err.message });
-    } finally {
-      setBusy(false);
-    }
-  };
+  const jump = (key) => document.getElementById(`settings-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
     <div className="space-y-4 pb-28">
+      <nav aria-label="Settings sections" className="scrollbar-hide sticky top-14 z-20 -mx-4 flex gap-2 overflow-x-auto bg-cream-100/95 px-4 py-2 backdrop-blur">
+        {SECTIONS.map(([key, label]) => (
+          <button key={key} type="button" onClick={() => jump(key)} className="flex-shrink-0 rounded-full bg-cream-50 px-3.5 py-2 text-xs font-bold text-ink-700 ring-1 ring-cream-300 transition hover:bg-cream-200">{label}</button>
+        ))}
+      </nav>
+
       {forcePasswordChange && (
-        <div role="alert" className="rounded-2xl border border-sun-400 bg-sun-100 p-4 text-sm text-sun-900">
+        <div role="alert" className="rounded-2xl border border-sun-400 bg-apricot-200 p-4 text-sm text-sun-900">
           <p className="font-bold">Set your own password</p>
-          <p className="mt-1 text-xs">You&apos;re using the starter password. Choose a new one below before you do anything else.</p>
+          <p className="mt-1 text-xs">You&apos;re using the starter password. Choose a new one in Security before you do anything else.</p>
         </div>
       )}
 
-      <Card>
-        <h2 className="font-display text-base font-extrabold text-leaf-800">Ordering</h2>
-        <div className="divide-y divide-cream-300">
-          <Row title="Accepting orders" hint="Turn off to pause Paystack and WhatsApp checkout."><Switch checked={s.acceptingOrders} onChange={(v) => setS({ acceptingOrders: v })} label="Accepting orders" /></Row>
-          <Row title="Offer delivery" hint="Off = pickup only."><Switch checked={s.deliveryEnabled} onChange={(v) => setS({ deliveryEnabled: v })} label="Offer delivery" /></Row>
-          <Row title="Delivery fee" hint="0 = customer pays the rider."><NumberField id="fee" value={s.deliveryFee} onChange={(v) => setS({ deliveryFee: v })} /></Row>
-          <Row title="Minimum order" hint="Items subtotal. 0 = none."><NumberField id="min" value={s.minOrder} onChange={(v) => setS({ minOrder: v })} /></Row>
-        </div>
-        <p className="mt-2 text-[11px] text-ink-500">These go live when you press Publish.</p>
-      </Card>
-
-      <Card>
-        <h2 className="flex items-center gap-2 font-display text-base font-extrabold text-leaf-800"><KeyRound size={16} /> Password</h2>
-        <form onSubmit={change} className="mt-3 space-y-3" noValidate>
-          <Field id="pw-cur" label="Current password"><input id="pw-cur" type="password" autoComplete="current-password" className={inputClass(false)} value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} /></Field>
-          <Field id="pw-new" label="New password" hint="At least 10 characters. A few random words works well."><input id="pw-new" type="password" autoComplete="new-password" className={inputClass(false)} value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} /></Field>
-          <Field id="pw-conf" label="Repeat new password"><input id="pw-conf" type="password" autoComplete="new-password" className={inputClass(false)} value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} /></Field>
-          {msg.text && <p role={msg.type === "error" ? "alert" : "status"} className={`text-xs font-semibold ${msg.type === "error" ? "text-red-600" : "text-leaf-700"}`}>{msg.text}</p>}
-          <button type="submit" disabled={busy || !pw.current || !pw.next} className={`${btnPrimary} w-full`}>{busy ? "Saving…" : "Change password"}</button>
-        </form>
-      </Card>
-
-      <button type="button" onClick={onLogout} className={`${btnGhost} w-full`}><LogOut size={16} /> Sign out</button>
+      <OrderingSettings settings={settings} set={set} />
+      <DeliverySettings settings={settings} set={set} />
+      <FeeSettings settings={settings} set={set} />
+      <HoursSettings settings={settings} set={set} />
+      <BusinessSettings settings={settings} set={set} />
+      <AlertsSettings capabilities={capabilities} />
+      <IntegrationsPanel capabilities={capabilities} demo={demo} />
+      <SecuritySettings demo={demo} forcePasswordChange={forcePasswordChange} onPasswordChanged={onPasswordChanged} onLogout={onLogout} />
     </div>
   );
 }

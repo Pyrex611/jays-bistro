@@ -10,7 +10,7 @@ import { useMenu } from "../context/MenuContext.js";
 import { useInvoice } from "../hooks/useInvoice.js";
 import { formatPrice } from "../lib/format.js";
 
-function Notice({ title, children }) {
+function Notice({ title, children, whatsapp }) {
   return (
     <div className="rounded-3xl bg-cream-50 p-8 text-center shadow-card">
       <img src={assetUrl(SITE.logoPath)} alt="" className="mx-auto h-14 w-14 rounded-full border border-cream-300 object-cover" />
@@ -18,7 +18,7 @@ function Notice({ title, children }) {
       <div className="mt-2 text-sm leading-relaxed text-ink-600">{children}</div>
       <div className="mt-6 flex flex-col gap-2">
         <Link to="/" className="rounded-full bg-leaf-700 py-3 text-sm font-bold text-white">Back to the menu</Link>
-        <a href={`https://wa.me/${SITE.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] py-3 text-sm font-bold text-white"><WhatsAppIcon size={18} /> Chat with us</a>
+        <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] py-3 text-sm font-bold text-white"><WhatsAppIcon size={18} /> Chat with us</a>
       </div>
     </div>
   );
@@ -31,14 +31,14 @@ export default function InvoicePage() {
   const state = useInvoice(id);
 
   return (
-    <div className="min-h-svh bg-leaf-800">
+    <div className="min-h-svh bg-sage-300 bg-[radial-gradient(120%_80%_at_20%_0%,rgba(255,255,255,0.55),transparent_60%)]">
       <Helmet>
         <title>{state.phase === "paid" ? "Receipt" : "Invoice"} · {SITE.name}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <div className="mx-auto max-w-md px-4 pb-10 pt-[calc(1.25rem+env(safe-area-inset-top))]">
-        <Link to="/" className="no-print mb-4 inline-flex items-center gap-1 text-xs font-bold text-leaf-100 hover:text-white"><ArrowLeft size={14} /> {SITE.name}</Link>
+        <Link to="/" className="no-print mb-4 inline-flex items-center gap-1 text-xs font-bold text-leaf-800 hover:text-leaf-950"><ArrowLeft size={14} /> {SITE.name}</Link>
 
         {state.phase === "loading" && (
           <div className="space-y-3" role="status" aria-label="Loading">
@@ -48,12 +48,12 @@ export default function InvoicePage() {
 
         {state.phase === "paid" && (
           <>
-            <div className="no-print mb-5 text-center text-cream-50">
+            <div className="no-print mb-5 text-center text-leaf-950">
               <SuccessBurst />
               <h1 className="mt-2 font-display text-2xl font-extrabold">Payment received</h1>
-              <p className="mt-1 text-sm text-leaf-100">Thank you, {state.receipt.customer.name.split(" ")[0]}! {formatPrice(state.receipt.total)} paid.</p>
+              <p className="mt-1 text-sm text-leaf-900">Thank you, {state.receipt.customer.name.split(" ")[0]}! {formatPrice(state.receipt.total)} paid.</p>
             </div>
-            <Receipt receipt={state.receipt} mode={state.mode} />
+            <Receipt receipt={state.receipt} mode={state.mode} whatsapp={settings.business.whatsapp} />
             <NextSteps receipt={state.receipt} />
             <Link to="/" className="no-print mt-5 block rounded-full bg-sun-500 py-3.5 text-center text-sm font-bold uppercase tracking-widest text-leaf-950">Back to the menu</Link>
           </>
@@ -61,9 +61,9 @@ export default function InvoicePage() {
 
         {state.phase === "pending" && <InvoicePending invoice={state.invoice} settings={settings} confirming={state.confirming} gaveUp={state.gaveUp} onRefresh={state.reload} />}
 
-        {state.phase === "expired" && <Notice title="This invoice has expired">Invoices are valid for 24 hours so your prices stay accurate. Pop back to the menu and place a fresh order — it only takes a minute.</Notice>}
-        {state.phase === "missing" && <Notice title="We couldn't find that invoice">The link may be mistyped, or the invoice expired and was cleared. You can start a new order any time.</Notice>}
-        {state.phase === "error" && <Notice title="Something went wrong">{state.message} <button type="button" onClick={state.reload} className="font-bold underline underline-offset-4">Try again</button></Notice>}
+        {state.phase === "expired" && <Notice whatsapp={settings.business.whatsapp} title="This invoice has expired">Invoices are valid for 24 hours so your prices stay accurate. Pop back to the menu and place a fresh order — it only takes a minute.</Notice>}
+        {state.phase === "missing" && <Notice whatsapp={settings.business.whatsapp} title="We couldn't find that invoice">The link may be mistyped, or the invoice expired and was cleared. You can start a new order any time.</Notice>}
+        {state.phase === "error" && <Notice whatsapp={settings.business.whatsapp} title="Something went wrong">{state.message} <button type="button" onClick={state.reload} className="font-bold underline underline-offset-4">Try again</button></Notice>}
       </div>
     </div>
   );

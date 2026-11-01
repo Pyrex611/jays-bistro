@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getOpenStatus } from "../lib/hours.js";
+import { getOpenStatus, toSlots } from "../lib/hours.js";
+import { DEFAULT_SETTINGS, normalizeHours } from "../lib/settings.js";
 import { SITE } from "../config/site.js";
 
 // Lagos is UTC+1 all year. 2026-10-26 is a Monday.
@@ -27,3 +28,25 @@ describe("getOpenStatus (Africa/Lagos)", () => {
     expect(getOpenStatus([], at("2026-10-26T10:00:00Z"))).toEqual({ open: false, label: "Closed" });
   });
 });
+
+describe("settings-shaped hours and closures", () => {
+  const hours = DEFAULT_SETTINGS.hours;
+
+  it("reads the per-day settings shape", () => {
+    expect(getOpenStatus(hours, at("2026-10-26T10:00:00Z")).label).toBe("Open · until 10 PM");
+    expect(toSlots(hours)).toHaveLength(7);
+  });
+
+  it("skips days marked closed when finding the next opening", () => {
+    const tuesdayClosed = normalizeHours(hours.map((h) => (h.day === "Tuesday" ? { ...h, closed: true } : h)));
+    expect(getOpenStatus(tuesdayClosed, at("2026-10-26T22:30:00Z")).label).toBe("Closed · opens Wed at 8 AM");
+  });
+
+  it("honours special closures (today and the following days)", () => {
+    const closures = [{ date: "2026-10-26", note: "Public holiday" }];
+    expect(getOpenStatus(hours, at("2026-10-26T10:00:00Z"), closures)).toEqual({ open: false, label: "Closed today · opens tomorrow at 8 AM" });
+    const twoDays = [{ date: "2026-10-26" }, { date: "2026-10-27" }];
+    expect(getOpenStatus(hours, at("2026-10-26T10:00:00Z"), twoDays).label).toBe("Closed today · opens Wed at 8 AM");
+  });
+});
+

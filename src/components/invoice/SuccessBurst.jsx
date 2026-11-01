@@ -1,12 +1,12 @@
 const CONFETTI = [
   { left: "8%", color: "bg-sun-500", delay: "0s", size: "h-2 w-2" },
-  { left: "20%", color: "bg-leaf-300", delay: "0.15s", size: "h-1.5 w-3" },
+  { left: "20%", color: "bg-leaf-500", delay: "0.15s", size: "h-1.5 w-3" },
   { left: "33%", color: "bg-sun-300", delay: "0.05s", size: "h-2 w-2" },
-  { left: "46%", color: "bg-cream-50", delay: "0.25s", size: "h-1.5 w-3" },
+  { left: "46%", color: "bg-leaf-600", delay: "0.25s", size: "h-1.5 w-3" },
   { left: "58%", color: "bg-sun-500", delay: "0.1s", size: "h-2 w-2" },
-  { left: "70%", color: "bg-leaf-300", delay: "0.3s", size: "h-2 w-2" },
+  { left: "70%", color: "bg-leaf-500", delay: "0.3s", size: "h-2 w-2" },
   { left: "82%", color: "bg-sun-300", delay: "0.18s", size: "h-1.5 w-3" },
-  { left: "92%", color: "bg-cream-50", delay: "0.08s", size: "h-2 w-2" },
+  { left: "92%", color: "bg-leaf-600", delay: "0.08s", size: "h-2 w-2" },
 ];
 
 /** Animated check ring + a short burst of brand-coloured confetti. Motion is disabled globally for reduced-motion users. */

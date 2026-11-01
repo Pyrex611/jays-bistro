@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { getStorage } from "./storage.js";
-import { computeTotals, toKobo } from "../../src/lib/pricing.js";
+import { applyAttempt, buildInvoiceRecord, buildReceipt, isExpired as isExpiredModel, INVOICE_TTL_MS as TTL } from "../../src/lib/invoiceModel.js";
+export { normalizePhone, validateCustomer } from "../../src/lib/customer.js";
 
 /**
  * Invoice → receipt lifecycle.
@@ -12,7 +13,7 @@ import { computeTotals, toKobo } from "../../src/lib/pricing.js";
  * The id is 80 random bits, so the link itself is the access token.
  */
 
-export const INVOICE_TTL_MS = 24 * 60 * 60 * 1000;
+export const INVOICE_TTL_MS = TTL;
 const ID_RE = /^\d{8}[a-z2-7]{16}$/;
 const B32 = "abcdefghijklmnopqrstuvwxyz234567";
 
@@ -29,53 +30,13 @@ export function newInvoiceId(now = new Date()) {
   return date + Array.from(bytes, (b) => B32[b & 31]).join("");
 }
 
-export function normalizePhone(raw) {
-  const digits = String(raw ?? "").replace(/[^\d]/g, "");
-  if (/^0\d{10}$/.test(digits)) return `234${digits.slice(1)}`;
-  return digits;
-}
-
-/** Full validation used when someone is about to pay. */
-export function validateCustomer(c, fulfilment) {
-  const errors = {};
-  const name = String(c?.name ?? "").trim();
-  const email = String(c?.email ?? "").trim().toLowerCase();
-  const phone = normalizePhone(c?.phone);
-  const address = String(c?.address ?? "").trim();
-  const note = String(c?.note ?? "").trim();
-
-  if (name.length < 2 || name.length > 60) errors.name = "Enter your name.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 120) errors.email = "Enter a valid email for your receipt.";
-  if (phone.length < 10 || phone.length > 15) errors.phone = "Enter a phone number we can reach.";
-  if (fulfilment === "delivery" && (address.length < 5 || address.length > 200)) errors.address = "Enter your delivery address.";
-  if (note.length > 200) errors.note = "Keep the note under 200 characters.";
-
-  return Object.keys(errors).length ? { ok: false, errors } : { ok: true, customer: { name, email, phone, address: fulfilment === "delivery" ? address : "", note } };
-}
-
-/** @param {{ lines: Array<{item:object, quantity:number}>, fulfilment: string, channel: string, settings: object, customer?: object }} input */
-export function buildInvoice({ lines, fulfilment, channel, settings, customer = {} }, now = new Date()) {
+/** @param {{ lines: Array<{item:object, quantity:number}>, fulfilment: string, channel: string, settings: object, zoneId?: string, customer?: object }} input */
+export function buildInvoice(input, now = new Date()) {
   const id = newInvoiceId(now);
-  const items = lines.map(({ item, quantity }) => ({ id: item.id, name: item.name, unitPrice: item.price, quantity, lineTotal: item.price * quantity }));
-  const totals = computeTotals(items, fulfilment, settings);
-  return {
-    id,
-    code: invoiceCode(id),
-    status: "pending",
-    channel,
-    createdAt: now.toISOString(),
-    expiresAt: new Date(now.getTime() + INVOICE_TTL_MS).toISOString(),
-    items,
-    subtotal: totals.subtotal,
-    deliveryFee: totals.deliveryFee,
-    total: totals.total,
-    fulfilment,
-    customer,
-    attempts: [],
-  };
+  return buildInvoiceRecord({ ...input, id, code: invoiceCode(id), now });
 }
 
-export const isExpired = (record, now = Date.now()) => record.status === "pending" && new Date(record.expiresAt).getTime() < now;
+export const isExpired = isExpiredModel;
 
 export async function saveInvoice(record) {
   await getStorage().putJSON(pendingKey(record.id), record);
@@ -88,16 +49,9 @@ export async function loadInvoice(id) {
   return (await storage.getJSON(receiptKey(id))) ?? (await storage.getJSON(pendingKey(id)));
 }
 
-/** Re-prices an invoice for a chosen fulfilment and registers a new payment attempt. Mutates and returns `record`. */
-export function addAttempt(record, { fulfilment, settings, customer }, now = new Date()) {
-  const totals = computeTotals(record.items, fulfilment, settings);
-  const reference = referenceFor(record.id, record.attempts.length + 1);
-  record.fulfilment = fulfilment;
-  record.deliveryFee = totals.deliveryFee;
-  record.total = totals.total;
-  record.customer = customer;
-  record.attempts.push({ reference, at: now.toISOString(), fulfilment, deliveryFee: totals.deliveryFee, total: totals.total, amountKobo: toKobo(totals.total) });
-  return { record, reference, amountKobo: toKobo(totals.total) };
+/** Re-prices an invoice for a chosen fulfilment/zone and registers a new payment attempt. Mutates and returns `record`. */
+export function addAttempt(record, input, now = new Date()) {
+  return applyAttempt(record, { ...input, reference: referenceFor(record.id, record.attempts.length + 1), now });
 }
 
 /**
@@ -105,20 +59,9 @@ export function addAttempt(record, { fulfilment, settings, customer }, now = new
  * Returns the receipt, or null if the verification does not match what we asked Paystack to charge.
  */
 export async function settle(record, reference, verification, { mode = "live" } = {}) {
+  const receipt = buildReceipt(record, reference, verification, mode);
+  if (!receipt) return null;
   if (record.status === "paid") return record;
-  const attempt = record.attempts.find((a) => a.reference === reference);
-  if (!attempt || verification.status !== "success") return null;
-  if ((verification.currency ?? "NGN") !== "NGN") return null;
-  if (verification.amountKobo !== attempt.amountKobo) return null;
-
-  const receipt = {
-    ...record,
-    status: "paid",
-    fulfilment: attempt.fulfilment,
-    deliveryFee: attempt.deliveryFee,
-    total: attempt.total,
-    payment: { reference, channel: verification.channel ?? "card", paidAt: verification.paidAt ?? new Date().toISOString(), amount: attempt.total, currency: "NGN", mode },
-  };
   const storage = getStorage();
   await storage.putJSON(receiptKey(record.id), receipt);
   await storage.remove(pendingKey(record.id));

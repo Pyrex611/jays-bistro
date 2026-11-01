@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { allow, fail, ok, parseBody, requireAjax } from "../_lib/http.js";
+import { requireStorage } from "../_lib/guard.js";
 import { requireMerchant } from "../_lib/auth.js";
 import { getStorage } from "../_lib/storage.js";
 
@@ -15,6 +16,7 @@ const sniff = (buf) => {
 /** POST /api/merchant/image { dataUrl } → { url }  (password-protected; WebP/PNG/JPEG only, ≤ 1.5 MB) */
 export default async function handler(req, res) {
   if (!allow(req, res, ["POST"])) return;
+  if (!requireStorage(res)) return;
   if (!requireAjax(req, res)) return;
   if (!(await requireMerchant(req, res))) return;
 

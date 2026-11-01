@@ -72,7 +72,7 @@ export default function ItemEditor({ item, categories, onSave, onDelete, onClose
         <div>
           <p className="mb-1.5 text-xs font-bold text-ink-700">Photo</p>
           <div className="flex gap-3">
-            <div className="relative h-28 w-36 flex-shrink-0 overflow-hidden rounded-2xl bg-leaf-800 shadow-card">
+            <div className="surface-sage-tile relative h-28 w-36 flex-shrink-0 overflow-hidden rounded-2xl shadow-card">
               <FoodImage src={form.image || PLACEHOLDER} alt="Preview" variant={form.imageStyle} className={`h-full w-full ${cutout ? "p-3" : ""}`} />
               {uploading && <div className="absolute inset-0 flex items-center justify-center bg-leaf-950/60"><Loader2 className="animate-spin text-white" /></div>}
             </div>

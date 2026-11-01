@@ -22,12 +22,16 @@ pending ──(Paystack confirms exact amount)──▶ paid (receipt)
 4. Settling is idempotent (webhook and browser can race safely).
 5. If the customer switches pickup↔delivery on the invoice page, the total is re-priced and each attempt records its own amount and reference (`<id>-1`, `<id>-2`).
 6. Paused store, sold-out items and below-minimum orders are rejected with clear messages (HTTP 403/409/400).
-7. If our API is unreachable when the WhatsApp button is tapped, a plain WhatsApp order still opens: ordering never depends on our backend. Business-rule rejections (paused, sold out) are shown instead of bypassed.
+7. **Delivery areas:** when areas are configured the customer must choose an enabled one; its fee, minimum order and ETA apply (a zone minimum replaces the global minimum). Free delivery applies when the items subtotal reaches the threshold. Outside hours with auto-pause on, orders are refused with a clear message.
+8. **Online payment fee:** computed on the server from the merchant's settings (percentage + flat amount, flat waived below a threshold, capped) and added **only when paying online**, never to a WhatsApp invoice until the customer pays it. It appears as its own line on checkout, invoice and receipt and is included in the exact kobo amount Paystack must confirm.
+9. If our API is unreachable when the WhatsApp button is tapped, a plain WhatsApp order still opens: ordering never depends on our backend. Business-rule rejections (paused, sold out) are shown instead of bypassed.
 
 ## Payment modes
 | Mode | When | Behaviour |
 |---|---|---|
-| **live** | `PAYSTACK_SECRET_KEY` set (`sk_test_…` or `sk_live_…`) | Real Paystack. Test keys + Paystack test cards cost nothing |
+| **demo** | no storage connected (see DEMO_MODE) | Demo payment page at `/pay/demo/:id` stands in for Paystack; browser-local invoices; receipts stamped **DEMO** |
+| **test** | `PAYSTACK_SECRET_KEY` starts `sk_test_` | Real Paystack with test cards; receipts stamped **TEST**; excluded from sales KPIs unless included in the console |
+| **live** | `PAYSTACK_SECRET_KEY` starts `sk_live_` | Real money; receipts stamped **PAID** |
 | **mock** | no key, not production (local dev, Vercel previews) | Skips Paystack; "pays" instantly; receipts are stamped **TEST** |
 | **off** | no key in production | Checkout says payments aren't on yet; WhatsApp invoices still work |
 

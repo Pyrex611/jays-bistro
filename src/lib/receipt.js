@@ -1,6 +1,9 @@
 /** Display helpers for invoices and receipts. Pure. */
 
 const CHANNELS = { card: "Card", bank: "Bank", bank_transfer: "Bank transfer", ussd: "USSD", qr: "QR", mobile_money: "Mobile money", eft: "EFT", apple_pay: "Apple Pay", test: "Test payment" };
+/** Receipts from mock/test payments are stamped TEST. */
+export const isTestMode = (mode) => mode === "mock" || mode === "test" || mode === "demo";
+
 export const channelLabel = (channel) => CHANNELS[channel] ?? (channel ? String(channel).replaceAll("_", " ") : "Online");
 
 export function formatLagosDateTime(iso) {

@@ -16,6 +16,16 @@ describe("menu publishing", () => {
     expect(r.headers["cache-control"]).toContain("s-maxage=30");
   });
 
+  it("reports capabilities so the app can pick real vs demo behaviour", async () => {
+    const live = (await call(publicMenu)).json.capabilities;
+    expect(live).toMatchObject({ storage: true, payments: "mock", email: false, orderStatus: false });
+    process.env.PAYSTACK_SECRET_KEY = "sk_test_abc";
+    expect((await call(publicMenu)).json.capabilities.payments).toBe("test");
+    process.env.PAYSTACK_SECRET_KEY = "sk_live_abc";
+    expect((await call(publicMenu)).json.capabilities.payments).toBe("live");
+    delete process.env.PAYSTACK_SECRET_KEY;
+  });
+
   it("publishes edits, bumps the version, and serves them publicly", async () => {
     const { cookie } = await signIn(auth);
     const current = (await call(adminMenu, { headers: { cookie } })).json;

@@ -6,6 +6,7 @@ import StorefrontPage from "./pages/StorefrontPage.jsx";
 // The merchant console and the invoice/receipt page are separate chunks: customers browsing the menu never download them.
 const MerchantPage = lazy(() => import("./pages/MerchantPage.jsx"));
 const InvoicePage = lazy(() => import("./pages/InvoicePage.jsx"));
+const MockPaymentPage = lazy(() => import("./pages/MockPaymentPage.jsx"));
 
 const basename = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
 
@@ -21,6 +22,8 @@ export default function App() {
             {/* /menu is kept for SEO continuity (it is in sitemap.xml); it renders the same page scrolled to the menu. */}
             <Route path="/menu" element={<StorefrontPage scrollToMenu />} />
             <Route path="/invoice/:id" element={<InvoicePage />} />
+            {/* Demo payment page: stands in for Paystack until the account is connected */}
+            <Route path="/pay/demo/:id" element={<MockPaymentPage />} />
             <Route path="/merchant" element={<MerchantPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

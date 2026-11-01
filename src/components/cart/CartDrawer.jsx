@@ -51,7 +51,7 @@ export default function CartDrawer({ open, onClose, lines, subtotal, settings, u
               <div className="flex-1 space-y-3 overflow-y-auto p-4">
                 {lines.length === 0 ? (
                   <div className="mt-16 flex flex-col items-center text-center text-ink-500">
-                    <div className="mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-leaf-100 text-leaf-700"><ShoppingBag size={28} /></div>
+                    <div className="mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-sage-200 text-leaf-700"><ShoppingBag size={28} /></div>
                     <p className="font-bold text-ink-800">Your tray is empty</p>
                     <p className="mt-1 text-xs">Add a few dishes and they&apos;ll wait for you here.</p>
                     <button type="button" onClick={close} className="mt-4 rounded-full bg-leaf-700 px-5 py-2.5 text-sm font-bold text-white">Explore the menu</button>
@@ -61,7 +61,7 @@ export default function CartDrawer({ open, onClose, lines, subtotal, settings, u
                     const soldOut = item.isAvailable === false;
                     return (
                       <article key={item.id} className={`flex items-center gap-3 rounded-2xl border bg-cream-100 p-2.5 ${soldOut ? "border-sun-300" : "border-cream-300"}`}>
-                        <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-leaf-800">
+                        <div className="surface-sage-tile h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl">
                           <FoodImage src={item.image} alt={item.name} variant={item.imageStyle} icon={iconByCategory[item.category]} className={`h-full w-full ${item.imageStyle === "cutout" ? "p-1.5" : ""}`} />
                         </div>
                         <div className="min-w-0 flex-1">

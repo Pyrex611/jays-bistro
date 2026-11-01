@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "images:migrate": "node scripts/copy-menu-images.mjs"
+    "images:migrate": "node scripts/copy-menu-images.mjs",
+    "photos:curate": "node scripts/curate-photos.mjs",
+    "photos:apply": "node scripts/apply-photos.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.554.0",

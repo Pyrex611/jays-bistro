@@ -1,4 +1,6 @@
 import { allow, clientIp, fail, ok, parseBody, requireAjax } from "../_lib/http.js";
+import { requireStorage } from "../_lib/guard.js";
+import { storageConfigured } from "../_lib/storage.js";
 import {
   authenticate, clearCookieHeader, clearFailures, cookieHeader, getSession, issueToken,
   recordFailure, setPassword, throttleStatus, validateNewPassword,
@@ -17,13 +19,16 @@ export default async function handler(req, res) {
   if (!allow(req, res, ["GET", "POST", "PUT", "DELETE"])) return;
 
   if (req.method === "GET") {
+    // No storage yet → DEMO mode: the console runs on the browser-local demo backend (src/demo) with the setup password.
+    if (!storageConfigured()) return ok(res, { authenticated: false, mustChangePassword: false, mode: "demo" });
     const s = await getSession(req);
-    return ok(res, { authenticated: Boolean(s), mustChangePassword: Boolean(s?.bootstrap) });
+    return ok(res, { authenticated: Boolean(s), mustChangePassword: Boolean(s?.bootstrap), mode: "live" });
   }
 
   if (!requireAjax(req, res)) return;
 
   if (req.method === "DELETE") return ok(res, { authenticated: false }, { "Set-Cookie": clearCookieHeader(req) });
+  if (!requireStorage(res)) return;
 
   const body = parseBody(req);
   const ip = clientIp(req);

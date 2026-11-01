@@ -37,6 +37,32 @@ describe("menu catalogue integrity", () => {
   });
 });
 
+describe("photo integrity", () => {
+  // Dishes that may legitimately share one photo (same dish in different sizes, or close variants).
+  const ALLOWED_SHARED = [[19, 20], [21, 22, 23, 24], [6, 7], [29, 30], [54, 55, 56], [57, 61]];
+  const PLACEHOLDERS = [42, 43, 44, 45, 46, 50, 60, 63, 64]; // honest icon tile until a real photo exists
+
+  it("never lets two different dishes share a photo unless that pairing is on the allow-list", () => {
+    const groups = new Map();
+    MENU_ITEMS.filter((i) => i.image !== "menu/placeholder.svg").forEach((i) => (groups.get(i.image) ?? groups.set(i.image, []).get(i.image)).push(i.id));
+    const shared = [...groups.values()].filter((ids) => ids.length > 1);
+    shared.forEach((ids) => expect(ALLOWED_SHARED.some((allowed) => ids.every((id) => allowed.includes(id))), `ids ${ids} share a photo`).toBe(true));
+  });
+
+  it("uses the placeholder only for the dishes that have no accurate photo yet", () => {
+    expect(MENU_ITEMS.filter((i) => i.image === "menu/placeholder.svg").map((i) => i.id)).toEqual(PLACEHOLDERS);
+  });
+});
+
+describe("home screen defaults", () => {
+  it("puts the six signature dishes in the hero and two Arabian teas in the sub-hero", () => {
+    expect(HERO_ITEM_IDS).toEqual([1, 36, 2, 3, 21, 51]);
+    expect(SUBHERO_ITEM_IDS.map((id) => MENU_ITEMS.find((i) => i.id === id).category)).toEqual(["Beverages", "Beverages"]);
+    expect(SUBHERO_ITEM_IDS.map((id) => MENU_ITEMS.find((i) => i.id === id).name.toLowerCase()).every((n) => n.includes("arabian"))).toBe(true);
+    expect(SUBHERO_ITEM_IDS.some((id) => HERO_ITEM_IDS.includes(id))).toBe(false);
+  });
+});
+
 describe("buildMenuModel", () => {
   const items = [
     { id: 1, category: "Meals", name: "A", price: 100, isActive: true },
@@ -69,3 +95,11 @@ describe("buildMenuModel", () => {
     expect(model.subhero).toHaveLength(2);
   });
 });
+describe("model groups", () => {
+  it("exposes the storefront pills without an All entry, in menu order", () => {
+    const m = buildMenuModel({ items: MENU_ITEMS, categories: CATEGORIES, heroIds: HERO_ITEM_IDS, subheroIds: SUBHERO_ITEM_IDS });
+    expect(m.groups.map((g) => g.name)).toEqual(["Meals", "Protein", "Starters", "Bites", "Beverages", "Soups"]);
+    expect(m.categories[0].name).toBe("All");
+  });
+});
+

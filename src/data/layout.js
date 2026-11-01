@@ -1,11 +1,10 @@
 /**
- * Storefront layout slots (Sprint 1: static).
+ * Storefront layout slots (default; the merchant edits them in the console → Home).
  *
- * Hero      = swipeable carousel under the header (any number of items, ideally 3–6).
- * Sub-hero  = the two cards directly under the hero: [left (horizontal), right (vertical)].
+ * Hero      = swipeable carousel under the header (up to 12 slides).
+ * Sub-hero  = the two cards directly under the hero: [left (apricot, horizontal), right (sage, vertical)].
  *
- * Both reference menu item ids. Phase 2 moves these into the `layout_slots` table so
- * they can be edited from the admin dashboard (docs/DATA_MODEL.md).
+ * Both reference menu item ids.
  */
-export const HERO_ITEM_IDS = [1, 36, 2, 3];
-export const SUBHERO_ITEM_IDS = [21, 51];
+export const HERO_ITEM_IDS = [1, 36, 2, 3, 21, 51];
+export const SUBHERO_ITEM_IDS = [7, 10]; // Arabian Double · Arabian Tea Pack

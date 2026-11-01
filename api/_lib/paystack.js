@@ -6,14 +6,21 @@ import { isProduction } from "./http.js";
  *   verify     → server-side confirmation (the ONLY thing we trust; never the redirect or webhook payload)
  *
  * Modes:
- *   live — PAYSTACK_SECRET_KEY set (sk_test_… for testing, sk_live_… for real money)
+ *   test — PAYSTACK_SECRET_KEY is an sk_test_… key: real Paystack, test money (receipts stamped TEST, excluded from sales KPIs)
+ *   live — PAYSTACK_SECRET_KEY is an sk_live_… key: real money
  *   mock — no key AND not production: lets you click through the whole flow locally / on previews
  *   off  — no key in production: checkout answers "payments not configured"
  */
 
 const API = "https://api.paystack.co";
 
-export const paystackMode = () => (process.env.PAYSTACK_SECRET_KEY ? "live" : isProduction() ? "off" : "mock");
+export const paystackMode = () => {
+  const key = process.env.PAYSTACK_SECRET_KEY;
+  if (key) return key.startsWith("sk_test_") ? "test" : "live"; // "test" = real Paystack, test money: receipts are stamped TEST
+  return isProduction() ? "off" : "mock";
+};
+/** True when we really talk to Paystack (test or live key). */
+export const isRealPaystack = (mode = paystackMode()) => mode === "live" || mode === "test";
 
 async function call(path, init = {}) {
   const controller = new AbortController();

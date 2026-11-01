@@ -25,10 +25,13 @@ const PATHS = {
   ),
   protein: (
     <>
-      <ellipse cx="15.3" cy="8.7" rx="5.3" ry="4.1" transform="rotate(45 15.3 8.7)" />
-      <path d="M11.6 12.4 6.9 17.1" />
-      <circle cx="5.7" cy="17.3" r="1.5" />
-      <circle cx="6.8" cy="19.2" r="1.5" />
+      {/* Suya skewer: three separated chunks on a stick, pointed tip, handle knob */}
+      <rect x="6.14" y="13.26" width="3.8" height="5.4" rx="1.3" transform="rotate(-45 8.04 15.96)" />
+      <rect x="10.1" y="9.3" width="3.8" height="5.4" rx="1.3" transform="rotate(-45 12 12)" />
+      <rect x="14.06" y="5.34" width="3.8" height="5.4" rx="1.3" transform="rotate(-45 15.96 8.04)" />
+      <path d="M3.2 20.8 6.2 17.8" />
+      <path d="M17.8 6.2 20.9 3.1" />
+      <circle cx="3.3" cy="20.7" r="1.05" />
     </>
   ),
   starters: (

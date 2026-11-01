@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { promisify } from "node:util";
 import { getStorage } from "./storage.js";
 import { fail, isHttps, isProduction, parseCookies } from "./http.js";
+export { validateNewPassword } from "../../src/lib/password.js";
 
 /**
  * Merchant password lock — no auth provider, no user accounts.
@@ -63,13 +64,6 @@ export async function setPassword(newPassword) {
   await getStorage().putJSON(RECORD_KEY, rec);
   recordCache = { at: Date.now(), value: rec };
   return { pwv: fingerprint(rec) };
-}
-
-export function validateNewPassword(pw) {
-  if (typeof pw !== "string" || pw.length < 10) return "Use at least 10 characters.";
-  if (pw.length > 128) return "That password is too long.";
-  if (/^(.)\1+$/.test(pw)) return "Choose something less repetitive.";
-  return null;
 }
 
 // ── sessions ────────────────────────────────────────────────

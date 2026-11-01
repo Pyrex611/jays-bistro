@@ -28,7 +28,7 @@ export default function ProductModal({ item, icon, quantity, onClose, onAdd, onD
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="w-full max-w-md animate-slide-up overflow-hidden rounded-t-3xl bg-cream-50 shadow-2xl sm:rounded-3xl">
-        <div className="relative h-60 bg-leaf-800">
+        <div className="surface-sage-tile relative h-60">
           <FoodImage src={item.image} alt={item.name} variant={item.imageStyle} icon={icon} className={`h-full w-full ${item.imageStyle === "cutout" ? "p-6" : ""} ${soldOut ? "opacity-50 grayscale" : ""}`} />
           <button ref={closeRef} type="button" onClick={onClose} aria-label="Close" className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-cream-50/90 transition hover:bg-cream-50">
             <X size={20} />

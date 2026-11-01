@@ -7,6 +7,10 @@ import invoice from "../../api/invoice/[id].js";
 import webhook from "../../api/paystack/webhook.js";
 import { getStorage } from "../../api/_lib/storage.js";
 import { AJAX, call, freshEnv, signIn, stubPaystack } from "./apiHelpers.js";
+import { computeServiceFee } from "../lib/pricing.js";
+import { DEFAULT_SETTINGS } from "../lib/settings.js";
+
+const FEE = (base) => computeServiceFee(base, DEFAULT_SETTINGS.serviceFee);
 
 const CUSTOMER = { name: "Ada Obi", email: "ada@example.com", phone: "0806 262 4447", address: "12 High Level, Makurdi", note: "No pepper" };
 const ITEMS = [{ id: 1, quantity: 2 }, { id: 2, quantity: 1 }]; // Party Jollof ₦1,500 ×2 + Isi-ewu ₦6,000 = ₦9,000
@@ -110,7 +114,9 @@ describe("pay online (mock mode — no Paystack key, not production)", () => {
     expect(pay.status).toBe(200);
     const ref = new URL(pay.json.authorizationUrl).searchParams.get("reference");
     const done = await call(invoice, { query: { id, reference: ref, mock: "success" } });
-    expect(done.json.receipt.total).toBe(9000);
+    expect(done.json.receipt.total).toBe(9000 + FEE(9000));
+    expect(done.json.receipt.serviceFee).toBe(FEE(9000));
+    expect(done.json.receipt.deliveryFee).toBe(0);
     expect(done.json.receipt.fulfilment).toBe("pickup");
   });
 
@@ -156,7 +162,7 @@ describe("pay online (live mode, Paystack stubbed)", () => {
     const r = await call(checkout, { method: "POST", body: { items: ITEMS, intent: "pay", fulfilment: "pickup", customer: CUSTOMER } });
     expect(r.json.authorizationUrl).toContain("checkout.paystack.com");
     const sent = JSON.parse(fn.mock.calls[0][1].body);
-    expect(sent).toMatchObject({ email: "ada@example.com", amount: 900000, currency: "NGN" });
+    expect(sent).toMatchObject({ email: "ada@example.com", amount: (9000 + FEE(9000)) * 100, currency: "NGN" });
     expect(sent.callback_url).toBe(r.json.invoiceUrl);
     expect(fn.mock.calls[0][1].headers.Authorization).toBe("Bearer sk_test_stub");
   });
@@ -171,28 +177,28 @@ describe("pay online (live mode, Paystack stubbed)", () => {
     // wrong amount → NOT settled (tampering / partial payment)
     expect((await call(invoice, { query: { id, reference: ref } })).json.status).toBe("pending");
     // wrong currency → NOT settled
-    verdict = { ...verdict, amount: 900000, currency: "USD" };
+    verdict = { ...verdict, amount: (9000 + FEE(9000)) * 100, currency: "USD" };
     expect((await call(invoice, { query: { id, reference: ref } })).json.status).toBe("pending");
     // abandoned → NOT settled
     verdict = { status: "abandoned" };
     expect((await call(invoice, { query: { id, reference: ref } })).json.status).toBe("pending");
     // correct → settled with the channel Paystack reports
-    verdict = { status: "success", amount: 900000, currency: "NGN", channel: "bank_transfer", paid_at: "2026-10-25T10:00:00Z" };
+    verdict = { status: "success", amount: (9000 + FEE(9000)) * 100, currency: "NGN", channel: "bank_transfer", paid_at: "2026-10-25T10:00:00Z" };
     const ok = await call(invoice, { query: { id, reference: ref } });
     expect(ok.json.status).toBe("paid");
-    expect(ok.json.receipt.payment).toMatchObject({ channel: "bank_transfer", amount: 9000, mode: "live" });
+    expect(ok.json.receipt.payment).toMatchObject({ channel: "bank_transfer", amount: 9000 + FEE(9000), mode: "test" }); // sk_test_ key → TEST
   });
 
   it("ignores a reference that does not belong to the invoice", async () => {
     // Paystack would say "success" for the foreign reference, but it is not one of this invoice's attempts.
-    initStub((ref) => (ref === "someone-elses-ref" ? { status: "success", amount: 900000, currency: "NGN" } : { status: "abandoned" }));
+    initStub((ref) => (ref === "someone-elses-ref" ? { status: "success", amount: (9000 + FEE(9000)) * 100, currency: "NGN" } : { status: "abandoned" }));
     const r = await call(checkout, { method: "POST", body: { items: ITEMS, intent: "pay", fulfilment: "pickup", customer: CUSTOMER } });
     const res = await call(invoice, { query: { id: r.json.invoiceId, reference: "someone-elses-ref" } });
     expect(res.json.status).toBe("pending");
   });
 
   it("webhook settles an invoice even if the customer never came back", async () => {
-    initStub(() => ({ status: "success", amount: 900000, currency: "NGN", channel: "card", paid_at: "2026-10-25T10:00:00Z" }));
+    initStub(() => ({ status: "success", amount: (9000 + FEE(9000)) * 100, currency: "NGN", channel: "card", paid_at: "2026-10-25T10:00:00Z" }));
     const r = await call(checkout, { method: "POST", body: { items: ITEMS, intent: "pay", fulfilment: "pickup", customer: CUSTOMER } });
     const id = r.json.invoiceId;
 
@@ -205,7 +211,7 @@ describe("pay online (live mode, Paystack stubbed)", () => {
     initStub(() => ({ status: "abandoned" }));
     const r = await call(checkout, { method: "POST", body: { items: ITEMS, intent: "pay", fulfilment: "pickup", customer: CUSTOMER } });
     const id = r.json.invoiceId;
-    await call(webhook, { method: "POST", body: { event: "charge.success", data: { reference: `${id}-1`, status: "success", amount: 900000 } } });
+    await call(webhook, { method: "POST", body: { event: "charge.success", data: { reference: `${id}-1`, status: "success", amount: (9000 + FEE(9000)) * 100 } } });
     expect((await call(invoice, { query: { id } })).json.status).toBe("pending");
     // junk and non-charge events are acknowledged and ignored
     expect((await call(webhook, { method: "POST", body: { event: "charge.success", data: { reference: "x" } } })).status).toBe(200);
@@ -235,26 +241,99 @@ describe("payments switched off (production, no key)", () => {
 });
 
 describe("merchant orders", () => {
-  it("lists paid orders with KPIs; pending invoices do not count", async () => {
+  const payTwo = async () => {
     for (const items of [ITEMS, [{ id: 1, quantity: 1 }]]) {
       const s = await call(checkout, { method: "POST", body: { items, intent: "pay", fulfilment: "pickup", customer: CUSTOMER } });
       await call(invoice, { query: { id: s.json.invoiceId, reference: `${s.json.invoiceId}-1`, mock: "success" } });
     }
     await call(checkout, { method: "POST", body: { items: ITEMS, intent: "invoice" } }); // unpaid
+  };
 
+  it("lists paid orders with KPIs when test orders are included; pending invoices never count", async () => {
+    await payTwo();
     expect((await call(orders, { query: { days: "7" } })).status).toBe(401);
     const { cookie } = await signIn(auth);
-    const r = await call(orders, { query: { days: "7" }, headers: { cookie } });
+    const r = await call(orders, { query: { days: "7", includeTest: "1" }, headers: { cookie } });
     expect(r.status).toBe(200);
-    expect(r.json.kpis).toEqual({ revenue: 10500, orders: 2, averageOrder: 5250 });
+    const revenue = 9000 + FEE(9000) + 1500 + FEE(1500);
+    expect(r.json.kpis).toEqual({ revenue, orders: 2, averageOrder: Math.round(revenue / 2) });
     expect(r.json.topItems[0]).toMatchObject({ id: 1, units: 3, revenue: 4500 });
     expect(r.json.daily).toHaveLength(7);
     expect(r.json.orders).toHaveLength(2);
+  });
+
+  it("excludes test/mock payments from sales by default but reports how many there are", async () => {
+    await payTwo();
+    const { cookie } = await signIn(auth);
+    const r = await call(orders, { query: { days: "7" }, headers: { cookie } });
+    expect(r.json.kpis).toEqual({ revenue: 0, orders: 0, averageOrder: 0 });
+    expect(r.json.testOrders).toBe(2);
+    expect(r.json.orders).toHaveLength(0);
   });
 
   it("summarize() handles an empty period", () => {
     const s = summarize([], 3, new Date("2026-10-25T12:00:00Z"));
     expect(s.kpis).toEqual({ revenue: 0, orders: 0, averageOrder: 0 });
     expect(s.daily).toHaveLength(3);
+  });
+});
+
+describe("delivery zones, free delivery, service fee and auto-pause", () => {
+  const ZONES = [
+    { id: "high-level", name: "High Level", fee: 500, minOrder: 0, etaMins: [20, 35], enabled: true },
+    { id: "north-bank", name: "North Bank", fee: 800, minOrder: 5000, etaMins: [30, 45], enabled: true },
+    { id: "old-gra", name: "Old GRA", fee: 1200, minOrder: 0, etaMins: [40, 60], enabled: false },
+  ];
+
+  it("prices delivery by zone, snapshots the zone on the invoice, and rejects bad zones", async () => {
+    await publishSettings({ zones: ZONES });
+    const ok = await call(checkout, { method: "POST", body: { items: ITEMS, intent: "invoice", fulfilment: "delivery", zoneId: "high-level" } });
+    expect(ok.json.total).toBe(9500);
+    const inv = await call(invoice, { query: { id: ok.json.invoiceId } });
+    expect(inv.json.invoice.zone).toMatchObject({ id: "high-level", name: "High Level", etaMins: [20, 35] });
+
+    const missing = await call(checkout, { method: "POST", body: { items: ITEMS, intent: "invoice", fulfilment: "delivery" } });
+    expect(missing.status).toBe(422);
+    expect(missing.json.fields.zone).toBeTruthy();
+    for (const bad of ["old-gra", "nope", "../x"]) {
+      expect((await call(checkout, { method: "POST", body: { items: ITEMS, intent: "invoice", fulfilment: "delivery", zoneId: bad } })).status, bad).toBe(422);
+    }
+    // pickup ignores zones entirely
+    expect((await call(checkout, { method: "POST", body: { items: ITEMS, intent: "invoice", fulfilment: "pickup", zoneId: "north-bank" } })).json.total).toBe(9000);
+  });
+
+  it("applies a per-zone minimum and the free-delivery threshold", async () => {
+    await publishSettings({ zones: ZONES, freeDeliveryAbove: 8000 });
+    const small = await call(checkout, { method: "POST", body: { items: [{ id: 1, quantity: 2 }], intent: "invoice", fulfilment: "delivery", zoneId: "north-bank" } });
+    expect(small.status).toBe(400);
+    expect(small.json.code).toBe("below_minimum");
+    const free = await call(checkout, { method: "POST", body: { items: ITEMS, intent: "invoice", fulfilment: "delivery", zoneId: "north-bank" } });
+    expect(free.json.total).toBe(9000); // ₦9,000 ≥ ₦8,000 → delivery free
+  });
+
+  it("adds the service fee only when paying online, computed by the server", async () => {
+    const pay = await call(checkout, { method: "POST", body: { items: ITEMS, intent: "pay", fulfilment: "pickup", customer: CUSTOMER } });
+    const done = await call(invoice, { query: { id: pay.json.invoiceId, reference: `${pay.json.invoiceId}-1`, mock: "success" } });
+    expect(done.json.receipt.serviceFee).toBe(FEE(9000));
+    expect(done.json.receipt.total).toBe(9000 + FEE(9000));
+    await publishSettings({ serviceFee: { enabled: false } });
+    const free = await call(checkout, { method: "POST", body: { items: ITEMS, intent: "pay", fulfilment: "pickup", customer: CUSTOMER } });
+    const doneFree = await call(invoice, { query: { id: free.json.invoiceId, reference: `${free.json.invoiceId}-1`, mock: "success" } });
+    expect(doneFree.json.receipt.serviceFee).toBe(0);
+    expect(doneFree.json.receipt.total).toBe(9000);
+  });
+
+  it("refuses orders outside opening hours when auto-pause is on", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-26T03:00:00Z")); // 04:00 Lagos Monday: closed
+    try {
+      expect((await call(checkout, { method: "POST", body: { items: ITEMS, intent: "invoice" } })).status).toBe(200); // off by default
+      await publishSettings({ autoPauseOutsideHours: true });
+      const r = await call(checkout, { method: "POST", body: { items: ITEMS, intent: "invoice" } });
+      expect(r.status).toBe(403);
+      expect(r.json.code).toBe("closed");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -1,5 +1,6 @@
 import { CATEGORIES, MENU_ITEMS } from "../data/menu.js";
 import { HERO_ITEM_IDS, SUBHERO_ITEM_IDS } from "../data/layout.js";
+import { PHOTOS } from "../data/photos.js";
 import { DEFAULT_ICON, ICON_KEYS } from "./categoryIcons.js";
 import { DEFAULT_SETTINGS, normalizeSettings } from "./settings.js";
 
@@ -9,16 +10,16 @@ import { DEFAULT_SETTINGS, normalizeSettings } from "./settings.js";
  * Validation here runs on the server (authoritative) and in the portal (instant feedback).
  */
 
-export const LIMITS = { name: 80, description: 280, maxPrice: 10_000_000, maxHero: 6, maxSubhero: 2, maxItems: 500 };
+export const LIMITS = { name: 80, description: 280, maxPrice: 10_000_000, maxHero: 12, maxSubhero: 2, maxItems: 500 };
 
 export function defaultMenuDoc() {
   return {
     version: 0,
     updatedAt: null,
     categories: CATEGORIES.map((c) => ({ ...c })),
-    items: MENU_ITEMS.map((i) => ({ ...i })),
+    items: MENU_ITEMS.map((i) => ({ ...i, ...(PHOTOS[i.id] ? { image: PHOTOS[i.id].url, imageStyle: "photo" } : {}) })),
     layout: { heroIds: [...HERO_ITEM_IDS], subheroIds: [...SUBHERO_ITEM_IDS] },
-    settings: { ...DEFAULT_SETTINGS },
+    settings: normalizeSettings({}),
   };
 }
 

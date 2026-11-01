@@ -1,9 +1,11 @@
 import { allow, baseUrl, fail, ok, parseBody } from "./_lib/http.js";
+import { requireStorage } from "./_lib/guard.js";
 import { loadMenuDoc } from "./_lib/menuStore.js";
-import { resolveOrderLines } from "./_lib/orderLines.js";
+import { resolveOrderLines } from "../src/lib/orderLines.js";
 import { addAttempt, buildInvoice, saveInvoice, validateCustomer } from "./_lib/invoices.js";
 import { initializeTransaction, paystackMode } from "./_lib/paystack.js";
 import { computeTotals } from "../src/lib/pricing.js";
+import { getOpenStatus } from "../src/lib/hours.js";
 
 /**
  * POST /api/checkout
@@ -16,22 +18,29 @@ import { computeTotals } from "../src/lib/pricing.js";
  */
 export default async function handler(req, res) {
   if (!allow(req, res, ["POST"])) return;
+  if (!requireStorage(res)) return;
   const body = parseBody(req);
 
   const doc = await loadMenuDoc();
   const settings = doc.settings;
   if (!settings.acceptingOrders) return fail(res, 403, "We're not taking orders right now. Please check back soon.", { code: "closed" });
 
+  if (settings.autoPauseOutsideHours && !getOpenStatus(settings.hours, new Date(), settings.closures).open) {
+    return fail(res, 403, "We're closed right now. Please order during opening hours.", { code: "closed" });
+  }
+
   const fulfilment = body.fulfilment === "delivery" ? "delivery" : "pickup";
+  const zoneId = typeof body.zoneId === "string" ? body.zoneId : null;
   if (fulfilment === "delivery" && !settings.deliveryEnabled) return fail(res, 400, "Delivery isn't available right now. Choose pickup instead.", { code: "no_delivery" });
 
   const resolved = resolveOrderLines(body.items, doc);
   if (!resolved.ok) return fail(res, resolved.code === "sold_out" || resolved.code === "unknown_item" ? 409 : 400, resolved.error, { code: resolved.code, soldOut: resolved.soldOut });
 
-  const totals = computeTotals(resolved.lines.map((l) => ({ unitPrice: l.item.price, quantity: l.quantity })), fulfilment, settings);
-  if (totals.belowMinimum) return fail(res, 400, `The minimum order is ₦${settings.minOrder.toLocaleString("en-NG")}. Add ₦${totals.shortBy.toLocaleString("en-NG")} more.`, { code: "below_minimum" });
-
   const intent = body.intent === "pay" ? "pay" : "invoice";
+  const totals = computeTotals(resolved.lines.map((l) => ({ unitPrice: l.item.price, quantity: l.quantity })), fulfilment, settings, { zoneId, payOnline: intent === "pay" });
+  if (totals.zoneRequired) return fail(res, 422, "Please choose your delivery area.", { fields: { zone: "Choose your delivery area." } });
+  if (totals.belowMinimum) return fail(res, 400, `The minimum order is ₦${totals.minOrder.toLocaleString("en-NG")}. Add ₦${totals.shortBy.toLocaleString("en-NG")} more.`, { code: "below_minimum" });
+
   let customer = {};
   if (intent === "pay") {
     const v = validateCustomer(body.customer, fulfilment);
@@ -40,7 +49,7 @@ export default async function handler(req, res) {
     if (paystackMode() === "off") return fail(res, 503, "Online payment isn't switched on yet. You can still order on WhatsApp.", { code: "payments_off" });
   }
 
-  const record = buildInvoice({ lines: resolved.lines, fulfilment, channel: intent === "pay" ? "web" : "whatsapp", settings, customer });
+  const record = buildInvoice({ lines: resolved.lines, fulfilment, channel: intent === "pay" ? "web" : "whatsapp", settings, zoneId, customer });
   const invoiceUrl = `${baseUrl(req)}/invoice/${record.id}`;
 
   if (intent === "invoice") {
@@ -48,7 +57,7 @@ export default async function handler(req, res) {
     return ok(res, { invoiceId: record.id, invoiceUrl, code: record.code, expiresAt: record.expiresAt, total: record.total });
   }
 
-  const { reference, amountKobo } = addAttempt(record, { fulfilment, settings, customer });
+  const { reference, amountKobo } = addAttempt(record, { fulfilment, zoneId, settings, customer });
   try {
     const init = await initializeTransaction({
       email: customer.email,

@@ -25,7 +25,7 @@ function Picker({ items, exclude, onPick, onClose, title }) {
         {options.map((i) => (
           <li key={i.id}>
             <button type="button" onClick={() => onPick(i.id)} className="flex w-full items-center gap-3 rounded-2xl border border-cream-300 bg-cream-100 p-2 text-left hover:bg-cream-200">
-              <div className="h-12 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-leaf-800"><FoodImage src={i.image} alt="" variant={i.imageStyle} className={`h-full w-full ${i.imageStyle === "cutout" ? "p-1" : ""}`} /></div>
+              <div className="h-12 w-14 flex-shrink-0 overflow-hidden rounded-xl surface-sage-tile"><FoodImage src={i.image} alt="" variant={i.imageStyle} className={`h-full w-full ${i.imageStyle === "cutout" ? "p-1" : ""}`} /></div>
               <span className="min-w-0"><span className="block truncate text-sm font-bold">{i.name}</span><span className="text-xs text-ink-500">{i.category} · {formatPrice(i.price)}</span></span>
             </button>
           </li>
@@ -39,7 +39,7 @@ function Picker({ items, exclude, onPick, onClose, title }) {
 function Row({ item, onUp, onDown, onRemove, first, last }) {
   return (
     <li className="flex items-center gap-2 rounded-2xl border border-cream-300 bg-cream-100 p-2">
-      <div className="h-12 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-leaf-800"><FoodImage src={item.image} alt="" variant={item.imageStyle} className={`h-full w-full ${item.imageStyle === "cutout" ? "p-1" : ""}`} /></div>
+      <div className="h-12 w-14 flex-shrink-0 overflow-hidden rounded-xl surface-sage-tile"><FoodImage src={item.image} alt="" variant={item.imageStyle} className={`h-full w-full ${item.imageStyle === "cutout" ? "p-1" : ""}`} /></div>
       <span className="min-w-0 flex-1 truncate text-sm font-bold">{item.name}</span>
       {[[onUp, ArrowUp, "Move up", first], [onDown, ArrowDown, "Move down", last]].map(([fn, Icon, label, off]) => (
         <button key={label} type="button" onClick={fn} disabled={off} aria-label={`${label}: ${item.name}`} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-cream-200 disabled:opacity-25"><Icon size={16} /></button>
@@ -104,10 +104,10 @@ export default function LayoutManager({ draft, setDraft }) {
             const item = byId[subheroIds[slot]];
             return (
               <div key={slot} className="rounded-2xl border border-cream-300 bg-cream-100 p-2.5">
-                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-ink-500">{slot === 0 ? "Left (orange)" : "Right (green)"}</p>
+                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-ink-500">{slot === 0 ? "Left (apricot)" : "Right (sage)"}</p>
                 {item ? (
                   <div className="mb-2 flex items-center gap-2">
-                    <div className="h-10 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-leaf-800"><FoodImage src={item.image} alt="" variant={item.imageStyle} className="h-full w-full" /></div>
+                    <div className="h-10 w-12 flex-shrink-0 overflow-hidden rounded-lg surface-sage-tile"><FoodImage src={item.image} alt="" variant={item.imageStyle} className="h-full w-full" /></div>
                     <span className="line-clamp-2 text-xs font-bold leading-tight">{item.name}</span>
                   </div>
                 ) : <p className="mb-2 py-2 text-xs text-ink-500">Empty</p>}

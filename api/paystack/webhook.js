@@ -1,6 +1,7 @@
 import { allow, parseBody, send } from "../_lib/http.js";
+import { storageConfigured } from "../_lib/storage.js";
 import { idFromReference, isValidId, loadInvoice, settle } from "../_lib/invoices.js";
-import { paystackMode, verifyTransaction } from "../_lib/paystack.js";
+import { isRealPaystack, paystackMode, verifyTransaction } from "../_lib/paystack.js";
 
 /**
  * POST /api/paystack/webhook   (set this URL in Paystack Dashboard → Settings → API Keys & Webhooks)
@@ -11,16 +12,17 @@ import { paystackMode, verifyTransaction } from "../_lib/paystack.js";
  */
 export default async function handler(req, res) {
   if (!allow(req, res, ["POST"])) return;
+  if (!storageConfigured()) return send(res, 200, { received: false });
   try {
     const event = parseBody(req);
     const reference = event?.data?.reference;
-    if (event?.event === "charge.success" && reference && paystackMode() === "live") {
+    if (event?.event === "charge.success" && reference && isRealPaystack()) {
       const id = idFromReference(reference);
       if (isValidId(id)) {
         const record = await loadInvoice(id);
         if (record && record.status !== "paid") {
           const verification = await verifyTransaction(reference);
-          await settle(record, reference, verification, { mode: "live" });
+          await settle(record, reference, verification, { mode: paystackMode() });
         }
       }
     }

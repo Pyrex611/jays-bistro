@@ -11,7 +11,7 @@
 - **Product:** Jay's Bistro online ordering (Makurdi, Benue State, Nigeria)
 - **Repo:** `github.com/Pyrex611/jays-bistro` · **Live:** `jays-bistro.vercel.app`
 - **Owner / lead engineer:** Pyrexx
-- **Intent version:** 1.1 — 2026-10-26
+- **Intent version:** 1.2 — 2026-11-01
 
 ---
 
@@ -115,6 +115,21 @@ SEO prerendering decision, AI concierge behind the API, kitchen notifications, o
 | R2.11 | Open/closed status, pause-orders switch, delivery fee, minimum order | ✅ |
 | R2.12 | UX research + audit + three-version comparison documented | ✅ ([docs/UX_RESEARCH.md](docs/UX_RESEARCH.md)) |
 
+## 6c. Scope — Sprint 3 requirements (traceable; detail in TASK.md)
+
+| ID | Requirement | Status |
+|---|---|---|
+| R3.1 | Brand-aware soft pastel surfaces (Eucalyptus green, apricot left sub-hero); actions stay saturated; contrast tested | ✅ |
+| R3.2 | One continuous menu; sticky pills follow the scroll and jump on tap; search collapses into a magnifier; quantity control in place | ✅ |
+| R3.3 | First screen shows hero, sub-hero, pills and dishes; open/pickup/delivery info moved to an (i) sheet | ✅ (real-device QA pending) |
+| R3.4 | Merchant edits delivery areas (fee, minimum, ETA), free-delivery threshold, prep time, service fee, hours, closures, business details, announcement | ✅ |
+| R3.5 | Kitchen alerts: recipients, events, test alert, log, template | 🟡 simulated until email is connected |
+| R3.6 | Order status workflow New → Preparing → Ready → Completed | 🟡 demo until storage is connected |
+| R3.7 | Test payments clearly marked and excluded from sales; demo payments stamped DEMO | ✅ |
+| R3.8 | Every page and feature usable **before** any integration (demo mode); integrations switch on by configuration | ✅ ([DEMO_MODE](docs/DEMO_MODE.md)) |
+| R3.9 | Accurate dish photos: tooling to curate, test that dishes don't share photos, honest icon tile otherwise | 🟡 tooling done; photos to be chosen |
+| R3.10 | Vercel Blob as the single store | 🟡 proposed ([ADR-0007](docs/adr/0007-vercel-blob-and-demo-mode.md)); needs Pro plan |
+
 ## 7. Scope — original Phase 2/3 summary (superseded where Sprint 2 differs; see docs/CONCEPTS.md)
 
 **Menu dashboard (`/admin`)** — Auth (owner, staff) · item CRUD with archive instead of delete · "sold out today" quick toggle ·
@@ -175,3 +190,4 @@ Amend this file with a dated entry below; never silently edit history.
 |---|---|---|
 | 2026-10-24 | v1.0 created: Phase 1 delivered, Phases 2–3 defined | Pyrexx + AI |
 | 2026-10-26 | v1.1: Supabase plan replaced by S3 + password-locked console (ADR-0005); Paystack, invoices, receipts (ADR-0006); full catalogue, search, canonical domain decided; logo-based theme | Pyrexx + AI |
+| 2026-11-01 | v1.2: Sprint 3 scoped and built as a demo (capability-driven mocks); pastel methodology; zones, service fee, hours, alerts (simulated); Vercel Blob proposed (ADR-0007) | Pyrexx + AI |

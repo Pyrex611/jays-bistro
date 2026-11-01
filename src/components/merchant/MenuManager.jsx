@@ -68,7 +68,7 @@ export default function MenuManager({ draft, setDraft }) {
         {list.map((item) => (
           <li key={item.id} className="flex items-center gap-3 rounded-2xl border border-cream-300 bg-cream-50 p-2.5">
             <button type="button" onClick={() => setEditing(item)} className="flex min-w-0 flex-1 items-center gap-3 text-left" aria-label={`Edit ${item.name}`}>
-              <div className="h-14 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-leaf-800">
+              <div className="h-14 w-16 flex-shrink-0 overflow-hidden rounded-xl surface-sage-tile">
                 <FoodImage src={item.image} alt="" variant={item.imageStyle} icon={iconOf[item.category]} className={`h-full w-full ${item.imageStyle === "cutout" ? "p-1" : ""}`} />
               </div>
               <div className="min-w-0">
@@ -76,7 +76,7 @@ export default function MenuManager({ draft, setDraft }) {
                 <p className="truncate text-xs text-ink-500">{item.category} · <span className="font-semibold text-leaf-700">{formatPrice(item.price)}</span></p>
                 <div className="mt-0.5 flex flex-wrap gap-1">
                   {!item.isActive && <span className="rounded bg-ink-200 px-1.5 py-px text-[10px] font-bold text-ink-700">Hidden</span>}
-                  {item.image === "menu/placeholder.svg" && <span className="inline-flex items-center gap-0.5 rounded bg-sun-100 px-1.5 py-px text-[10px] font-bold text-sun-800"><ImageOff size={10} />No photo</span>}
+                  {item.image === "menu/placeholder.svg" && <span className="inline-flex items-center gap-0.5 rounded bg-apricot-300 px-1.5 py-px text-[10px] font-bold text-sun-900"><ImageOff size={10} />No photo</span>}
                 </div>
               </div>
             </button>

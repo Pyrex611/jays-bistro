@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Header from "../components/layout/Header.jsx";
-import InfoStrip from "../components/layout/InfoStrip.jsx";
+import InfoSheet from "../components/layout/InfoSheet.jsx";
 import SeoHead from "../components/layout/SeoHead.jsx";
+import StatusBanners from "../components/layout/StatusBanners.jsx";
 import HeroCarousel from "../components/storefront/HeroCarousel.jsx";
 import SubHero from "../components/storefront/SubHero.jsx";
-import SearchBar from "../components/storefront/SearchBar.jsx";
-import CategoryPills from "../components/storefront/CategoryPills.jsx";
+import CategoryBar from "../components/storefront/CategoryBar.jsx";
 import MenuSections from "../components/storefront/MenuSections.jsx";
 import ProductModal from "../components/storefront/ProductModal.jsx";
 import CartBar from "../components/cart/CartBar.jsx";
@@ -15,6 +15,7 @@ import { SITE } from "../config/site.js";
 import { useMenu } from "../context/MenuContext.js";
 import { useCart } from "../hooks/useCart.js";
 import { useCheckout } from "../hooks/useCheckout.js";
+import { useScrollSpy } from "../hooks/useScrollSpy.js";
 import { searchItems } from "../lib/search.js";
 import { track } from "../lib/track.js";
 
@@ -31,29 +32,34 @@ const SEO = {
   },
 };
 
-/** The whole storefront. Search overrides the category view; "All" shows every category as a titled section. */
+/** Viewport Y a group's first card must rise above to become the current group: just under the sticky bars, plus ~30% of the screen. */
+const spyLine = () => {
+  const bar = document.querySelector("[data-category-bar]");
+  return (bar ? bar.getBoundingClientRect().bottom : 112) + window.innerHeight * 0.3;
+};
+
+/** The storefront. One continuous menu; the sticky bar follows the scroll; search collapses into a magnifier. */
 export default function StorefrontPage({ scrollToMenu = false }) {
-  const { activeItems, byId, categories, iconByCategory, hero, subhero, settings } = useMenu();
+  const { activeItems, byId, groups, iconByCategory, hero, subhero, settings } = useMenu();
   const cart = useCart(byId);
   const { add: addToCart } = cart;
-  const checkout = useCheckout({ lines: cart.lines, total: cart.subtotal });
+  const checkout = useCheckout({ lines: cart.lines, total: cart.subtotal, whatsapp: settings.business.whatsapp });
 
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
+
+  const searching = searchOpen && query.trim().length > 0;
+  const groupNames = useMemo(() => groups.map((g) => g.name), [groups]);
+  const { active, jumpTo } = useScrollSpy(groupNames, { enabled: !searching, getLine: spyLine });
 
   useEffect(() => {
     if (scrollToMenu) document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" });
   }, [scrollToMenu]);
 
-  const searching = query.trim().length > 0;
   const results = useMemo(() => (searching ? searchItems(activeItems, query) : []), [activeItems, query, searching]);
-  const categoryItems = useMemo(
-    () => (selectedCategory === "All" ? activeItems : activeItems.filter((item) => item.category === selectedCategory)),
-    [activeItems, selectedCategory],
-  );
-  const mode = searching ? "search" : selectedCategory === "All" ? "all" : "category";
 
   const selectedProduct = selectedProductId != null ? byId[selectedProductId] ?? null : null;
   const openProduct = useCallback((id) => {
@@ -62,6 +68,7 @@ export default function StorefrontPage({ scrollToMenu = false }) {
   }, []);
   const closeProduct = useCallback(() => setSelectedProductId(null), []);
   const closeCart = useCallback(() => setCartOpen(false), []);
+  const closeInfo = useCallback(() => setInfoOpen(false), []);
   const addItem = useCallback(
     (item) => {
       addToCart(item.id);
@@ -73,41 +80,48 @@ export default function StorefrontPage({ scrollToMenu = false }) {
     setCartOpen(true);
     track("cart_open", { count: cart.count });
   };
-
-  const pickCategory = (name) => {
+  const closeSearch = useCallback(() => {
+    setSearchOpen(false);
     setQuery("");
-    setSelectedCategory(name);
-    document.getElementById("menu")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  }, []);
 
   const seo = scrollToMenu ? SEO.menu : SEO.home;
 
   return (
     <div className="min-h-svh bg-cream-200">
-      <SeoHead {...seo} isMenu={scrollToMenu} />
+      <SeoHead {...seo} isMenu={scrollToMenu} settings={settings} />
 
       <div className="mx-auto min-h-svh max-w-md border-x border-cream-300 bg-cream-100 shadow-frame">
-        <Header cartCount={cart.count} cartBump={cart.bump} onOpenCart={openCart} />
+        <Header cartCount={cart.count} cartBump={cart.bump} onOpenCart={openCart} onOpenInfo={() => setInfoOpen(true)} />
 
         <main>
-          <InfoStrip settings={settings} />
+          <StatusBanners settings={settings} />
           <HeroCarousel items={hero} iconByCategory={iconByCategory} onOpenProduct={openProduct} />
           <SubHero items={subhero} iconByCategory={iconByCategory} onOpenProduct={openProduct} />
 
-          <section id="menu" aria-label={`${SITE.name} menu`} className="scroll-mt-16 px-4 pb-32 pt-5">
-            <SearchBar value={query} onChange={setQuery} />
-            <CategoryPills categories={categories} selected={selectedCategory} onSelect={pickCategory} dimmed={searching} />
-            <div className="mt-3">
+          <section id="menu" aria-label={`${SITE.name} menu`} className="px-4 pb-32 pt-2">
+            <CategoryBar
+              groups={groups}
+              active={active}
+              onSelect={jumpTo}
+              searchOpen={searchOpen}
+              query={query}
+              onQueryChange={setQuery}
+              onOpenSearch={() => setSearchOpen(true)}
+              onCloseSearch={closeSearch}
+            />
+            <div className="mt-2">
               <MenuSections
-                mode={mode}
+                mode={searching ? "search" : "all"}
                 query={query}
-                items={mode === "search" ? results : mode === "all" ? activeItems : categoryItems}
-                categories={categories}
+                items={searching ? results : activeItems}
+                groups={groups}
                 iconByCategory={iconByCategory}
                 quantities={cart.quantities}
                 onOpenProduct={openProduct}
                 onAdd={addItem}
-                onClearSearch={() => setQuery("")}
+                onDecrement={cart.decrement}
+                onClearSearch={closeSearch}
               />
             </div>
           </section>
@@ -115,6 +129,7 @@ export default function StorefrontPage({ scrollToMenu = false }) {
       </div>
 
       <CartBar count={cart.count} total={cart.subtotal} onOpen={openCart} />
+      <InfoSheet open={infoOpen} onClose={closeInfo} settings={settings} />
 
       <ProductModal
         item={selectedProduct}

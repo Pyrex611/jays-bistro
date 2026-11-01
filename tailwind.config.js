@@ -14,6 +14,14 @@ export default {
           50: "#FFF7EA", 100: "#FDEBCB", 200: "#FAD598", 300: "#F6B95E", 400: "#EE9B2D",
           500: "#E4830E", 600: "#C46A09", 700: "#A05309", 800: "#7F4010", 900: "#5E3010",
         },
+        // SURFACE tier (soft pastel, brand-aware). Eucalyptus = the logo green, cloudier. Apricot = the logo orange, softened.
+        // Actions keep the saturated leaf-700 / sun-500 above. See docs/DESIGN_SYSTEM.md "Methodology".
+        sage: {
+          100: "#E6EFE8", 200: "#CFE0D4", 300: "#B7D0BE", 400: "#9DBEA5", 500: "#93B49A", 600: "#81A78A", 700: "#6B9275",
+        },
+        apricot: {
+          100: "#FBEBD7", 200: "#F8E2C6", 300: "#F5DAB8", 400: "#EDC897", 500: "#E3B578",
+        },
         cream: {
           50: "#FDFCF6", 100: "#FBF8EE", 200: "#F4EEDC", 300: "#E9E2CC", 400: "#D4CBAE",
         },

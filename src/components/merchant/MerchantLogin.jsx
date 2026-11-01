@@ -7,7 +7,7 @@ import { inputClass } from "../ui/formStyles.js";
 import { btnPrimary } from "./ui.jsx";
 
 /** Password lock. The browser sends the password to the server over HTTPS; the server checks it against the hash in private storage. */
-export default function MerchantLogin({ onUnlocked }) {
+export default function MerchantLogin({ onUnlocked, demo = false }) {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -26,7 +26,7 @@ export default function MerchantLogin({ onUnlocked }) {
   };
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-leaf-800 px-4">
+    <div className="flex min-h-svh items-center justify-center bg-sage-300 bg-[radial-gradient(120%_80%_at_20%_0%,rgba(255,255,255,0.55),transparent_60%)] px-4">
       <form onSubmit={submit} className="w-full max-w-sm rounded-3xl bg-cream-50 p-7 shadow-card" noValidate>
         <img src={assetUrl(SITE.logoPath)} alt="" className="mx-auto h-20 w-20 rounded-full border border-cream-300 object-cover" />
         <h1 className="mt-4 text-center font-display text-xl font-extrabold text-leaf-800">Kitchen Console</h1>
@@ -42,6 +42,11 @@ export default function MerchantLogin({ onUnlocked }) {
             </div>
           </Field>
         </div>
+        {demo && (
+          <p className="mt-3 rounded-xl bg-apricot-200 px-3 py-2 text-xs font-semibold text-sun-900">
+            Demo mode: nothing is connected yet. Use the setup password <code className="rounded bg-white/60 px-1.5 py-0.5 font-mono">jays-setup</code>.
+          </p>
+        )}
         <button type="submit" disabled={busy || !password} className={`${btnPrimary} mt-5 w-full`}><Lock size={16} /> {busy ? "Checking…" : "Unlock"}</button>
         <p className="mt-4 text-center text-[11px] text-ink-500">This page is private and isn&apos;t listed on the website.</p>
       </form>

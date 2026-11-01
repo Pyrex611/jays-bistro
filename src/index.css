@@ -28,6 +28,28 @@
   }
 }
 
+/* ── Soft pastel surfaces ("cloudy"): diagonal two-stop gradient + a white radial glow + a faint inner highlight. ── */
+@layer components {
+  .surface-sage {
+    background-image:
+      radial-gradient(120% 90% at 20% 15%, rgb(255 255 255 / 0.35), transparent 60%),
+      linear-gradient(135deg, theme("colors.sage.400"), theme("colors.sage.600"));
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+  }
+  .surface-sage-tile {
+    background-image:
+      radial-gradient(120% 90% at 20% 15%, rgb(255 255 255 / 0.35), transparent 60%),
+      linear-gradient(135deg, theme("colors.sage.400"), theme("colors.sage.500"));
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+  }
+  .surface-apricot {
+    background-image:
+      radial-gradient(120% 90% at 20% 15%, rgb(255 255 255 / 0.45), transparent 60%),
+      linear-gradient(135deg, theme("colors.apricot.300"), theme("colors.apricot.400"));
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35);
+  }
+}
+
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;

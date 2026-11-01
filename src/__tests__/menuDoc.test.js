@@ -47,10 +47,10 @@ describe("validateMenuDoc", () => {
 
   it("drops layout ids that point to missing items and caps slot counts", () => {
     const doc = valid();
-    doc.layout = { heroIds: [1, 1, 999999, 2, 3, 4, 5, 6, 7, 8], subheroIds: [3, 4, 5] };
+    doc.layout = { heroIds: [1, 1, 999999, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], subheroIds: [3, 4, 5] };
     const r = validateMenuDoc(doc);
     expect(r.ok).toBe(true);
-    expect(r.doc.layout.heroIds).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(r.doc.layout.heroIds).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]); // hero is not limited to 6 any more
     expect(r.doc.layout.subheroIds).toHaveLength(2);
   });
 

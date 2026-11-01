@@ -1,16 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet";
-import { LayoutTemplate, Loader2, ReceiptText, Settings, UtensilsCrossed } from "lucide-react";
+import { LayoutDashboard, LayoutTemplate, Loader2, ReceiptText, Settings, UtensilsCrossed } from "lucide-react";
 import MerchantLogin from "../components/merchant/MerchantLogin.jsx";
+import OverviewPanel from "../components/merchant/OverviewPanel.jsx";
 import MenuManager from "../components/merchant/MenuManager.jsx";
 import LayoutManager from "../components/merchant/LayoutManager.jsx";
 import OrdersPanel from "../components/merchant/OrdersPanel.jsx";
 import SettingsPanel from "../components/merchant/SettingsPanel.jsx";
+import { Badge } from "../components/merchant/fields.jsx";
 import { Sheet, Switch, btnGhost, btnPrimary } from "../components/merchant/ui.jsx";
 import { SITE, assetUrl } from "../config/site.js";
+import { useMenu } from "../context/MenuContext.js";
 import { api } from "../services/api.js";
+import { runtime } from "../services/runtime.js";
 
 const TABS = [
+  { key: "overview", label: "Overview", icon: LayoutDashboard },
   { key: "menu", label: "Menu", icon: UtensilsCrossed },
   { key: "home", label: "Home", icon: LayoutTemplate },
   { key: "orders", label: "Orders", icon: ReceiptText },
@@ -21,8 +26,9 @@ const TABS = [
 const content = (doc) => ({ categories: doc.categories, items: doc.items, layout: doc.layout, settings: doc.settings });
 const signature = (doc) => JSON.stringify(content(doc));
 
-function Console({ mustChangePassword, onSignedOut, onPasswordChanged }) {
-  const [tab, setTab] = useState(mustChangePassword ? "settings" : "menu");
+function Console({ mustChangePassword, demo, capabilities, onSignedOut, onPasswordChanged }) {
+  const [tab, setTab] = useState(mustChangePassword ? "settings" : "overview");
+  const [section, setSection] = useState(mustChangePassword ? "security" : null);
   const [saved, setSaved] = useState(null);
   const [draft, setDraft] = useState(null);
   const [loadError, setLoadError] = useState("");
@@ -30,6 +36,8 @@ function Console({ mustChangePassword, onSignedOut, onPasswordChanged }) {
   const [notice, setNotice] = useState("");
   const [problems, setProblems] = useState([]);
   const [conflict, setConflict] = useState(null);
+
+  const canTrack = demo || Boolean(capabilities?.orderStatus);
 
   const guard = useCallback((e) => {
     if (e.status === 401) onSignedOut();
@@ -56,6 +64,12 @@ function Console({ mustChangePassword, onSignedOut, onPasswordChanged }) {
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
+  const go = (nextTab, nextSection = null) => {
+    setSection(nextSection);
+    setTab(nextTab);
+    window.scrollTo({ top: 0 });
+  };
+
   const publish = async (docToPublish = draft, base = saved.version) => {
     setPublishing(true);
     setProblems([]);
@@ -64,7 +78,7 @@ function Console({ mustChangePassword, onSignedOut, onPasswordChanged }) {
       setSaved(next);
       setDraft(next);
       setConflict(null);
-      setNotice("Published. Customers will see it within a minute.");
+      setNotice(demo ? "Published to this browser: open the storefront to see it." : "Published. Customers will see it within a minute.");
     } catch (e) {
       guard(e);
       if (e.status === 409) setConflict(e.data.current);
@@ -102,7 +116,10 @@ function Console({ mustChangePassword, onSignedOut, onPasswordChanged }) {
         <div className="mx-auto flex h-14 max-w-2xl items-center justify-between gap-3 px-4">
           <div className="flex min-w-0 items-center gap-2.5">
             <img src={assetUrl(SITE.logoPath)} alt="" className="h-9 w-9 rounded-full border border-cream-300 object-cover" />
-            <div className="leading-tight"><p className="font-display text-sm font-extrabold text-leaf-800">Kitchen Console</p><p className="text-[11px] text-ink-500">{saved.source === "default" ? "Using starter menu" : `Version ${saved.version}`}</p></div>
+            <div className="leading-tight">
+              <p className="font-display text-sm font-extrabold text-leaf-800">Kitchen Console</p>
+              <p className="text-[11px] text-ink-500">{demo ? "Demo · saved in this browser" : saved.source === "default" ? "Using starter menu" : `Version ${saved.version}`}</p>
+            </div>
           </div>
           <label className="flex items-center gap-2 text-xs font-bold">
             <span className={draft.settings.acceptingOrders ? "text-leaf-700" : "text-red-600"}>{draft.settings.acceptingOrders ? "Taking orders" : "Paused"}</span>
@@ -112,17 +129,24 @@ function Console({ mustChangePassword, onSignedOut, onPasswordChanged }) {
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pb-8 pt-4">
+        {demo && tab === "overview" && (
+          <div className="mb-4 flex items-start gap-2 rounded-2xl bg-apricot-200 p-3 text-xs text-sun-900">
+            <Badge tone="demo">Demo</Badge>
+            <p>Everything here works: edit the menu, change settings, place orders on the storefront and watch them arrive. It&apos;s saved in this browser only until storage is connected.</p>
+          </div>
+        )}
+        {tab === "overview" && <OverviewPanel draft={draft} saved={saved} capabilities={capabilities} demo={demo} canTrack={canTrack} onNavigate={go} onToggleOrders={toggleOrders} />}
         {tab === "menu" && <MenuManager draft={draft} setDraft={setDraft} />}
         {tab === "home" && <LayoutManager draft={draft} setDraft={setDraft} />}
-        {tab === "orders" && <OrdersPanel />}
-        {tab === "settings" && <SettingsPanel draft={draft} setDraft={setDraft} forcePasswordChange={mustChangePassword} onPasswordChanged={onPasswordChanged} onLogout={signOut} />}
+        {tab === "orders" && <OrdersPanel canTrack={canTrack} />}
+        {tab === "settings" && <SettingsPanel draft={draft} setDraft={setDraft} capabilities={capabilities} demo={demo} section={section} forcePasswordChange={mustChangePassword} onPasswordChanged={onPasswordChanged} onLogout={signOut} />}
       </main>
 
       {notice && <div role="status" className="fixed inset-x-0 top-[calc(4rem+env(safe-area-inset-top))] z-40 mx-auto w-fit max-w-[90%] animate-slide-up rounded-full bg-leaf-900 px-4 py-2 text-xs font-bold text-cream-50 shadow-fab">{notice}</div>}
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-cream-300 bg-cream-50/95 backdrop-blur">
         {dirty && tab !== "orders" && (
-          <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 border-b border-cream-300 bg-sun-100 px-4 py-2">
+          <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 border-b border-cream-300 bg-apricot-200 px-4 py-2">
             <p className="text-xs font-bold text-sun-900">Unpublished changes</p>
             <div className="flex gap-2">
               <button type="button" className={`${btnGhost} !px-4 !py-2 text-xs`} onClick={() => setDraft(saved)} disabled={publishing}>Discard</button>
@@ -130,9 +154,9 @@ function Console({ mustChangePassword, onSignedOut, onPasswordChanged }) {
             </div>
           </div>
         )}
-        <nav aria-label="Console sections" className="mx-auto grid max-w-2xl grid-cols-4 pb-[env(safe-area-inset-bottom)]">
+        <nav aria-label="Console sections" className="mx-auto grid max-w-2xl grid-cols-5 pb-[env(safe-area-inset-bottom)]">
           {TABS.map(({ key, label, icon: Icon }) => (
-            <button key={key} type="button" aria-current={tab === key ? "page" : undefined} disabled={mustChangePassword && key !== "settings"} onClick={() => setTab(key)} className={`flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-bold disabled:opacity-30 ${tab === key ? "text-leaf-700" : "text-ink-500"}`}>
+            <button key={key} type="button" aria-current={tab === key ? "page" : undefined} disabled={mustChangePassword && key !== "settings"} onClick={() => go(key)} className={`flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-bold disabled:opacity-30 ${tab === key ? "text-leaf-700" : "text-ink-500"}`}>
               <Icon size={20} strokeWidth={tab === key ? 2.2 : 1.7} />{label}
             </button>
           ))}
@@ -151,24 +175,28 @@ function Console({ mustChangePassword, onSignedOut, onPasswordChanged }) {
   );
 }
 
-/** /merchant — password-locked console for the owner. Not linked from the site, not indexed. */
+/** /merchant: password-locked console for the owner. Not linked from the site, not indexed. */
 export default function MerchantPage() {
   const [auth, setAuth] = useState({ status: "checking" });
+  const { capabilities: menuCaps } = useMenu();
 
   useEffect(() => {
     api.merchant.session().then((s) => setAuth(s.authenticated ? { status: "in", mustChange: s.mustChangePassword } : { status: "out" })).catch(() => setAuth({ status: "out" }));
   }, []);
+
+  const demo = runtime.isDemo();
+  const capabilities = menuCaps ?? runtime.capabilities;
 
   return (
     <>
       <Helmet>
         <title>Kitchen Console · {SITE.name}</title>
         <meta name="robots" content="noindex, nofollow" />
-        <meta name="theme-color" content="#1E4B28" />
+        <meta name="theme-color" content="#B7D0BE" />
       </Helmet>
-      {auth.status === "checking" && <div className="flex min-h-svh items-center justify-center bg-leaf-800" role="status" aria-label="Loading"><Loader2 className="animate-spin text-cream-50" /></div>}
-      {auth.status === "out" && <MerchantLogin onUnlocked={(s) => setAuth({ status: "in", mustChange: s.mustChangePassword })} />}
-      {auth.status === "in" && <Console key="console" mustChangePassword={auth.mustChange} onSignedOut={() => setAuth({ status: "out" })} onPasswordChanged={() => setAuth({ status: "in", mustChange: false })} />}
+      {auth.status === "checking" && <div className="flex min-h-svh items-center justify-center bg-sage-300" role="status" aria-label="Loading"><Loader2 className="animate-spin text-leaf-800" /></div>}
+      {auth.status === "out" && <MerchantLogin demo={demo} onUnlocked={(s) => setAuth({ status: "in", mustChange: s.mustChangePassword })} />}
+      {auth.status === "in" && <Console key="console" mustChangePassword={auth.mustChange} demo={demo} capabilities={capabilities} onSignedOut={() => setAuth({ status: "out" })} onPasswordChanged={() => setAuth({ status: "in", mustChange: false })} />}
     </>
   );
 }

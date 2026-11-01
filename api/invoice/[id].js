@@ -1,7 +1,10 @@
 import { allow, baseUrl, fail, ok, parseBody } from "../_lib/http.js";
+import { requireStorage } from "../_lib/guard.js";
 import { loadMenuDoc } from "../_lib/menuStore.js";
 import { addAttempt, isExpired, isValidId, loadInvoice, saveInvoice, settle, validateCustomer } from "../_lib/invoices.js";
 import { initializeTransaction, paystackMode, verifyTransaction } from "../_lib/paystack.js";
+import { computeTotals } from "../../src/lib/pricing.js";
+import { getOpenStatus } from "../../src/lib/hours.js";
 
 const idFrom = (req) => req.query?.id ?? new URL(req.url, "http://x").pathname.split("/").filter(Boolean).pop();
 const queryOf = (req, key) => req.query?.[key] ?? new URL(req.url, "http://x").searchParams.get(key);
@@ -9,7 +12,8 @@ const queryOf = (req, key) => req.query?.[key] ?? new URL(req.url, "http://x").s
 /** What the browser is allowed to see. */
 const view = (r) => ({
   id: r.id, code: r.code, status: r.status, channel: r.channel, createdAt: r.createdAt, expiresAt: r.expiresAt,
-  items: r.items, subtotal: r.subtotal, deliveryFee: r.deliveryFee, total: r.total, fulfilment: r.fulfilment,
+  items: r.items, subtotal: r.subtotal, deliveryFee: r.deliveryFee, serviceFee: r.serviceFee ?? 0, total: r.total, fulfilment: r.fulfilment,
+  zone: r.zone ?? null, prepMins: r.prepMins,
   customer: r.customer, payment: r.payment ? { ...r.payment, reference: r.payment.reference } : undefined,
 });
 
@@ -21,6 +25,7 @@ const view = (r) => ({
  */
 export default async function handler(req, res) {
   if (!allow(req, res, ["GET", "POST"])) return;
+  if (!requireStorage(res)) return;
   const id = idFrom(req);
   if (!isValidId(id)) return fail(res, 404, "We couldn't find that invoice.");
 
@@ -54,14 +59,19 @@ export default async function handler(req, res) {
 
   const doc = await loadMenuDoc();
   if (!doc.settings.acceptingOrders) return fail(res, 403, "We're not taking orders right now.", { code: "closed" });
+  if (doc.settings.autoPauseOutsideHours && !getOpenStatus(doc.settings.hours, new Date(), doc.settings.closures).open) return fail(res, 403, "We're closed right now.", { code: "closed" });
   const fulfilment = body.fulfilment === "delivery" ? "delivery" : "pickup";
+  const zoneId = typeof body.zoneId === "string" ? body.zoneId : null;
   if (fulfilment === "delivery" && !doc.settings.deliveryEnabled) return fail(res, 400, "Delivery isn't available right now. Choose pickup instead.");
+  const preview = computeTotals(record.items, fulfilment, doc.settings, { zoneId, payOnline: true });
+  if (preview.zoneRequired) return fail(res, 422, "Please choose your delivery area.", { fields: { zone: "Choose your delivery area." } });
+  if (preview.belowMinimum) return fail(res, 400, `The minimum order is ₦${preview.minOrder.toLocaleString("en-NG")}.`, { code: "below_minimum" });
   if (paystackMode() === "off") return fail(res, 503, "Online payment isn't switched on yet. Please pay via WhatsApp.", { code: "payments_off" });
 
   const v = validateCustomer(body.customer, fulfilment);
   if (!v.ok) return fail(res, 422, "Please check your details.", { fields: v.errors });
 
-  const { reference, amountKobo } = addAttempt(record, { fulfilment, settings: doc.settings, customer: v.customer });
+  const { reference, amountKobo } = addAttempt(record, { fulfilment, zoneId, settings: doc.settings, customer: v.customer });
   try {
     const init = await initializeTransaction({
       email: v.customer.email, amountKobo, reference, callbackUrl: `${baseUrl(req)}/invoice/${record.id}`,

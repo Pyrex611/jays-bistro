@@ -1,14 +1,19 @@
 # Merchant portal (`/merchant`) — "Kitchen Console"
 
 ## Why this design
-The owner works from a phone between customers, so the console is **mobile-first**, one-handed, with four bottom tabs and the few controls that matter at the top.
+The owner works from a phone between customers, so the console is **mobile-first**, one-handed, with five bottom tabs and the few controls that matter at the top.
 
 | Tab | What it does |
 |---|---|
+| **Overview** | Greeting and open/closed status · pause/resume orders · today's sales, orders, average · **Needs attention** (orders in the kitchen with a one-tap next step) · sold-out chips · quick actions · **Going live** progress |
 | **Menu** | Search/filter all dishes · flip **In stock / Sold out** per dish · tap a dish to edit · **Add dish** · Edit categories |
-| **Home** | Choose what appears in the hero carousel (up to 6) and the two feature cards, reorder with arrows, **live preview** that uses the real storefront components |
-| **Orders** | Paid orders only. Today / 7 / 30 days. Sales, orders, average order, sales-per-day bars, top sellers, order list with call/WhatsApp buttons |
-| **Settings** | Delivery on/off, delivery fee, minimum order, change password, sign out |
+| **Home** | Choose the hero carousel (up to **12**) and the two feature cards, reorder with arrows, **live preview** using the real storefront components |
+| **Orders** | Paid orders. Today / 7 / 30 days. Sales, orders, average, sales per day, **busiest hours**, **pickup vs delivery**, **payment methods**, top sellers, and the **kitchen workflow** New → Preparing → Ready → Completed with filters. Test payments are hidden from sales unless you include them |
+| **Settings** | Eight cards with a section strip: **Ordering** · **Delivery** (areas with fee/minimum/ETA, free-delivery threshold, note) · **Fees** (online payment fee + live calculator) · **Hours** (per day + closures) · **Business** (WhatsApp, phone, address, pickup note, announcement) · **Alerts** (recipients, events, test alert preview, log) · **Go live** (status of each integration, checklist, reset demo data) · **Security** (password, sign out) |
+
+Public settings (Ordering, Delivery, Fees, Hours, Business) edit the **draft** and go live with **Publish**. Alerts and Security are private and save on their own. Settings are normalised on publish: an invalid day (closing before opening) is closed, an invalid WhatsApp number falls back to the default; the console warns while you type.
+
+**Demo mode:** with no storage connected the console opens with the setup password `jays-setup`, shows a demo banner, and keeps everything in this browser ([DEMO_MODE.md](DEMO_MODE.md)). Orders, statuses and alerts are simulated; nothing is sent.
 
 Header: **Taking orders** switch. It publishes *immediately and alone* (it never publishes other half-finished edits), because "we're closed/overwhelmed" can't wait.
 

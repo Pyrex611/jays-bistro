@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /merchant
 Disallow: /invoice/
+Disallow: /pay/
 Disallow: /api/
 
 Sitemap: https://jays-bistro.vercel.app/sitemap.xml
