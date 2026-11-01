@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pyrex611.github.io/jays-bistro/sitemap.xml
