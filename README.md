@@ -1,24 +1,16 @@
-# Jay's Bistro — ordering platform
+# React + Vite
 
-Mobile-first ordering for Jay's Bistro (Makurdi, NG) — live at **jays-bistro.vercel.app**.
-Customers browse 64 dishes, search, and either pay with **Paystack** or send the order on **WhatsApp** (as an expiring invoice that becomes a receipt). The owner runs everything from a password-locked console at `/merchant`.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-React 19 · Vite · Tailwind 3 · Vercel Functions · S3 (Vercel Blob proposed) · Paystack · Vitest.
+Currently, two official plugins are available:
 
-```
-npm install
-npm run images:migrate   # once
-npm run dev              # storefront + /api, no AWS or Paystack needed locally
-set DEMO_MODE=1          # (Windows CMD, before npm run dev) browser-only demo: every feature, nothing connected; console password jays-setup
-npm run lint && npm test && npm run build
-```
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-- Why/what: [INTENT.md](INTENT.md) · How/when: [PLAN.md](PLAN.md) · **Open work: [TASK.md](TASK.md)** · Agent rules: [CLAUDE.md](CLAUDE.md)
-- **Apply, demo and deploy Sprint 3 (Windows): [docs/SPRINT-3-RUNBOOK.md](docs/SPRINT-3-RUNBOOK.md)** · Demo mode and go-live checklist: [docs/DEMO_MODE.md](docs/DEMO_MODE.md) · Storage decision: [ADR-0007](docs/adr/0007-vercel-blob-and-demo-mode.md)
-- Apply and deploy Sprint 2 (Windows): [docs/SPRINT-2-RUNBOOK.md](docs/SPRINT-2-RUNBOOK.md) · Cloud setup: [docs/AWS_SETUP.md](docs/AWS_SETUP.md)
-- Merchant console + password lock: [docs/MERCHANT_PORTAL.md](docs/MERCHANT_PORTAL.md) · Checkout/receipts: [docs/CHECKOUT_AND_RECEIPTS.md](docs/CHECKOUT_AND_RECEIPTS.md)
-- UX research & three-version comparison: [docs/UX_RESEARCH.md](docs/UX_RESEARCH.md)
-- Architecture, data, design system, decisions: [docs/](docs)
-- Env vars: copy `.env.example` to `.env.local`.
+## React Compiler
 
-Designed and built by Pyrexx.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

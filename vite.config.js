@@ -1,17 +1,12 @@
-import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react";
-import { apiDevPlugin } from "./dev/apiPlugin.js";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), apiDevPlugin()],
-
-  // Absolute base so deep links like /menu and /invoice/<id> load their assets correctly on Vercel.
-  base: "/",
-
-  test: {
-    environment: "node",
-    include: ["src/**/*.test.{js,jsx}"],
-    env: { STORAGE_DRIVER: "memory", NODE_ENV: "test" },
-  },
-});
+  plugins: [react()],
+  
+  // FIX FOR GITHUB PAGES BLANK SCREEN ISSUE:
+  // Sets the base path to relative ('./') so all assets (CSS, JS) are
+  // referenced correctly from the repository subdirectory, fixing the white screen.
+  base: './' 
+})
