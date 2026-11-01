@@ -1,5 +1,0 @@
-api/_lib/orderLines.js
-src/components/layout/InfoStrip.jsx
-src/components/storefront/CategoryPills.jsx
-src/components/storefront/ProductGrid.jsx
-src/components/storefront/SearchBar.jsx
