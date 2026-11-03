@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import MenuProvider from "../context/MenuProvider.jsx";
 import StorefrontPage from "../pages/StorefrontPage.jsx";
 import ProductModal from "../components/storefront/ProductModal.jsx";
+import DishPreviewModal from "../components/merchant/DishPreviewModal.jsx";
 import ItemEditor from "../components/merchant/ItemEditor.jsx";
 import { getDishUrl } from "../lib/format.js";
 
@@ -64,27 +65,35 @@ describe("Dish direct link & modal integration", () => {
     expect(html).toContain('aria-label="Share link for Basmati Fried Rice"');
   });
 
-  it("ItemEditor in dashboard provides copyable direct customer link for existing meals", () => {
+  it("DishPreviewModal renders read-only dish view with Copy dish link button and edit pencil button", () => {
     const item = {
-      id: 48,
-      name: "Yam and Egg Sauce",
-      price: 3000,
-      category: "Meals",
-      image: "menu/yam-and-egg-sauce.png",
-      imageStyle: "cutout",
+      id: 2,
+      name: "Isi-ewu",
+      price: 6000,
+      category: "Protein",
+      image: "menu/isi-ewu.jpg",
+      imageStyle: "photo",
       isAvailable: true,
-      description: "Boiled yam paired with savory egg sauce.",
+      featured: true,
+      description: "Traditional spicy goat head delicacy.",
     };
 
-    const categories = [{ name: "Meals", icon: "meals" }];
-
     const html = renderToStaticMarkup(
-      <ItemEditor item={item} categories={categories} onSave={() => {}} onDelete={() => {}} onClose={() => {}} />,
+      <DishPreviewModal item={item} icon="protein" onClose={() => {}} onEdit={() => {}} />,
     );
 
-    expect(html).toContain("Direct meal link");
-    expect(html).toContain("/menu?dish=48");
-    expect(html).toContain("Copy");
+    // Read-only modal assertions
+    expect(html).toContain("Isi-ewu");
+    expect(html).toContain("₦6,000");
+    expect(html).toContain("Traditional spicy goat head delicacy.");
+    expect(html).toContain("In stock");
+    expect(html).toContain("Featured");
+    // "Copy dish link" button must be in this view-only modal
+    expect(html).toContain("Copy dish link");
+    expect(html).toContain("/menu?dish=2");
+    // Pencil button heading to edit dish
+    expect(html).toContain('aria-label="Edit Isi-ewu"');
+    expect(html).toContain("Edit dish");
   });
 
   it("ItemEditor allows creating a new meal with image upload", () => {

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Camera, Check, ExternalLink, Link2, Loader2, Trash2 } from "lucide-react";
+import { Camera, Loader2, Trash2 } from "lucide-react";
 import FoodImage from "../ui/FoodImage.jsx";
 import { Field } from "../ui/FormField.jsx";
 import { inputClass } from "../ui/formStyles.js";
@@ -7,7 +7,6 @@ import { Sheet, Switch, btnDanger, btnGhost, btnPrimary } from "./ui.jsx";
 import { LIMITS } from "../../lib/menuDoc.js";
 import { prepareImage } from "../../services/imageCompress.js";
 import { api } from "../../services/api.js";
-import { getDishUrl } from "../../lib/format.js";
 
 const PLACEHOLDER = "menu/placeholder.svg";
 
@@ -19,7 +18,6 @@ export default function ItemEditor({ item, categories, onSave, onDelete, onClose
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
   const fileRef = useRef(null);
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
@@ -42,27 +40,6 @@ export default function ItemEditor({ item, categories, onSave, onDelete, onClose
   const removePhoto = () => {
     set("image", "");
     if (fileRef.current) fileRef.current.value = "";
-  };
-
-  const copyDishLink = async () => {
-    if (isNew) return;
-    const url = getDishUrl(item.id);
-    try {
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(url);
-      } else {
-        const textarea = document.createElement("textarea");
-        textarea.value = url;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-      }
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2200);
-    } catch {
-      /* ignore */
-    }
   };
 
   const submit = () => {
@@ -89,83 +66,149 @@ export default function ItemEditor({ item, categories, onSave, onDelete, onClose
       footer={
         <div className="flex gap-2">
           {!isNew && (
-            <button type="button" className={`${confirmDelete ? btnDanger : btnGhost} !px-4`} onClick={() => (confirmDelete ? onDelete(item.id) : setConfirmDelete(true))} aria-label="Delete dish">
+            <button
+              type="button"
+              className={`${confirmDelete ? btnDanger : btnGhost} !px-4`}
+              onClick={() => (confirmDelete ? onDelete(item.id) : setConfirmDelete(true))}
+              aria-label="Delete dish"
+            >
               <Trash2 size={16} /> {confirmDelete ? "Tap to confirm" : ""}
             </button>
           )}
-          <button type="button" className={`${btnPrimary} flex-1`} onClick={submit} disabled={uploading}>{isNew ? "Add to menu" : "Save changes"}</button>
+          <button
+            type="button"
+            className={`${btnPrimary} flex-1`}
+            onClick={submit}
+            disabled={uploading}
+          >
+            {isNew ? "Add to menu" : "Save changes"}
+          </button>
         </div>
       }
     >
       <div className="space-y-4">
-        {!isNew && (
-          <div className="flex items-center justify-between rounded-2xl border border-cream-300 bg-cream-100 p-3">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-leaf-900">Direct meal link</p>
-              <p className="truncate font-mono text-[11px] text-ink-500">{getDishUrl(item.id)}</p>
-            </div>
-            <div className="flex items-center gap-1.5 pl-2">
-              <button
-                type="button"
-                onClick={copyDishLink}
-                className="inline-flex items-center gap-1 rounded-full bg-leaf-700 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-leaf-800 active:scale-95"
-              >
-                {copiedLink ? <Check size={13} /> : <Link2 size={13} />}
-                {copiedLink ? "Copied" : "Copy"}
-              </button>
-              <a
-                href={`/menu?dish=${item.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Preview link in new tab"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-cream-200 text-leaf-800 transition hover:bg-cream-300"
-              >
-                <ExternalLink size={14} />
-              </a>
-            </div>
-          </div>
-        )}
-
         <div>
           <p className="mb-1.5 text-xs font-bold text-ink-700">Photo</p>
           <div className="flex gap-3">
             <div className="surface-sage-tile relative h-28 w-36 flex-shrink-0 overflow-hidden rounded-2xl shadow-card">
-              <FoodImage src={form.image || PLACEHOLDER} alt="Preview" variant={form.imageStyle} className={`h-full w-full ${cutout ? "p-3" : ""}`} />
-              {uploading && <div className="absolute inset-0 flex items-center justify-center bg-leaf-950/60"><Loader2 className="animate-spin text-white" /></div>}
+              <FoodImage
+                src={form.image || PLACEHOLDER}
+                alt="Preview"
+                variant={form.imageStyle}
+                className={`h-full w-full ${cutout ? "p-3" : ""}`}
+              />
+              {uploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-leaf-950/60">
+                  <Loader2 className="animate-spin text-white" />
+                </div>
+              )}
             </div>
             <div className="flex flex-1 flex-col justify-between">
-              <input ref={fileRef} type="file" accept="image/*" className="sr-only" id="photo" onChange={(e) => pick(e.target.files?.[0])} />
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                id="photo"
+                onChange={(e) => pick(e.target.files?.[0])}
+              />
               <div className="flex flex-wrap gap-1.5">
-                <label htmlFor="photo" className={`${btnGhost} cursor-pointer !px-3 !py-2 text-xs`}><Camera size={15} /> {hasCustomPhoto ? "Change" : "Upload photo"}</label>
+                <label
+                  htmlFor="photo"
+                  className={`${btnGhost} cursor-pointer !px-3 !py-2 text-xs`}
+                >
+                  <Camera size={15} /> {hasCustomPhoto ? "Change" : "Upload photo"}
+                </label>
                 {hasCustomPhoto && (
-                  <button type="button" onClick={removePhoto} className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
+                  <button
+                    type="button"
+                    onClick={removePhoto}
+                    className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+                  >
                     <Trash2 size={13} /> Clear
                   </button>
                 )}
               </div>
-              <div role="group" aria-label="Photo style" className="grid grid-cols-2 rounded-full bg-cream-200 p-0.5 text-xs font-bold">
+              <div
+                role="group"
+                aria-label="Photo style"
+                className="grid grid-cols-2 rounded-full bg-cream-200 p-0.5 text-xs font-bold"
+              >
                 {[["cutout", "Cutout"], ["photo", "Photo"]].map(([v, l]) => (
-                  <button key={v} type="button" aria-pressed={form.imageStyle === v} onClick={() => set("imageStyle", v)} className={`rounded-full py-2 ${form.imageStyle === v ? "bg-leaf-700 text-white" : "text-ink-600"}`}>{l}</button>
+                  <button
+                    key={v}
+                    type="button"
+                    aria-pressed={form.imageStyle === v}
+                    onClick={() => set("imageStyle", v)}
+                    className={`rounded-full py-2 ${
+                      form.imageStyle === v ? "bg-leaf-700 text-white" : "text-ink-600"
+                    }`}
+                  >
+                    {l}
+                  </button>
                 ))}
               </div>
             </div>
           </div>
-          <p className="mt-1.5 text-[11px] text-ink-500">Cutout = dish on a transparent background (PNG). Photo = a normal picture that fills the card.</p>
+          <p className="mt-1.5 text-[11px] text-ink-500">
+            Cutout = dish on a transparent background (PNG). Photo = a normal picture that fills the card.
+          </p>
           {uploadError && <p role="alert" className="mt-1 text-xs font-medium text-red-600">{uploadError}</p>}
         </div>
 
-        <Field id="it-name" label="Name" error={errors.name}><input id="it-name" className={inputClass(errors.name)} value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={LIMITS.name} placeholder="Party Jollof Rice" /></Field>
+        <Field id="it-name" label="Name" error={errors.name}>
+          <input
+            id="it-name"
+            className={inputClass(errors.name)}
+            value={form.name}
+            onChange={(e) => set("name", e.target.value)}
+            maxLength={LIMITS.name}
+            placeholder="Party Jollof Rice"
+          />
+        </Field>
+
         <div className="grid grid-cols-2 gap-3">
           <Field id="it-cat" label="Category" error={errors.category}>
-            <select id="it-cat" className={inputClass(errors.category)} value={form.category} onChange={(e) => set("category", e.target.value)}>
+            <select
+              id="it-cat"
+              className={inputClass(errors.category)}
+              value={form.category}
+              onChange={(e) => set("category", e.target.value)}
+            >
               <option value="">Choose…</option>
-              {categories.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+              {categories.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </Field>
-          <Field id="it-price" label="Price (₦)" error={errors.price}><input id="it-price" className={inputClass(errors.price)} value={form.price} onChange={(e) => set("price", e.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" placeholder="1500" /></Field>
+          <Field id="it-price" label="Price (₦)" error={errors.price}>
+            <input
+              id="it-price"
+              className={inputClass(errors.price)}
+              value={form.price}
+              onChange={(e) => set("price", e.target.value.replace(/[^\d]/g, ""))}
+              inputMode="numeric"
+              placeholder="1500"
+            />
+          </Field>
         </div>
-        <Field id="it-desc" label="Description" error={errors.description} hint={`${form.description.length}/${LIMITS.description}`}>
-          <textarea id="it-desc" rows={3} className={`${inputClass(errors.description)} h-auto py-3`} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Smoky, rich and slow-cooked…" />
+
+        <Field
+          id="it-desc"
+          label="Description"
+          error={errors.description}
+          hint={`${form.description.length}/${LIMITS.description}`}
+        >
+          <textarea
+            id="it-desc"
+            rows={3}
+            className={`${inputClass(errors.description)} h-auto py-3`}
+            value={form.description}
+            onChange={(e) => set("description", e.target.value)}
+            placeholder="Smoky, rich and slow-cooked…"
+          />
         </Field>
 
         <div className="divide-y divide-cream-300 rounded-2xl border border-cream-300 bg-cream-100 px-4">
@@ -175,7 +218,10 @@ export default function ItemEditor({ item, categories, onSave, onDelete, onClose
             ["featured", "Featured", "A highlight you can pin to the home screen."],
           ].map(([key, label, hint]) => (
             <div key={key} className="flex items-center justify-between gap-3 py-3">
-              <div><p className="text-sm font-bold">{label}</p><p className="text-[11px] text-ink-500">{hint}</p></div>
+              <div>
+                <p className="text-sm font-bold">{label}</p>
+                <p className="text-[11px] text-ink-500">{hint}</p>
+              </div>
               <Switch checked={Boolean(form[key])} onChange={(v) => set(key, v)} label={label} />
             </div>
           ))}
