@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Header from "../components/layout/Header.jsx";
 import InfoSheet from "../components/layout/InfoSheet.jsx";
 import SeoHead from "../components/layout/SeoHead.jsx";
@@ -45,11 +46,33 @@ export default function StorefrontPage({ scrollToMenu = false }) {
   const { add: addToCart } = cart;
   const checkout = useCheckout({ lines: cart.lines, total: cart.subtotal, whatsapp: settings.business.whatsapp });
 
+  const { id: routeDishId } = useParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+
+  // Parse direct dish link from query string (?dish=... or ?item=...) or route param (/dish/:id)
+  const targetDishParam = routeDishId || searchParams.get("dish") || searchParams.get("item");
+
+  useEffect(() => {
+    if (!targetDishParam) return;
+    const numericId = Number(targetDishParam);
+    const matched = Number.isInteger(numericId) && byId[numericId]
+      ? byId[numericId]
+      : activeItems.find((i) => String(i.id) === targetDishParam || i.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") === targetDishParam);
+
+    if (matched) {
+      setSelectedProductId(matched.id);
+      track("product_view", { id: matched.id, source: "direct_link" });
+      document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [targetDishParam, byId, activeItems]);
 
   const searching = searchOpen && query.trim().length > 0;
   const groupNames = useMemo(() => groups.map((g) => g.name), [groups]);
@@ -62,11 +85,31 @@ export default function StorefrontPage({ scrollToMenu = false }) {
   const results = useMemo(() => (searching ? searchItems(activeItems, query) : []), [activeItems, query, searching]);
 
   const selectedProduct = selectedProductId != null ? byId[selectedProductId] ?? null : null;
+
   const openProduct = useCallback((id) => {
     setSelectedProductId(id);
     track("product_view", { id });
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("dish", String(id));
+      window.history.replaceState(null, "", url.toString());
+    }
   }, []);
-  const closeProduct = useCallback(() => setSelectedProductId(null), []);
+
+  const closeProduct = useCallback(() => {
+    setSelectedProductId(null);
+    if (routeDishId) {
+      navigate("/menu", { replace: true });
+    } else if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("dish") || url.searchParams.has("item")) {
+        url.searchParams.delete("dish");
+        url.searchParams.delete("item");
+        window.history.replaceState(null, "", url.pathname + (url.search ? url.search : ""));
+      }
+    }
+  }, [routeDishId, navigate]);
+
   const closeCart = useCallback(() => setCartOpen(false), []);
   const closeInfo = useCallback(() => setInfoOpen(false), []);
   const addItem = useCallback(
@@ -85,11 +128,11 @@ export default function StorefrontPage({ scrollToMenu = false }) {
     setQuery("");
   }, []);
 
-  const seo = scrollToMenu ? SEO.menu : SEO.home;
+  const seo = scrollToMenu || Boolean(targetDishParam) ? SEO.menu : SEO.home;
 
   return (
     <div className="min-h-svh bg-cream-200">
-      <SeoHead {...seo} isMenu={scrollToMenu} settings={settings} />
+      <SeoHead {...seo} isMenu={scrollToMenu || Boolean(targetDishParam)} settings={settings} />
 
       <div className="mx-auto min-h-svh max-w-md border-x border-cream-300 bg-cream-100 shadow-frame">
         <Header cartCount={cart.count} cartBump={cart.bump} onOpenCart={openCart} onOpenInfo={() => setInfoOpen(true)} />

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Camera, Loader2, Trash2 } from "lucide-react";
+import { Camera, Check, ExternalLink, Link2, Loader2, Trash2 } from "lucide-react";
 import FoodImage from "../ui/FoodImage.jsx";
 import { Field } from "../ui/FormField.jsx";
 import { inputClass } from "../ui/formStyles.js";
@@ -7,6 +7,7 @@ import { Sheet, Switch, btnDanger, btnGhost, btnPrimary } from "./ui.jsx";
 import { LIMITS } from "../../lib/menuDoc.js";
 import { prepareImage } from "../../services/imageCompress.js";
 import { api } from "../../services/api.js";
+import { getDishUrl } from "../../lib/format.js";
 
 const PLACEHOLDER = "menu/placeholder.svg";
 
@@ -18,6 +19,7 @@ export default function ItemEditor({ item, categories, onSave, onDelete, onClose
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const fileRef = useRef(null);
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
@@ -37,6 +39,32 @@ export default function ItemEditor({ item, categories, onSave, onDelete, onClose
     }
   };
 
+  const removePhoto = () => {
+    set("image", "");
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const copyDishLink = async () => {
+    if (isNew) return;
+    const url = getDishUrl(item.id);
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = url;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2200);
+    } catch {
+      /* ignore */
+    }
+  };
+
   const submit = () => {
     const next = {};
     const name = form.name.trim();
@@ -51,6 +79,7 @@ export default function ItemEditor({ item, categories, onSave, onDelete, onClose
   };
 
   const cutout = form.imageStyle === "cutout";
+  const hasCustomPhoto = form.image && form.image !== PLACEHOLDER;
 
   return (
     <Sheet
@@ -69,6 +98,34 @@ export default function ItemEditor({ item, categories, onSave, onDelete, onClose
       }
     >
       <div className="space-y-4">
+        {!isNew && (
+          <div className="flex items-center justify-between rounded-2xl border border-cream-300 bg-cream-100 p-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-leaf-900">Direct meal link</p>
+              <p className="truncate font-mono text-[11px] text-ink-500">{getDishUrl(item.id)}</p>
+            </div>
+            <div className="flex items-center gap-1.5 pl-2">
+              <button
+                type="button"
+                onClick={copyDishLink}
+                className="inline-flex items-center gap-1 rounded-full bg-leaf-700 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-leaf-800 active:scale-95"
+              >
+                {copiedLink ? <Check size={13} /> : <Link2 size={13} />}
+                {copiedLink ? "Copied" : "Copy"}
+              </button>
+              <a
+                href={`/menu?dish=${item.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Preview link in new tab"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-cream-200 text-leaf-800 transition hover:bg-cream-300"
+              >
+                <ExternalLink size={14} />
+              </a>
+            </div>
+          </div>
+        )}
+
         <div>
           <p className="mb-1.5 text-xs font-bold text-ink-700">Photo</p>
           <div className="flex gap-3">
@@ -78,7 +135,14 @@ export default function ItemEditor({ item, categories, onSave, onDelete, onClose
             </div>
             <div className="flex flex-1 flex-col justify-between">
               <input ref={fileRef} type="file" accept="image/*" className="sr-only" id="photo" onChange={(e) => pick(e.target.files?.[0])} />
-              <label htmlFor="photo" className={`${btnGhost} cursor-pointer !py-2.5 text-xs`}><Camera size={16} /> {form.image && form.image !== PLACEHOLDER ? "Change photo" : "Add photo"}</label>
+              <div className="flex flex-wrap gap-1.5">
+                <label htmlFor="photo" className={`${btnGhost} cursor-pointer !px-3 !py-2 text-xs`}><Camera size={15} /> {hasCustomPhoto ? "Change" : "Upload photo"}</label>
+                {hasCustomPhoto && (
+                  <button type="button" onClick={removePhoto} className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
+                    <Trash2 size={13} /> Clear
+                  </button>
+                )}
+              </div>
               <div role="group" aria-label="Photo style" className="grid grid-cols-2 rounded-full bg-cream-200 p-0.5 text-xs font-bold">
                 {[["cutout", "Cutout"], ["photo", "Photo"]].map(([v, l]) => (
                   <button key={v} type="button" aria-pressed={form.imageStyle === v} onClick={() => set("imageStyle", v)} className={`rounded-full py-2 ${form.imageStyle === v ? "bg-leaf-700 text-white" : "text-ink-600"}`}>{l}</button>

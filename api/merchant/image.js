@@ -20,10 +20,11 @@ export default async function handler(req, res) {
   if (!requireAjax(req, res)) return;
   if (!(await requireMerchant(req, res))) return;
 
-  const match = /^data:image\/(?:webp|png|jpeg);base64,([A-Za-z0-9+/=]+)$/.exec(String(parseBody(req).dataUrl ?? ""));
+  const rawDataUrl = String(parseBody(req).dataUrl ?? "").trim();
+  const match = /^data:image\/(?:webp|png|jpe?g);base64,([A-Za-z0-9+/=\s]+)$/.exec(rawDataUrl);
   if (!match) return fail(res, 400, "Upload a WebP, PNG or JPEG image.");
 
-  const buffer = Buffer.from(match[1], "base64");
+  const buffer = Buffer.from(match[1].replace(/\s/g, ""), "base64");
   if (buffer.length > MAX_BYTES) return fail(res, 413, "That image is too large. Try a smaller photo.");
   const kind = sniff(buffer); // trust the bytes, not the label
   if (!kind) return fail(res, 400, "That file doesn't look like an image.");

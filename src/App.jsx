@@ -21,6 +21,9 @@ export default function App() {
             <Route path="/" element={<StorefrontPage />} />
             {/* /menu is kept for SEO continuity (it is in sitemap.xml); it renders the same page scrolled to the menu. */}
             <Route path="/menu" element={<StorefrontPage scrollToMenu />} />
+            {/* Direct links to specific dishes that lead to the menu with the modal open */}
+            <Route path="/dish/:id" element={<StorefrontPage scrollToMenu />} />
+            <Route path="/item/:id" element={<StorefrontPage scrollToMenu />} />
             <Route path="/invoice/:id" element={<InvoicePage />} />
             {/* Demo payment page: stands in for Paystack until the account is connected (demo/live) */}
             <Route path="/pay/demo/:id" element={<MockPaymentPage />} />

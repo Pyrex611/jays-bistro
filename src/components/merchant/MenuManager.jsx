@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { ImageOff, Plus, Search, Tags } from "lucide-react";
+import { Check, ImageOff, Link2, Plus, Search, Tags } from "lucide-react";
 import FoodImage from "../ui/FoodImage.jsx";
 import { Switch, btnGhost } from "./ui.jsx";
 import ItemEditor from "./ItemEditor.jsx";
 import CategoryManager from "./CategoryManager.jsx";
 import { searchItems } from "../../lib/search.js";
-import { formatPrice } from "../../lib/format.js";
+import { formatPrice, getDishUrl } from "../../lib/format.js";
 import { nextItemId } from "../../lib/menuDoc.js";
 
 const blank = (category) => ({ id: 0, category, name: "", price: 0, description: "", image: "", imageStyle: "cutout", featured: false, isActive: true, isAvailable: true });
@@ -16,6 +16,7 @@ export default function MenuManager({ draft, setDraft }) {
   const [filter, setFilter] = useState("All");
   const [editing, setEditing] = useState(null);
   const [showCategories, setShowCategories] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
 
   const iconOf = useMemo(() => Object.fromEntries(draft.categories.map((c) => [c.name, c.icon])), [draft.categories]);
   const list = useMemo(() => {
@@ -42,6 +43,27 @@ export default function MenuManager({ draft, setDraft }) {
     setEditing(null);
   };
 
+  const copyMealLink = async (e, id) => {
+    e.stopPropagation();
+    const url = getDishUrl(id);
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = url;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      /* ignore */
+    }
+  };
+
   const saveCategories = (categories, renames) => {
     setDraft((d) => ({ ...d, categories, items: d.items.map((i) => ({ ...i, category: renames[i.category] ?? i.category })) }));
     if (filter !== "All" && renames[filter]) setFilter(renames[filter]);
@@ -50,9 +72,18 @@ export default function MenuManager({ draft, setDraft }) {
 
   return (
     <div>
-      <div className="relative">
-        <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" aria-hidden="true" />
-        <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={`Search ${draft.items.length} dishes…`} aria-label="Search dishes" className="h-12 w-full rounded-full border border-cream-300 bg-cream-50 pl-10 pr-4 text-base outline-none focus:border-leaf-500 focus:ring-2 focus:ring-leaf-200" />
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" aria-hidden="true" />
+          <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={`Search ${draft.items.length} dishes…`} aria-label="Search dishes" className="h-12 w-full rounded-full border border-cream-300 bg-cream-50 pl-10 pr-4 text-base outline-none focus:border-leaf-500 focus:ring-2 focus:ring-leaf-200" />
+        </div>
+        <button
+          type="button"
+          onClick={() => setEditing(blank(filter !== "All" ? filter : draft.categories[0]?.name ?? ""))}
+          className="inline-flex h-12 items-center gap-1.5 rounded-full bg-sun-500 px-4 text-xs font-bold text-leaf-950 shadow-sm hover:bg-sun-400 active:scale-95"
+        >
+          <Plus size={16} strokeWidth={2.4} /> Add
+        </button>
       </div>
 
       <div className="scrollbar-hide -mx-4 mt-3 flex gap-2 overflow-x-auto px-4">
@@ -80,9 +111,20 @@ export default function MenuManager({ draft, setDraft }) {
                 </div>
               </div>
             </button>
-            <div className="flex flex-shrink-0 flex-col items-center gap-0.5">
-              <Switch checked={item.isAvailable} onChange={(v) => patchItem(item.id, { isAvailable: v })} label={`${item.name} in stock`} />
-              <span className="text-[10px] font-semibold text-ink-500">{item.isAvailable ? "In stock" : "Sold out"}</span>
+            <div className="flex flex-shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={(e) => copyMealLink(e, item.id)}
+                aria-label={`Copy customer link for ${item.name}`}
+                title="Copy customer link"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-cream-200 text-leaf-800 transition hover:bg-cream-300 active:scale-95"
+              >
+                {copiedId === item.id ? <Check size={16} className="text-leaf-700" /> : <Link2 size={16} />}
+              </button>
+              <div className="flex flex-col items-center gap-0.5">
+                <Switch checked={item.isAvailable} onChange={(v) => patchItem(item.id, { isAvailable: v })} label={`${item.name} in stock`} />
+                <span className="text-[10px] font-semibold text-ink-500">{item.isAvailable ? "In stock" : "Sold out"}</span>
+              </div>
             </div>
           </li>
         ))}

@@ -118,9 +118,10 @@ export const demoApi = {
     async uploadImage(dataUrl) {
       requireSession();
       await sleep(latency());
-      if (!/^data:image\/(webp|png|jpeg);base64,/.test(dataUrl)) throw httpError(400, "Upload a WebP, PNG or JPEG image.");
+      const clean = String(dataUrl ?? "").trim();
+      if (!/^data:image\/(?:webp|png|jpe?g);base64,/.test(clean)) throw httpError(400, "Upload a WebP, PNG or JPEG image.");
       const id = `demo-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-      demoStorage.set(`jb:demo:img:${id}`, dataUrl);
+      demoStorage.set(`jb:demo:img:${id}`, clean);
       return { url: `uploads/${id}` };
     },
     async orders(days = 7) {
